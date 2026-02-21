@@ -15,7 +15,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore API dependencies
         run: dotnet restore VacationOptimizer.Server/VacationOptimizer.Server.csproj
@@ -23,14 +23,17 @@ jobs:
       - name: Build & Publish API
         run: dotnet publish VacationOptimizer.Server/VacationOptimizer.Server.csproj -c Release -o publish_api
 
-      - name: Azure Login
-        uses: azure/login@v1
+      - name: Login to Azure
+        uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.__clientidsecretname__ }}
+          tenant-id: ${{ secrets.__tenantidsecretname__ }}
+          subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
 
-      - name: Deploy API to Azure Web App
-        uses: azure/webapps-deploy@v2
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_API_PUBLISH_PROFILE }}
-          package: publish_api
+          app-name: 'vacation'
+          slot-name: 'Production'
+          package: .
