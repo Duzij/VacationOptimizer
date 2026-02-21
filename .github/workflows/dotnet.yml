@@ -23,12 +23,10 @@ jobs:
       - name: Build & Publish API
         run: dotnet publish VacationOptimizer.Server/VacationOptimizer.Server.csproj -c Release -o publish_api
 
-      - name: Login to Azure
-        uses: azure/login@v2
+      - name: Azure Login
+        uses: azure/login@v1
         with:
-          client-id: ${{ secrets.__clientidsecretname__ }}
-          tenant-id: ${{ secrets.__tenantidsecretname__ }}
-          subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
