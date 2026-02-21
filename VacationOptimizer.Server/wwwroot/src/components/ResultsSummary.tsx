@@ -1,5 +1,5 @@
 import type { OptimizeResult, VacationRange } from "../types/models";
-import { Calendar, Palmtree, Sun, TrendingUp } from "lucide-react";
+import { Calendar, Palmtree, Sun } from "lucide-react";
 
 interface Props {
     result: OptimizeResult;
