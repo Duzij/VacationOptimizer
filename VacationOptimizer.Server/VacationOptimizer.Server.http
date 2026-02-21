@@ -1,0 +1,6 @@
+@VacationOptimizer.Server_HostAddress = http://localhost:5039
+
+GET {{VacationOptimizer.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

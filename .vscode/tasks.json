@@ -1,0 +1,58 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build_all",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "dotnet_build",
+                "npm: build - vacation-optimizer-app"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "dotnet_build",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "build",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "my_dotnet_release",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "publish",
+                "--configuration",
+                "Release"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "build",
+            "path": "VacationOptimizer.Server/wwwroot",
+            "group": "build",
+            "problemMatcher": [],
+            "label": "npm: build - vacation-optimizer-app",
+            "detail": "tsc && vite build"
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="VacationOptimizer.Server/VacationOptimizer.Server.csproj" />
+  <Project Path="VacationOptimizer.Test/VacationOptimizer.Test.csproj" />
+</Solution>
