@@ -40,6 +40,10 @@ public class CalendarService
             {
                 type = DayType.Weekend;
             }
+            else if (date == DateOnly.FromDateTime(DateTime.Today))
+            {
+                type = DayType.Today;
+            }
             else
             {
                 type = DayType.WorkDay;

@@ -92,12 +92,11 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
                     <input
                         id="vacationDays"
                         type="range"
-                        defaultValue={25}
                         min={1}
                         max={40}
                         value={vacationDays}
                         onChange={(e) => setVacationDays(Number(e.target.value))}
-                        className="flex-1 accent-primary"
+                        className="flex-1 themed-range"
                     />
                     <span className="text-lg font-semibold text-primary min-w-[2ch] text-right tabular-nums">
                         {vacationDays}
@@ -134,7 +133,7 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
                                     max={14}
                                     value={minimumDaysPerRange ?? 1}
                                     onChange={(e) => setMinimumDaysPerRange(Number(e.target.value))}
-                                    className="flex-1 accent-accent"
+                                    className="flex-1 themed-range"
                                 />
                                 <span className="text-sm font-semibold text-accent min-w-[3ch] text-right tabular-nums">
                                     {minimumDaysPerRange ?? "off"}
@@ -158,7 +157,7 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
                                     max={31}
                                     value={maximumDaysPerRange ?? 31}
                                     onChange={(e) => setMaximumDaysPerRange(Number(e.target.value))}
-                                    className="flex-1 accent-accent"
+                                    className="flex-1 themed-range"
                                 />
                                 <span className="text-sm font-semibold text-accent min-w-[3ch] text-right tabular-nums">
                                     {maximumDaysPerRange ?? "off"}

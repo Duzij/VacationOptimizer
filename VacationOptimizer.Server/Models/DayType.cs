@@ -6,6 +6,7 @@ public enum DayType
     Weekend,
     PublicHoliday,
     CustomFreeDay,
-    Vacation
+    Vacation,
+    Today
 }
 

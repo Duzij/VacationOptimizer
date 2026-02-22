@@ -31,22 +31,51 @@ function normalizeDayType(type: any): DayType {
     return DayTypeMap[type] || "WorkDay";
 }
 
-function getDayClass(type: DayType | number | string): string {
+function getDayStyle(type: DayType | number | string): React.CSSProperties {
     const normalizedType = normalizeDayType(type);
     switch (normalizedType) {
         case "Vacation":
-            return "bg-vacation text-vacation-text font-semibold";
+            return {
+                background: "var(--calendar-vacation-bg)",
+                color: "var(--calendar-vacation-text)",
+                fontWeight: 600,
+            };
         case "CustomFreeDay":
-            return "bg-custom text-custom-text";
+            return {
+                background: "var(--calendar-custom-bg)",
+                color: "var(--calendar-custom-text)",
+            };
         case "PublicHoliday":
-            return "bg-holiday text-holiday-text";
+            return {
+                background: "var(--calendar-holiday-bg)",
+                color: "var(--calendar-holiday-text)",
+            };
         case "Weekend":
-            return "bg-weekend text-text-muted";
+            return {
+                background: "var(--calendar-weekend-bg)",
+                color: "var(--color-text-muted)",
+            };
         case "WorkDay":
-            return "bg-surface text-text-muted/60";
+            return {
+                background: "var(--calendar-workday-bg)",
+                color: "var(--color-text-muted)",
+                border: "1px solid var(--calendar-workday-border)",
+                opacity: 0.7,
+            };
+        case "Today":
+            return {
+                background: "var(--calendar-today-bg)",
+                color: "var(--calendar-today-text)",
+                border: "1px solid var(--calendar-today-border)",
+                fontWeight: 600,
+            };
         default:
             console.warn("Unknown day type:", type);
-            return "bg-surface text-text-muted/60";
+            return {
+                background: "var(--calendar-workday-bg)",
+                color: "var(--color-text-muted)",
+                opacity: 0.7,
+            };
     }
 }
 
@@ -64,8 +93,6 @@ export default function CalendarView({ calendar, year }: Props) {
         months[d.getUTCMonth()].push(day);
     });
     
-    console.log("Months", months);
-
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full max-w-6xl mx-auto">
             {months.map((days, monthIdx) => (
@@ -124,8 +151,8 @@ function MonthGrid({
                     return (
                         <div
                             key={day.date}
-                            className={`aspect-square flex items-center justify-center rounded-md text-[11px] leading-none
-                         transition-colors cursor-default ${getDayClass(day.type)}`}
+                            className="aspect-square flex items-center justify-center rounded-md text-[11px] leading-none transition-colors cursor-default"
+                            style={getDayStyle(day.type)}
                             title={
                                 day.holidayName
                                     ? `${day.holidayName}`

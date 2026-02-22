@@ -20,8 +20,20 @@ export default function App() {
 
 function Main() {
   const [result, setResult] = useState<OptimizeResult | null>(null);
-  const [activeRequest, setActiveRequest] = useState<OptimizeRequest | null>(null);
+  const [activeRequest, setActiveRequest] = useState<OptimizeRequest | null>(
+    null,
+  );
   const optimize = useOptimize();
+
+  var darkPreference = localStorage.theme === "dark" ||
+    (!("theme" in localStorage) &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  if (darkPreference) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.add("light");
+  }
 
   const handleOptimize = (req: OptimizeRequest) => {
     setActiveRequest(req);
@@ -29,6 +41,18 @@ function Main() {
       onSuccess: (data) => setResult(data),
     });
   };
+
+  function toggleDarkMode() {
+    if (document.documentElement.classList.contains("dark")) {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+      localStorage.setItem("theme", "light");
+    } else {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("theme", "dark");
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,6 +63,14 @@ function Main() {
           <h1 className="text-base font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Vacation Optimizer
           </h1>
+          <button
+            onClick={() => {
+              toggleDarkMode();
+            }}
+            className="ml-auto text-sm text-primary hover:text-primary-hover transition-colors"
+          >
+            Toggle Dark Mode
+          </button>
         </div>
       </header>
 
