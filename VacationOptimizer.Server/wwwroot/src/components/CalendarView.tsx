@@ -80,7 +80,6 @@ function getDayStyle(type: DayType | number | string): React.CSSProperties {
 }
 
 function parseDate(dateStr: string): Date {
-    // Parse YYYY-MM-DD format in UTC to avoid timezone issues
     const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(Date.UTC(year, month - 1, day));
 }

@@ -57,10 +57,10 @@ export default function ResultsSummary({ result }: Props) {
                                 <span className="text-text font-medium">
                                     {formatRange(range)}
                                 </span>
-                                <div className="flex items-center gap-2 text-text-muted text-xs">
+                                <div className="flex items-center gap-2 text-vacation-text text-xs">
                                     <span>{range.totalDaysOff}d off</span>
                                     {range.vacationDaysUsed > 0 && (
-                                        <span className="text-vacation-text">
+                                        <span className="text-text-muted">
                                             {range.vacationDaysUsed} vac
                                         </span>
                                     )}

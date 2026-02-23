@@ -180,7 +180,7 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
             <button
                 type="submit"
                 disabled={isLoading || countriesLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3
+                className="optimize-btn w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3
                    text-sm font-semibold text-white
                    hover:bg-primary-hover active:scale-[0.98]
                    disabled:opacity-50 disabled:cursor-not-allowed

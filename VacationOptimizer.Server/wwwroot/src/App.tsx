@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import OptimizerForm from "./components/OptimizerForm";
 import CalendarView from "./components/CalendarView";
@@ -6,7 +6,7 @@ import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import { useOptimize } from "./api/vacationApi";
 import type { OptimizeRequest, OptimizeResult } from "./types/models";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Sun, Moon } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -25,15 +25,24 @@ function Main() {
   );
   const optimize = useOptimize();
 
-  var darkPreference = localStorage.theme === "dark" ||
-    (!("theme" in localStorage) &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.theme === "dark" ||
+      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  });
 
-  if (darkPreference) {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.add("light");
-  }
+  // Set theme class on mount and when isDark changes
+  // This ensures React state and DOM are in sync
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDark]);
 
   const handleOptimize = (req: OptimizeRequest) => {
     setActiveRequest(req);
@@ -43,33 +52,23 @@ function Main() {
   };
 
   function toggleDarkMode() {
-    if (document.documentElement.classList.contains("dark")) {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-      localStorage.setItem("theme", "light");
-    } else {
-      document.documentElement.classList.add("dark");
-      document.documentElement.classList.remove("light");
-      localStorage.setItem("theme", "dark");
-    }
+    setIsDark((prev) => !prev);
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
       <header className="border-b border-border bg-surface/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <h1 className="text-base font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Vacation Optimizer
+          <h1 className="text-base font-bold bg-gradient-to-r bg-clip-text">
+            Vakie Takie 
           </h1>
+          <Sparkles className="w-5 h-5 text-primary" />
           <button
-            onClick={() => {
-              toggleDarkMode();
-            }}
-            className="ml-auto text-sm text-primary hover:text-primary-hover transition-colors"
+            onClick={toggleDarkMode}
+            className="ml-auto p-2 rounded-full border border-border bg-surface hover:bg-surface-hover transition-colors flex items-center justify-center"
+            aria-label="Toggle dark mode"
           >
-            Toggle Dark Mode
+            {isDark ? <Sun className="w-5 h-5 text-primary" /> : <Moon className="w-5 h-5 text-primary" />}
           </button>
         </div>
       </header>

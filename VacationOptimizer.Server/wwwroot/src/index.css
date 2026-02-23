@@ -79,6 +79,44 @@
   cursor: not-allowed;
 }
 
+.optimize-btn{
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border-radius: var(--radius);
+  padding: 0.75em 1.5em;
+  font-weight: 600;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.bg-vacation {
+  background-color: var(--calendar-vacation-bg);
+  color: var(--calendar-vacation-text);
+}
+
+.bg-custom {
+  background-color: var(--calendar-custom-bg);
+  color: var(--calendar-custom-text);
+}
+
+.bg-holiday {
+  background-color: var(--calendar-holiday-bg);
+  color: var(--calendar-holiday-text);
+}
+
+.bg-weekend {
+  background-color: var(--calendar-weekend-bg);
+  color: var(--calendar-weekend-text);
+} 
+
+.bg-surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.text-text-muted {
+  color: var(--color-text-muted);
+}
+
 .light {
   --color-background: #ffffff;
   --color-surface: #f7f7f7;
@@ -160,4 +198,10 @@
     background-color: var(--color-primary);
     color: white;
   }
+}
+
+/* Improve selection for dark mode */
+.dark ::selection {
+  background-color: #fff;
+  color: #222;
 }
