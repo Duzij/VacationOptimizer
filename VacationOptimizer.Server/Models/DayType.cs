@@ -1,5 +1,9 @@
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+
 namespace VacationOptimizer.Server.Models;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DayType
 {
     WorkDay,
@@ -7,6 +11,7 @@ public enum DayType
     PublicHoliday,
     CustomFreeDay,
     Vacation,
-    Today
+    Today,
+    PassedDay
 }
 

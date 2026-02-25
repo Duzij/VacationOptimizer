@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCountries } from "../api/vacationApi";
 import type { OptimizeRequest, CustomFreeDay } from "../types/models";
-import { Plane, Loader2, Info } from "lucide-react";
+import { Plane, Loader2, ChevronDown } from "lucide-react";
 import CustomFreeDaysManager from "./CustomFreeDaysManager";
 
 interface Props {
@@ -23,9 +23,9 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const request: OptimizeRequest = { 
-            country, 
-            year, 
+        const request: OptimizeRequest = {
+            country,
+            year,
             vacationDays,
         };
         if (minimumDaysPerRange !== null) {
@@ -105,18 +105,24 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
             </div>
 
             {/* Advanced Options */}
-            <div className="pt-2 space-y-3 border-t border-border/50">
+            <div className="pt-1 space-y-3">
                 <button
                     type="button"
                     onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="flex items-center gap-2 text-xs text-text-muted hover:text-text transition-colors"
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2.5
+                               rounded-lg border border-border bg-surface
+                               text-xs font-medium text-text-muted
+                               hover:bg-surface-hover hover:text-text
+                               transition-all duration-150 cursor-pointer"
                 >
-                    <Info className="w-3.5 h-3.5" />
-                    {showAdvanced ? "Hide" : "Show"} vacation range constraints (optional)
+                    <span>Advanced constraints</span>
+                    <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""}`}
+                    />
                 </button>
 
                 {showAdvanced && (
-                    <div className="space-y-4 pl-5 py-2 border-l border-border/50">
+                    <div className="space-y-4 px-3 py-3 rounded-lg border border-border bg-surface">
                         {/* Minimum Days */}
                         <div className="space-y-2">
                             <label htmlFor="minimumDaysPerRange" className="text-xs font-medium text-text-muted">
@@ -167,7 +173,7 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
 
                         {/* Custom Free Days */}
                         <div className="space-y-2">
-                            <CustomFreeDaysManager 
+                            <CustomFreeDaysManager
                                 customFreeDays={customFreeDays}
                                 onUpdate={setCustomFreeDays}
                             />

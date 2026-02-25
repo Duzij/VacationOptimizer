@@ -61,6 +61,14 @@ public class OptimizerTests
     }
 
     [Fact]
+    public void BuildCalendar_OnlyOneTodayDayIsMarked()
+    {
+        var calendar = BuildDefaultCalendar();
+        var todayCount = calendar.Count(d => d.Type == DayType.Today);
+        Assert.Equal(1, todayCount);
+    }
+
+    [Fact]
     public void BuildCalendar_HolidaysAreMarked()
     {
         var calendar = BuildDefaultCalendar();

@@ -10,6 +10,7 @@ export const DayType = {
     CustomFreeDay: "CustomFreeDay",
     Vacation: "Vacation",
     Today: "Today",
+    PassedDay: "PassedDay",
 } as const;
 
 export type DayType = (typeof DayType)[keyof typeof DayType];

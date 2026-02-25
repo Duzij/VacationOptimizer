@@ -25,8 +25,13 @@ public class CalendarService
         {
             DayType type;
             string? holidayName = null;
+            var today = DateOnly.FromDateTime(DateTime.Today);
 
-            if (customFreeDayLookup.TryGetValue(date, out var customDay))
+            if(date < today)
+            {
+                type = DayType.PassedDay;
+            }
+            else if (customFreeDayLookup.TryGetValue(date, out var customDay))
             {
                 type = DayType.CustomFreeDay;
                 holidayName = customDay.GetTitle();
