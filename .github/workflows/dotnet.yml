@@ -6,7 +6,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App - vacation
 on:
   push:
     branches:
-      - main
+      - main_old
   workflow_dispatch:
 
 jobs:
