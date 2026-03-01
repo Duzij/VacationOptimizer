@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build_prod" />
+    <!-- <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" /> -->
+    <!-- <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build_prod" /> -->
     <ItemGroup>
       <DistFiles Include="$(SpaRoot)dist/**" />
       <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
