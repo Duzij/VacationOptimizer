@@ -65,7 +65,7 @@ jobs:
             else
               cd "$APP_DIR"
               git reset --hard HEAD
-              git clean -fd
+              git clean -fd --exclude=certbot
               git remote set-url origin "https://${TOKEN}@github.com/Duzij/VacationOptimizer.git"
               git pull
             fi
@@ -93,16 +93,15 @@ jobs:
             if [ ! -f "/root/vacation-app/certbot/conf/live/optimize-vacation-for.me/fullchain.pem" ]; then
               log_info "No certificate found, obtaining one..."
 
-              # Step 1: start with HTTP-only config
+              # Step 1: use HTTP-only config temporarily (save the real one first)
+              cp /root/vacation-app/nginx/conf.d/default.conf /root/vacation-app/nginx/conf.d/default.conf.bak
               cat > /root/vacation-app/nginx/conf.d/default.conf << 'EOF'
             server {
                 listen 80;
                 server_name optimize-vacation-for.me;
-
                 location /.well-known/acme-challenge/ {
                     root /var/www/certbot;
                 }
-
                 location / {
                     proxy_pass http://vacation-app:80;
                     proxy_http_version 1.1;
@@ -121,42 +120,9 @@ jobs:
                 --email your@email.com \
                 --agree-tos --no-eff-email --non-interactive
 
-              # Step 3: restore HTTPS config
-              cat > /root/vacation-app/nginx/conf.d/default.conf << 'EOF'
-            server {
-                listen 80;
-                server_name optimize-vacation-for.me;
-
-                location /.well-known/acme-challenge/ {
-                    root /var/www/certbot;
-                }
-
-                location / {
-                    return 301 https://$host$request_uri;
-                }
-            }
-
-            server {
-                listen 443 ssl;
-                server_name optimize-vacation-for.me;
-
-                ssl_certificate /etc/letsencrypt/live/optimize-vacation-for.me/fullchain.pem;
-                ssl_certificate_key /etc/letsencrypt/live/optimize-vacation-for.me/privkey.pem;
-
-                location = / {
-                    return 301 https://$host/app;
-                }
-
-                location /app {
-                    proxy_pass http://vacation-app:80/app;
-                    proxy_http_version 1.1;
-                    proxy_set_header Host $host;
-                    proxy_set_header X-Real-IP $remote_addr;
-                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                    proxy_set_header X-Forwarded-Proto $scheme;
-                }
-            }
-            EOF
+              # Step 3: restore the original config from git
+              cp /root/vacation-app/nginx/conf.d/default.conf.bak /root/vacation-app/nginx/conf.d/default.conf
+              rm /root/vacation-app/nginx/conf.d/default.conf.bak
 
               docker compose -f /root/vacation-app/docker-compose.yaml restart nginx
               log_success "SSL certificate obtained"
