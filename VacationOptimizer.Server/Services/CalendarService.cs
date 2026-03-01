@@ -31,6 +31,10 @@ public class CalendarService
             {
                 type = DayType.PassedDay;
             }
+            else if (date == DateOnly.FromDateTime(DateTime.Today))
+            {
+                type = DayType.Today;
+            }
             else if (customFreeDayLookup.TryGetValue(date, out var customDay))
             {
                 type = DayType.CustomFreeDay;
@@ -44,10 +48,6 @@ public class CalendarService
             else if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
             {
                 type = DayType.Weekend;
-            }
-            else if (date == DateOnly.FromDateTime(DateTime.Today))
-            {
-                type = DayType.Today;
             }
             else
             {
