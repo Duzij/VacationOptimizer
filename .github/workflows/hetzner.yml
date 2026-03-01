@@ -56,40 +56,13 @@ jobs:
           script: |
             set -e
 
-            echo "🚀 Docker Deployment Starting"
-
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NC='\033[0m'
-
-            info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-            success() { echo -e "${GREEN}[✓]${NC} $1"; }
-            error() { echo -e "${RED}[✗]${NC} $1"; exit 1; }
-
-            info "Checking system prerequisites..."
-
-            if ! command -v docker >/dev/null 2>&1; then
-              info "Installing Docker..."
-              curl -fsSL https://get.docker.com | sh
-              systemctl start docker
-              systemctl enable docker
-            fi
-
-            apt update -qq && apt install -y git curl >/dev/null 2>&1 || true
-            success "System ready"
-
-            info "Configuring GitHub authentication..."
-            export GIT_TERMINAL_PROMPT=0
-            git config --global credential.helper ""
+            # ... keep your existing helper functions and prereqs ...
 
             APP_DIR="/root/vacation-app"
 
             if [ ! -d "$APP_DIR" ]; then
-              info "Cloning repository..."
               git clone "https://${TOKEN}@github.com/Duzij/VacationOptimizer.git" "$APP_DIR"
             else
-              info "Updating repository..."
               cd "$APP_DIR"
               git reset --hard HEAD
               git clean -fd
@@ -99,26 +72,16 @@ jobs:
 
             cd "$APP_DIR"
 
-            info "Building Docker image..."
-            docker build -t vacation-app .
+            # Write env file for docker compose
+            cat > .env <<EOF
+            JWT_SECRET_KEY=${JWT_SECRET}
+            SOME_API_KEY=${SOME_API_KEY}
+            ASPNETCORE_ENVIRONMENT=Production
+            EOF
 
-            info "Stopping old container..."
-            docker stop vacation-app 2>/dev/null || true
-            docker rm vacation-app 2>/dev/null || true
-
-            info "Starting new container..."
-            docker run -d \
-              --name vacation-app \
-              -p 80:80 \
-              -e ASPNETCORE_ENVIRONMENT=Production \
-              -e JWT_SECRET_KEY=${JWT_SECRET} \
-              -e SOME_API_KEY=${SOME_API_KEY} \
-              vacation-app
-
-            success "Container started"
-
-            info "Waiting for app to boot..."
-            sleep 10
+            info "Deploying with docker compose..."
+            docker compose pull || true
+            docker compose up -d --build
 
             info "Running health check..."
             for i in {1..5}; do
