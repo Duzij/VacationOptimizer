@@ -89,7 +89,7 @@ jobs:
 
             # After docker compose up -d
 
-            info "Checking SSL certificate..."
+            log_info "Checking SSL certificate..."
             if [ ! -f "/root/vacation-app/certbot/conf/live/optimize-vacation-for.me/fullchain.pem" ]; then
               log_info "No certificate found, obtaining one..."
 
