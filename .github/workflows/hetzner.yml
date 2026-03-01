@@ -79,24 +79,28 @@ jobs:
             ASPNETCORE_ENVIRONMENT=Production
             EOF
 
-            info "Deploying with docker compose..."
+            log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+            log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
+            log_error() { echo -e "${RED}[✗]${NC} $1"; exit 1; }
+
+            log_info "Deploying with docker compose..."
             docker compose pull || true
             docker compose up -d --build
 
-            info "Running health check..."
+            log_info "Running health check..."
             for i in {1..5}; do
               if curl -s --max-time 5 http://localhost/api/vacations/countries >/dev/null 2>&1; then
-                success "API is healthy"
+                log_success "API is healthy"
                 break
               elif [ $i -eq 5 ]; then
-                error "Health check failed"
+                log_error "Health check failed"
               else
-                info "Retrying... ($i/5)"
+                log_info "Retrying... ($i/5)"
                 sleep 5
               fi
             done
 
-            success "🎉 Deployment completed!"
+            log_success "🎉 Deployment completed!"
 
             echo ""
             echo "🌐 Application:"
