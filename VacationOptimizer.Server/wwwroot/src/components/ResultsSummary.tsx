@@ -1,5 +1,5 @@
 import type { OptimizeResult, VacationRange } from "../types/models";
-import { Calendar, Palmtree, Sun } from "lucide-react";
+import { Calendar, Palmtree, PointerIcon, Sun } from "lucide-react";
 
 interface Props {
     result: OptimizeResult;
@@ -23,7 +23,7 @@ export default function ResultsSummary({ result }: Props) {
     return (
         <div className="w-full max-w-6xl mx-auto space-y-5">
             {/* Stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <StatCard
                     icon={<Palmtree className="w-3 h-4 text-vacation-text" />}
                     label="Vacation days used"
@@ -38,6 +38,12 @@ export default function ResultsSummary({ result }: Props) {
                     icon={<Sun className="w-3 h-4 text-holiday-text" />}
                     label="Vacation ranges"
                     value={result.ranges.length}
+                />
+                <StatCard
+                    icon={<PointerIcon className="w-3 h-4 text-holiday-text" />}
+                    label="Long press on a day cell to mark as holiday!"
+                    value={""}
+                    inverted={true}
                 />
             </div>
 
@@ -78,18 +84,20 @@ function StatCard({
     icon,
     label,
     value,
+    inverted = false,
 }: {
     icon: React.ReactNode;
     label: string;
-    value: number | string;
+    value: number | string | undefined;
+    inverted?: boolean;
 }) {
     return (
-        <div className="rounded-lg border border-border bg-surface/50 px-3 py-3 text-center">
+        <div className={`rounded-lg border border-border bg-surface/50 px-3 py-3 text-center ${inverted ? "inverted" : ""}`}>
             <div className="flex items-center justify-center gap-1.5 mb-1">
                 {icon}
-                <span className="text-xl font-bold text-text tabular-nums">
+                {value && <span className="text-xl font-bold text-text tabular-nums">
                     {value}
-                </span>
+                </span>}
             </div>
             <span className="text-[11px] text-text-muted">{label}</span>
         </div>
