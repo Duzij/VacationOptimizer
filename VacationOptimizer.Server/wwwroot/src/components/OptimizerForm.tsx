@@ -7,9 +7,11 @@ import CustomFreeDaysManager from "./CustomFreeDaysManager";
 interface Props {
     onResult: (req: OptimizeRequest) => void;
     isLoading: boolean;
+    customFreeDays: CustomFreeDay[];
+    onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
 }
 
-export default function OptimizerForm({ onResult, isLoading }: Props) {
+export default function OptimizerForm({ onResult, isLoading, customFreeDays, onCustomFreeDaysChange }: Props) {
     const currentYear = new Date().getFullYear();
     const [country, setCountry] = useState("ES");
     const [year, setYear] = useState(currentYear);
@@ -21,7 +23,7 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
     const [maximumDaysPerRange, setMaximumDaysPerRange] = useState<
         number | null
     >(14);
-    const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>([]);
+
 
     const { data: countries, isLoading: countriesLoading } = useCountries();
 
@@ -168,9 +170,8 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
                 >
                     <span>Advanced constraints</span>
                     <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                            showAdvanced ? "rotate-180" : ""
-                        }`}
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""
+                            }`}
                     />
                 </button>
 
@@ -242,7 +243,7 @@ export default function OptimizerForm({ onResult, isLoading }: Props) {
                         <div className="space-y-2">
                             <CustomFreeDaysManager
                                 customFreeDays={customFreeDays}
-                                onUpdate={setCustomFreeDays}
+                                onUpdate={onCustomFreeDaysChange}
                             />
                         </div>
                     </div>

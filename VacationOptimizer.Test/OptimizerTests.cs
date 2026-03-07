@@ -271,11 +271,12 @@ public class OptimizerTests
         var birthdayDay = GetDayFromCalendar(result.Calendar, new DateOnly(DefaultYear, 3, 15));
         Assert.Equal(DayType.CustomFreeDay, birthdayDay.Type);
         Assert.Equal("Birthday", birthdayDay.HolidayName);
+        Assert.Contains(result.Ranges, range => range.Start <= new DateOnly(DefaultYear, 3, 15) && range.End >= new DateOnly(DefaultYear, 3, 15));
 
         var anniversaryDay = GetDayFromCalendar(result.Calendar, new DateOnly(DefaultYear, 7, 20));
         Assert.Equal(DayType.CustomFreeDay, anniversaryDay.Type);
         Assert.Equal("Anniversary", anniversaryDay.HolidayName);
-
+        Assert.Contains(result.Ranges, range => range.Start <= new DateOnly(DefaultYear, 7, 20) && range.End >= new DateOnly(DefaultYear, 7, 20));
         // Verify optimization still works with custom free days
         Assert.True(result.VacationDaysUsed <= DefaultBudget);
     }
