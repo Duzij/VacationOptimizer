@@ -8,7 +8,7 @@ import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
 import { useOptimize } from "./api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "./types/models";
-import { Sparkles, Sun, Moon } from "lucide-react";
+import { Sun, Moon, TreePalm } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -93,9 +93,9 @@ function Main() {
       <header className="border-b border-border bg-surface/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2">
           <h1 className="text-base font-bold bg-gradient-to-r bg-clip-text">
-            Vakie Takie
+            Vacation Optimizer
           </h1>
-          <Sparkles className="w-5 h-5 text-primary" />
+          <TreePalm className="w-5 h-5 text-primary" />
           <button
             onClick={() => setIsDark((prev) => !prev)}
             className="ml-auto p-2 rounded-full border border-border bg-surface hover:bg-surface-hover transition-colors flex items-center justify-center cursor-pointer"
