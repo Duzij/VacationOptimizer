@@ -4,9 +4,10 @@ services:
     env_file:
       - .env
     environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=vacation_optimizer;Username=postgres;Password=postgres
-    ports:
-      - "8080:80"
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB:-vacation_optimizer};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-change-me}
+    expose:
+      - "80"
     depends_on:
       postgres:
         condition: service_healthy
@@ -14,20 +15,23 @@ services:
 
   postgres:
     image: postgres:15-alpine
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=vacation_optimizer
-    ports:
-      - "5432:5432"
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me}
+      - POSTGRES_DB=${POSTGRES_DB:-vacation_optimizer}
+    expose:
+      - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d vacation_optimizer"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-vacation_optimizer}"]
       interval: 5s
       timeout: 5s
       retries: 12
       start_period: 5s
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine

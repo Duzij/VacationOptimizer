@@ -24,6 +24,7 @@ docker compose -f docker-compose.dev.yaml up -d
 Open:
 - Frontend (Vite HMR): `http://localhost:3001`
 - Backend API: `http://localhost:8080`
+- PostgreSQL (host-only): `127.0.0.1:5432`
 
 Dev logs:
 
@@ -44,6 +45,12 @@ docker compose -f docker-compose.dev.yaml down
 - Ports `80` and `443` open on the server
 - A valid `.env` file in the project root
 
+Create `.env` from `.env.example` and set a strong database password before starting production:
+
+```bash
+cp .env.example .env
+```
+
 ## 2. First-time startup (works without TLS certs)
 
 From the project root:
@@ -55,6 +62,8 @@ docker compose up -d --build
 Important behavior:
 - If certificates are missing in `./certbot/conf`, nginx serves HTTP only.
 - Once certificates exist, nginx automatically switches to HTTPS config on restart.
+- PostgreSQL is not published publicly in the production stack.
+- The application container is only reachable through `nginx` inside the Compose network.
 
 ## 3. Issue the first Let's Encrypt certificate
 

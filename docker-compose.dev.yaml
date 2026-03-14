@@ -1,30 +1,35 @@
 services:
   postgres:
     image: postgres:15-alpine
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=vacation_optimizer
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-vacation_optimizer}
     cpus: 0.5
     mem_limit: 512m
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata-dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d vacation_optimizer"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-vacation_optimizer}"]
       interval: 5s
       timeout: 5s
       retries: 12
       start_period: 5s
+    restart: unless-stopped
 
   vacation-app-dev:
     image: mcr.microsoft.com/dotnet/sdk:10.0
     working_dir: /src
     command: ["dotnet", "watch", "--project", "VacationOptimizer.Server/VacationOptimizer.Server.csproj", "run", "--urls", "http://0.0.0.0:8080"]
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=vacation_optimizer;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB:-vacation_optimizer};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-dev-postgres}
     cpus: 0.5
     mem_limit: 512m
     volumes:
@@ -34,6 +39,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
 
   frontend-dev:
     image: node:20
@@ -51,6 +57,7 @@ services:
       - "3001:3001"
     depends_on:
       - vacation-app-dev
+    restart: unless-stopped
 
 volumes:
   pgdata-dev:
