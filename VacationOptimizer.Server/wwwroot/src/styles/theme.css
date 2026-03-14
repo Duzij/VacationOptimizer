@@ -1,0 +1,115 @@
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-primary);
+    color: white;
+  }
+}
+
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --radius: 0.5rem;
+  --range-track-size: 0.25em;
+  --range-thumb-size: 1.25em;
+  --range-thumb-border: 2px solid var(--color-background);
+  --range-thumb-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23888888' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5l5 5 5-5'/%3E%3C/svg%3E");
+}
+
+.light {
+  --color-background: #ffffff;
+  --color-surface: #f7f7f7;
+  --color-surface-hover: #ededed;
+  --color-border: #e0e0e0;
+  --color-text: #222222;
+  --color-text-muted: #888888;
+  --color-primary: #222222;
+  --color-primary-hover: #444444;
+  --color-accent: #444444;
+
+  --calendar-workday-bg: #ffffff;
+  --calendar-workday-border: #f3f3f3;
+  --calendar-workday-text: #222222;
+  --calendar-weekend-bg: #f3f3f3;
+  --calendar-weekend-text: #888888;
+  --calendar-holiday-bg: #ffe5e5;
+  --calendar-holiday-text: #b91c1c;
+  --calendar-vacation-bg: #e0f7fa;
+  --calendar-vacation-text: #006064;
+  --calendar-custom-bg: #f5f5dc;
+  --calendar-custom-text: #444444;
+  --calendar-today-bg: #222222;
+  --calendar-today-text: #fff;
+  --calendar-today-border: #222222;
+  --calendar-past-bg: #f0f0f0;
+  --calendar-past-text: #bbbbbb;
+  --calendar-past-line: #cccccc;
+}
+
+.dark {
+  --color-background: #222222;
+  --color-surface: #2a2a2a;
+  --color-surface-hover: #444444;
+  --color-border: #444444;
+  --color-text: #f9fafb;
+  --color-text-muted: #888888;
+  --color-primary: #f9fafb;
+  --color-primary-hover: #888888;
+  --color-accent: #888888;
+
+  --calendar-workday-bg: #222222;
+  --calendar-workday-border: #2a2a2a;
+  --calendar-workday-text: #f9fafb;
+  --calendar-weekend-bg: #2a2a2a;
+  --calendar-weekend-text: #888888;
+  --calendar-holiday-bg: #7f1d1d;
+  --calendar-holiday-text: #fee2e2;
+  --calendar-vacation-bg: #006064;
+  --calendar-vacation-text: #e0f7fa;
+  --calendar-custom-bg: #444444;
+  --calendar-custom-text: #f9fafb;
+  --calendar-today-bg: #f9fafb;
+  --calendar-today-text: #222222;
+  --calendar-today-border: #f9fafb;
+  --calendar-past-bg: #1a1a1a;
+  --calendar-past-text: #555555;
+  --calendar-past-line: #333333;
+}
+
+.dark ::selection {
+  background-color: #fff;
+  color: #222;
+}
+
+.bg-surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.text-text-muted {
+  color: var(--color-text-muted);
+}
+
+.inverted {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+.optimize-btn {
+  color: var(--color-background);
+  background: var(--color-primary);
+  border: 1px solid var(--color-border);
+}

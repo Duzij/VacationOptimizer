@@ -1,8 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Net.Sockets;
 using Microsoft.AspNetCore.Http.Headers;
 using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using VacationOptimizer.Server.Data;
 using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
@@ -62,12 +64,26 @@ var app = builder.Build();
 // Run migrations automatically on startup if not testing
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    using (var scope = app.Services.CreateScope())
+    const int maxAttempts = 10;
+    var delay = TimeSpan.FromSeconds(3);
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
     {
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        if (db.Database.IsRelational())
+        try
         {
-            db.Database.Migrate();
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            if (db.Database.IsRelational())
+            {
+                db.Database.Migrate();
+            }
+
+            break;
+        }
+        catch (Exception ex) when (attempt < maxAttempts && IsTransientDbStartupException(ex))
+        {
+            app.Logger.LogWarning(ex, "Database is not ready yet (attempt {Attempt}/{MaxAttempts}). Retrying in {DelaySeconds}s.", attempt, maxAttempts, delay.TotalSeconds);
+            Thread.Sleep(delay);
         }
     }
 }
@@ -146,5 +162,26 @@ app.UseSpa(spa =>
 });
 
 app.Run();
+
+static bool IsTransientDbStartupException(Exception ex)
+{
+    if (ex is NpgsqlException)
+    {
+        return true;
+    }
+
+    var current = ex;
+    while (current != null)
+    {
+        if (current is SocketException)
+        {
+            return true;
+        }
+
+        current = current.InnerException;
+    }
+
+    return false;
+}
 
 public partial class Program { }

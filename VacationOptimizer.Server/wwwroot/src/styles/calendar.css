@@ -1,0 +1,50 @@
+.bg-vacation {
+  background-color: var(--calendar-vacation-bg);
+  color: var(--calendar-vacation-text);
+}
+
+.bg-custom {
+  background-color: var(--calendar-custom-bg);
+  color: var(--calendar-custom-text);
+}
+
+.bg-holiday {
+  background-color: var(--calendar-holiday-bg);
+  color: var(--calendar-holiday-text);
+}
+
+.bg-weekend {
+  background-color: var(--calendar-weekend-bg);
+  color: var(--calendar-weekend-text);
+}
+
+.bg-today {
+  background-color: var(--calendar-today-bg);
+  color: var(--calendar-today-text);
+  border: 1px solid var(--calendar-today-border);
+}
+
+.bg-workday {
+  background-color: var(--calendar-workday-bg);
+  color: var(--color-text-muted);
+  border: 1px solid var(--calendar-workday-border);
+}
+
+.bg-past {
+  background-color: var(--calendar-past-bg);
+  color: var(--calendar-past-text);
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-past::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  width: 140%;
+  height: 1px;
+  background-color: var(--calendar-past-line);
+  pointer-events: none;
+}
