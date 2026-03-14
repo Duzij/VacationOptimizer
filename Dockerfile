@@ -1,10 +1,12 @@
 # ---------- FRONTEND BUILD ----------
-FROM node:20 AS frontend
+# Use a slimmer, current LTS Node image for the asset build stage to
+# reduce OS package exposure compared with the generic node:20 image.
+FROM node:22-alpine AS frontend
 WORKDIR /app
 
 # adjust if your frontend is in another folder
 COPY VacationOptimizer.Server/wwwroot/package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY VacationOptimizer.Server/wwwroot ./
 RUN npm run build
