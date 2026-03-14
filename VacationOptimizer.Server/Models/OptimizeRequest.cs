@@ -8,7 +8,8 @@ public record OptimizeRequest(
     int MaximumDaysPerRange = 365,
     Dictionary<Month, int>? MaxNumberOfVacationsPerMonth = null,
     List<CustomFreeDay>? CustomFreeDays = null,
-    string? State = null
+    string? State = null,
+    List<DateOnly>? IgnoredHolidayDates = null
 );
 
 public enum Month

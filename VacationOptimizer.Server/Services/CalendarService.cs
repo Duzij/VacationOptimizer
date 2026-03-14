@@ -11,9 +11,17 @@ public class CalendarService
         _holidayService = holidayService;
     }
 
-    public List<CalendarDay> BuildCalendar(string country, int year, string? stateCode = null, List<CustomFreeDay>? customFreeDays = null)
+    public List<CalendarDay> BuildCalendar(
+        string country,
+        int year,
+        string? stateCode = null,
+        List<CustomFreeDay>? customFreeDays = null,
+        List<DateOnly>? ignoredHolidayDates = null)
     {
-        var holidays = _holidayService.GetHolidays(country, year, stateCode);
+        var ignoredHolidayDateSet = ignoredHolidayDates?.ToHashSet() ?? new HashSet<DateOnly>();
+        var holidays = _holidayService.GetHolidays(country, year, stateCode)
+            .Where(h => !ignoredHolidayDateSet.Contains(h.Date))
+            .ToList();
         var holidayLookup = holidays.ToDictionary(h => h.Date, h => h.Name);
         var customFreeDayLookup = customFreeDays?.ToDictionary(c => c.Date, c => c) ?? new Dictionary<DateOnly, CustomFreeDay>();
 

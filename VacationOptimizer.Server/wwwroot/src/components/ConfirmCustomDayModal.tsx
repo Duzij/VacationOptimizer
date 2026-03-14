@@ -11,10 +11,11 @@ interface Props {
     mode: "add" | "remove" | "reportHoliday";
     holidayName?: string | null;
     onConfirm: () => void;
+    onIgnoreAndReport?: () => void;
     onCancel: () => void;
 }
 
-export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfirm, onCancel }: Props) {
+export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfirm, onIgnoreAndReport, onCancel }: Props) {
     const [_year, month, day] = date.split("-").map(Number);
     const monthName = MONTH_NAMES_FULL[month - 1];
     const isRemove = mode === "remove";
@@ -62,7 +63,7 @@ export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfi
                     }
                 </p>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                     <button
                         type="button"
                         onClick={onCancel}
@@ -76,8 +77,17 @@ export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfi
                         onClick={onConfirm}
                         className={`action-btn flex-1 ${isRemove ? "action-btn-danger" : "action-btn-primary"}`}
                     >
-                        {isHolidayReport ? "Open report form" : isRemove ? "Remove" : "OK"}
+                        {isHolidayReport ? "Report only" : isRemove ? "Remove" : "OK"}
                     </button>
+                    {isHolidayReport && onIgnoreAndReport && (
+                        <button
+                            type="button"
+                            onClick={onIgnoreAndReport}
+                            className="action-btn action-btn-primary flex-1"
+                        >
+                            Ignore and report
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

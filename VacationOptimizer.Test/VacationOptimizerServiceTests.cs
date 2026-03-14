@@ -234,6 +234,23 @@ public class VacationOptimizerServiceTests
         Assert.Equal("Custom free day (Apr 10)", customDay.HolidayName);  // Auto-generated title
     }
 
+    [Fact]
+    public void Optimize_WithIgnoredHolidayDates_RemovesHolidayFromCalendar()
+    {
+        var ignoredHolidayDate = new DateOnly(DefaultYear, 1, 1);
+
+        var result = _optimizer.Optimize(new OptimizeRequest(
+            DefaultCountry,
+            DefaultYear,
+            DefaultBudget,
+            IgnoredHolidayDates: new List<DateOnly> { ignoredHolidayDate }
+        ));
+
+        var ignoredHoliday = GetDayFromCalendar(result.Calendar, ignoredHolidayDate);
+        Assert.NotEqual(DayType.PublicHoliday, ignoredHoliday.Type);
+        Assert.Null(ignoredHoliday.HolidayName);
+    }
+
     // Helper methods
     private List<CalendarDay> BuildDefaultCalendar() =>
         _calendarService.BuildCalendar(DefaultCountry, DefaultYear);

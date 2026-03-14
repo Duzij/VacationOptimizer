@@ -132,7 +132,9 @@ jobs:
 
             log_info "Running health check..."
             for i in {1..5}; do
-            if curl -s --max-time 5 https://localhost:443/app >/dev/null 2>&1; then
+            if curl -fsS --max-time 10 \
+              --resolve optimize-vacation-for.me:443:127.0.0.1 \
+              https://optimize-vacation-for.me/app >/dev/null 2>&1; then
                 log_success "API is healthy"
                 break
               elif [ $i -eq 5 ]; then

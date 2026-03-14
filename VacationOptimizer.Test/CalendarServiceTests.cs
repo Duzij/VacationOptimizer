@@ -66,6 +66,21 @@ public class CalendarServiceTests
         Assert.NotNull(newYear.HolidayName);
     }
 
+    [Fact]
+    public void BuildCalendar_IgnoredHolidayDates_AreNotMarkedAsHolidays()
+    {
+        var ignoredDate = new DateOnly(DefaultYear, 1, 1);
+
+        var calendar = _calendarService.BuildCalendar(
+            DefaultCountry,
+            DefaultYear,
+            ignoredHolidayDates: new List<DateOnly> { ignoredDate });
+
+        var newYear = GetDayFromCalendar(calendar, ignoredDate);
+        Assert.NotEqual(DayType.PublicHoliday, newYear.Type);
+        Assert.Null(newYear.HolidayName);
+    }
+
     private static void AssertDayType(List<CalendarDay> calendar, DateOnly date, DayType expectedType) =>
         Assert.Equal(expectedType, GetDayFromCalendar(calendar, date).Type);
 

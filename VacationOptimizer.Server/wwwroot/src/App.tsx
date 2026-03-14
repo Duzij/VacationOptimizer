@@ -23,6 +23,7 @@ export default function App() {
 function Main() {
   const [result, setResult] = useState<OptimizeResult | null>(null);
   const [activeRequest, setActiveRequest] = useState<OptimizeRequest | null>(null);
+  const [ignoredHolidayDates, setIgnoredHolidayDates] = useState<string[]>([]);
   const [feedbackDraft, setFeedbackDraft] = useState<{
     title: string;
     description?: string;
@@ -63,9 +64,27 @@ function Main() {
     return () => window.removeEventListener("keydown", handler);
   }, [feedbackDraft]);
 
-  const handleOptimize = (req: OptimizeRequest) => {
-    setActiveRequest(req);
-    optimize.mutate(req, {
+  const withIgnoredHolidayDates = (req: OptimizeRequest, nextIgnoredHolidayDates = ignoredHolidayDates): OptimizeRequest => ({
+    ...req,
+    ignoredHolidayDates: nextIgnoredHolidayDates.length > 0 ? nextIgnoredHolidayDates : undefined,
+  });
+
+  const hasSameHolidayScope = (left: OptimizeRequest | null, right: OptimizeRequest) =>
+    left?.country === right.country &&
+    left?.year === right.year &&
+    (left?.state ?? "") === (right.state ?? "");
+
+  const handleOptimize = (req: OptimizeRequest, overrideIgnoredHolidayDates?: string[]) => {
+    const nextIgnoredHolidayDates = hasSameHolidayScope(activeRequest, req) ? ignoredHolidayDates : [];
+    const effectiveIgnoredHolidayDates = overrideIgnoredHolidayDates ?? nextIgnoredHolidayDates;
+
+    if (!hasSameHolidayScope(activeRequest, req) && ignoredHolidayDates.length > 0 && !overrideIgnoredHolidayDates) {
+      setIgnoredHolidayDates([]);
+    }
+
+    const requestWithIgnoredDates = withIgnoredHolidayDates(req, effectiveIgnoredHolidayDates);
+    setActiveRequest(requestWithIgnoredDates);
+    optimize.mutate(requestWithIgnoredDates, {
       onSuccess: (data) => setResult(data),
     });
   };
@@ -80,7 +99,7 @@ function Main() {
     });
   };
 
-  const openHolidayReport = (day: CalendarDay) => {
+  const openHolidayReport = (day: CalendarDay, isIgnoredInApp = ignoredHolidayDates.includes(day.date)) => {
     const country = activeRequest?.country ?? "unknown";
     const state = activeRequest?.state ?? "national";
     setFeedbackDraft({
@@ -89,6 +108,7 @@ function Main() {
       submitLabel: "Send report",
       message: [
         "Issue type: Public holiday removal request",
+        `Ignored in app: ${isIgnoredInApp ? "yes" : "no"}`,
         `Country: ${country}`,
         `State: ${state}`,
         `Date: ${formatReportDate(day.date)} (${day.date})`,
@@ -121,7 +141,7 @@ function Main() {
     if (confirmDay.mode === "reportHoliday") {
       const holidayDay = result?.calendar.find((day) => day.date === confirmDay.date);
       if (holidayDay) {
-        openHolidayReport(holidayDay);
+        openHolidayReport(holidayDay, ignoredHolidayDates.includes(confirmDay.date));
       }
       setConfirmDay(null);
       return;
@@ -138,6 +158,27 @@ function Main() {
       customFreeDays: updatedDays.length > 0 ? updatedDays : undefined,
     };
     handleOptimize(updatedRequest);
+  };
+
+  const handleIgnoreAndReportHoliday = () => {
+    if (!confirmDay || !activeRequest || confirmDay.mode !== "reportHoliday") {
+      return;
+    }
+
+    const holidayDay = result?.calendar.find((day) => day.date === confirmDay.date);
+    if (!holidayDay) {
+      setConfirmDay(null);
+      return;
+    }
+
+    const updatedIgnoredHolidayDates = ignoredHolidayDates.includes(confirmDay.date)
+      ? ignoredHolidayDates
+      : [...ignoredHolidayDates, confirmDay.date];
+
+    setIgnoredHolidayDates(updatedIgnoredHolidayDates);
+    openHolidayReport(holidayDay, true);
+    setConfirmDay(null);
+    handleOptimize(activeRequest, updatedIgnoredHolidayDates);
   };
 
   return (
@@ -212,6 +253,7 @@ function Main() {
           mode={confirmDay.mode}
           holidayName={confirmDay.holidayName}
           onConfirm={handleConfirmCustomDay}
+          onIgnoreAndReport={confirmDay.mode === "reportHoliday" ? handleIgnoreAndReportHoliday : undefined}
           onCancel={() => setConfirmDay(null)}
         />
       )}

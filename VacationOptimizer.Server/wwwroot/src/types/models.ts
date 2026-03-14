@@ -55,4 +55,5 @@ export interface OptimizeRequest {
     minimumDaysPerRange?: number;
     maximumDaysPerRange?: number;
     customFreeDays?: CustomFreeDay[];
+    ignoredHolidayDates?: string[];
 }

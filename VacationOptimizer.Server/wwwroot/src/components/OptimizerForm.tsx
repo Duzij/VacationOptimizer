@@ -11,6 +11,11 @@ interface Props {
     onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
 }
 
+function supportsNationalHolidaysOnly(countryCode: string) {
+    // TODO: replace this hardcoded exception with backend capability metadata.
+    return countryCode !== "IN";
+}
+
 export default function OptimizerForm({ onResult, isLoading, customFreeDays, onCustomFreeDaysChange }: Props) {
     const currentYear = new Date().getFullYear();
     const [country, setCountry] = useState("ES");
@@ -105,7 +110,9 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
                      transition-all appearance-none cursor-pointer"
                     >
-                        <option value="">National holidays only</option>
+                        {supportsNationalHolidaysOnly(country) && (
+                            <option value="">National holidays only</option>
+                        )}
                         {states.map((entry) => (
                             <option key={entry.code} value={entry.code}>
                                 {entry.name}
