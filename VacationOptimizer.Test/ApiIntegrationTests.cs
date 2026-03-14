@@ -56,11 +56,11 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
                 var testCountry = new Country { Id = 999, Name = "TestLand", IsoCode = "XX" };
                 db.Countries.Add(testCountry);
 
-                var testState = new State { Id = 999, Name = "Testville", CountryId = 999 };
+                var testState = new State { Id = 999, Name = "Testville", Code = "XX-TV", CountryId = 999 };
                 db.States.Add(testState);
 
-                var testHoliday = new Holiday { Id = 999, StateId = 999, Date = new DateOnly(2026, 7, 4), Name = "Test Independence Day" };
-                db.Holidays.Add(testHoliday);
+                db.Holidays.Add(new Holiday { Id = 998, CountryId = 999, StateId = null, Date = new DateOnly(2026, 1, 1), Name = "National Test Day" });
+                db.Holidays.Add(new Holiday { Id = 999, CountryId = 999, StateId = 999, Date = new DateOnly(2026, 7, 4), Name = "Test Independence Day" });
 
                 db.SaveChanges();
             });
@@ -83,5 +83,28 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         // Deserialize and check
         Assert.Contains("XX", jsonString);
         Assert.Contains("TestLand", jsonString);
+    }
+
+    [Fact]
+    public async Task GetStates_ReturnsStatesForCountry()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/countries/XX/states");
+
+        response.EnsureSuccessStatusCode();
+        var jsonString = await response.Content.ReadAsStringAsync();
+        Assert.Contains("XX-TV", jsonString);
+        Assert.Contains("Testville", jsonString);
+    }
+
+    [Fact]
+    public async Task GetStates_Returns404WhenCountryHasNoStates()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/countries/ES/states");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

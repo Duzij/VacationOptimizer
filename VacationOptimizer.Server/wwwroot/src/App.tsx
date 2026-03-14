@@ -82,6 +82,7 @@ function Main() {
 
   const openHolidayReport = (day: CalendarDay) => {
     const country = activeRequest?.country ?? "unknown";
+    const state = activeRequest?.state ?? "national";
     setFeedbackDraft({
       title: "Report public holiday",
       description: "Send a report if this holiday looks incorrect and should be removed from the calendar.",
@@ -89,6 +90,7 @@ function Main() {
       message: [
         "Issue type: Public holiday removal request",
         `Country: ${country}`,
+        `State: ${state}`,
         `Date: ${formatReportDate(day.date)} (${day.date})`,
         `Holiday name: ${day.holidayName ?? "Unknown"}`,
         "",

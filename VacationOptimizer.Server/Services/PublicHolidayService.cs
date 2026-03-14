@@ -1,15 +1,18 @@
 using PublicHoliday;
 using System.Reflection;
 using VacationOptimizer.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace VacationOptimizer.Server.Services;
 
 public record HolidayInfo(DateOnly Date, string Name);
+public record StateInfo(string Code, string Name);
 
 public interface IPublicHolidayService
 {
-    IList<HolidayInfo> GetHolidays(string countryCode, int year);
+    IList<HolidayInfo> GetHolidays(string countryCode, int year, string? stateCode = null);
     IList<string> GetSupportedCountries();
+    IList<StateInfo> GetStates(string countryCode);
 }
 
 public class PublicHolidayService : IPublicHolidayService
@@ -102,16 +105,37 @@ public class PublicHolidayService : IPublicHolidayService
         }
     }
 
-    public IList<HolidayInfo> GetHolidays(string countryCode, int year)
+    public IList<HolidayInfo> GetHolidays(string countryCode, int year, string? stateCode = null)
     {
-        // 1. Try to get from database first
-        var dbHolidays = _dbContext.Holidays
-            .Where(h => h.State!.Country!.IsoCode == countryCode && h.Date.Year == year)
-            .Select(h => new HolidayInfo(h.Date, h.Name))
-            .ToList();
+        var hasDatabaseHolidays = _dbContext.Holidays
+            .Any(h => h.Country!.IsoCode == countryCode && h.Date.Year == year);
 
-        if (dbHolidays.Any())
+        if (hasDatabaseHolidays)
         {
+            IQueryable<Models.Holiday> query = _dbContext.Holidays
+                .Include(h => h.State)
+                .Include(h => h.Country)
+                .Where(h => h.Country!.IsoCode == countryCode && h.Date.Year == year);
+
+            if (string.IsNullOrWhiteSpace(stateCode))
+            {
+                query = query.Where(h => h.StateId == null);
+            }
+            else
+            {
+                var stateExists = _dbContext.States.Any(s => s.Country!.IsoCode == countryCode && s.Code == stateCode);
+                if (!stateExists)
+                {
+                    throw new ArgumentException($"Unsupported state code '{stateCode}' for country '{countryCode}'.");
+                }
+
+                query = query.Where(h => h.StateId == null || h.State!.Code == stateCode);
+            }
+
+            var dbHolidays = query
+                .Select(h => new HolidayInfo(h.Date, h.Name))
+                .ToList();
+
             return dbHolidays.OrderBy(h => h.Date).ToList();
         }
 
@@ -135,6 +159,15 @@ public class PublicHolidayService : IPublicHolidayService
         var fallbackCountries = _countryFactories.Keys;
 
         return dbCountries.Union(fallbackCountries).OrderBy(k => k).ToList();
+    }
+
+    public IList<StateInfo> GetStates(string countryCode)
+    {
+        return _dbContext.States
+            .Where(s => s.Country!.IsoCode == countryCode)
+            .OrderBy(s => s.Name)
+            .Select(s => new StateInfo(s.Code, s.Name))
+            .ToList();
     }
 
     public static string GetCountryName(string code)

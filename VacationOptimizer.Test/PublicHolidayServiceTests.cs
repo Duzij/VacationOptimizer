@@ -48,4 +48,12 @@ public class PublicHolidayServiceTests
     {
         Assert.Throws<ArgumentException>(() => _holidayService.GetHolidays("XX", DefaultYear));
     }
+
+    [Fact]
+    public void GetStates_UnitedStates_ReturnsSeededState()
+    {
+        var states = _holidayService.GetStates("US");
+
+        Assert.Contains(states, s => s.Code == "US-CA" && s.Name == "California");
+    }
 }

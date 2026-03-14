@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using VacationOptimizer.Server.Models;
+using VacationOptimizer.Server.Data.SeedData;
 
 namespace VacationOptimizer.Server.Data;
 
@@ -15,24 +16,33 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Seed some initial data based on the supported countries
-        modelBuilder.Entity<Country>().HasData(
-            new Country { Id = 1, Name = "Austria", IsoCode = "AT" },
-            new Country { Id = 2, Name = "Germany", IsoCode = "DE" },
-            new Country { Id = 3, Name = "United States", IsoCode = "US" }
-        );
+        modelBuilder.Entity<Country>()
+            .HasIndex(c => c.IsoCode)
+            .IsUnique();
 
-        modelBuilder.Entity<State>().HasData(
-            new State { Id = 1, Name = "Vienna", CountryId = 1 },
-            new State { Id = 2, Name = "Bavaria", CountryId = 2 },
-            new State { Id = 3, Name = "California", CountryId = 3 }
-        );
+        modelBuilder.Entity<State>()
+            .HasIndex(s => new { s.CountryId, s.Code })
+            .IsUnique();
 
-        // Create some generic dummy holidays
-        modelBuilder.Entity<Holiday>().HasData(
-            new Holiday { Id = 1, StateId = 1, Date = new DateOnly(DateTime.Now.Year, 1, 1), Name = "New Year's Day" },
-            new Holiday { Id = 2, StateId = 2, Date = new DateOnly(DateTime.Now.Year, 1, 1), Name = "New Year's Day" },
-            new Holiday { Id = 3, StateId = 3, Date = new DateOnly(DateTime.Now.Year, 1, 1), Name = "New Year's Day" }
-        );
+        modelBuilder.Entity<Holiday>()
+            .HasIndex(h => new { h.CountryId, h.Date, h.StateId })
+            .IsUnique()
+            .AreNullsDistinct(false);
+
+        modelBuilder.Entity<Holiday>()
+            .HasOne(h => h.Country)
+            .WithMany(c => c.Holidays)
+            .HasForeignKey(h => h.CountryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Holiday>()
+            .HasOne(h => h.State)
+            .WithMany(s => s.Holidays)
+            .HasForeignKey(h => h.StateId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Country>().HasData(CountrySeedCatalog.Countries);
+        modelBuilder.Entity<State>().HasData(CountrySeedCatalog.States);
+        modelBuilder.Entity<Holiday>().HasData(CountrySeedCatalog.Holidays);
     }
 }

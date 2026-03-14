@@ -2,11 +2,40 @@
 
 This project is deployed with `docker compose`.
 
+For local development with hot reload, use `docker-compose.dev.yaml` instead of the production stack.
+
 The stack includes:
 - `vacation-app` (application)
 - `postgres` (database)
 - `nginx` (reverse proxy)
 - `certbot` (manual certificate issuance/renewal; not started by default)
+
+## 0. Local development (hot reload in containers)
+
+Why old FE appears with `docker compose up -d`:
+- `docker-compose.yaml` is production-style and serves built frontend files from the app image.
+
+Use the dev stack:
+
+```bash
+docker compose -f docker-compose.dev.yaml up -d
+```
+
+Open:
+- Frontend (Vite HMR): `http://localhost:3001`
+- Backend API: `http://localhost:8080`
+
+Dev logs:
+
+```bash
+docker compose -f docker-compose.dev.yaml logs -f vacation-app-dev frontend-dev postgres
+```
+
+Stop dev stack:
+
+```bash
+docker compose -f docker-compose.dev.yaml down
+```
 
 ## 1. Prerequisites
 

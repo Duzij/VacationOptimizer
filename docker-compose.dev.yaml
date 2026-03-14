@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=vacation_optimizer
+    cpus: 0.5
+    mem_limit: 512m
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vacation_optimizer"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  vacation-app-dev:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    working_dir: /src
+    command: ["dotnet", "watch", "--project", "VacationOptimizer.Server/VacationOptimizer.Server.csproj", "run", "--urls", "http://0.0.0.0:8080"]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=vacation_optimizer;Username=postgres;Password=postgres
+    cpus: 0.5
+    mem_limit: 512m
+    volumes:
+      - ./:/src
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend-dev:
+    image: node:20
+    working_dir: /app
+    command: ["sh", "-c", "npm install && npm run dev -- --host 0.0.0.0 --port 3001"]
+    environment:
+      - VITE_API_PROXY_TARGET=http://vacation-app-dev:8080
+      - CHOKIDAR_USEPOLLING=true
+    cpus: 0.5
+    mem_limit: 512m
+    volumes:
+      - ./VacationOptimizer.Server/wwwroot:/app
+      - frontend-node-modules:/app/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      - vacation-app-dev
+
+volumes:
+  pgdata-dev:
+  frontend-node-modules:

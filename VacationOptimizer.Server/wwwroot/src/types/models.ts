@@ -3,6 +3,11 @@ export interface Country {
     name: string;
 }
 
+export interface StateOption {
+    code: string;
+    name: string;
+}
+
 export const DayType = {
     WorkDay: "WorkDay",
     Weekend: "Weekend",
@@ -44,6 +49,7 @@ export interface OptimizeResult {
 
 export interface OptimizeRequest {
     country: string;
+    state?: string;
     year: number;
     vacationDays: number;
     minimumDaysPerRange?: number;

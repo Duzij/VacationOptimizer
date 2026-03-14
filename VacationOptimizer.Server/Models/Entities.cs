@@ -17,6 +17,7 @@ public class Country
     public string IsoCode { get; set; } = string.Empty; // ISO 3166-1 alpha-2
 
     public ICollection<State> States { get; set; } = new List<State>();
+    public ICollection<Holiday> Holidays { get; set; } = new List<Holiday>();
 }
 
 public class State
@@ -27,6 +28,10 @@ public class State
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(16)]
+    public string Code { get; set; } = string.Empty;
 
     [Required]
     public int CountryId { get; set; }
@@ -43,7 +48,12 @@ public class Holiday
     public int Id { get; set; }
 
     [Required]
-    public int StateId { get; set; }
+    public int CountryId { get; set; }
+
+    [ForeignKey(nameof(CountryId))]
+    public Country? Country { get; set; }
+
+    public int? StateId { get; set; }
 
     [ForeignKey(nameof(StateId))]
     public State? State { get; set; }

@@ -13,7 +13,7 @@ public class VacationOptimizerService
 
     public OptimizeResult Optimize(OptimizeRequest request)
     {
-        var calendar = _calendarService.BuildCalendar(request.Country, request.Year, request.CustomFreeDays);
+        var calendar = _calendarService.BuildCalendar(request.Country, request.Year, request.State, request.CustomFreeDays);
         int remainingBudget = request.VacationDays;
 
         if (remainingBudget <= 0)

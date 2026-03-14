@@ -11,9 +11,9 @@ public class CalendarService
         _holidayService = holidayService;
     }
 
-    public List<CalendarDay> BuildCalendar(string country, int year, List<CustomFreeDay>? customFreeDays = null)
+    public List<CalendarDay> BuildCalendar(string country, int year, string? stateCode = null, List<CustomFreeDay>? customFreeDays = null)
     {
-        var holidays = _holidayService.GetHolidays(country, year);
+        var holidays = _holidayService.GetHolidays(country, year, stateCode);
         var holidayLookup = holidays.ToDictionary(h => h.Date, h => h.Name);
         var customFreeDayLookup = customFreeDays?.ToDictionary(c => c.Date, c => c) ?? new Dictionary<DateOnly, CustomFreeDay>();
 

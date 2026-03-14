@@ -42,6 +42,9 @@ namespace VacationOptimizer.Server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IsoCode")
+                        .IsUnique();
+
                     b.ToTable("Countries");
 
                     b.HasData(
@@ -73,6 +76,9 @@ namespace VacationOptimizer.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CountryId")
+                        .HasColumnType("integer");
+
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
@@ -81,10 +87,16 @@ namespace VacationOptimizer.Server.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int>("StateId")
+                    b.Property<int?>("StateId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("CountryId", "Date", "StateId")
+                        .IsUnique()
+                        .HasAnnotation("Npgsql:NullsDistinct", false);
 
                     b.HasIndex("StateId");
 
@@ -94,22 +106,33 @@ namespace VacationOptimizer.Server.Migrations
                         new
                         {
                             Id = 1,
+                            CountryId = 1,
                             Date = new DateOnly(2026, 1, 1),
                             Name = "New Year's Day",
-                            StateId = 1
+                            StateId = (int?)null
                         },
                         new
                         {
                             Id = 2,
-                            Date = new DateOnly(2026, 1, 1),
-                            Name = "New Year's Day",
+                            CountryId = 2,
+                            Date = new DateOnly(2026, 1, 6),
+                            Name = "Epiphany",
                             StateId = 2
                         },
                         new
                         {
                             Id = 3,
+                            CountryId = 3,
                             Date = new DateOnly(2026, 1, 1),
                             Name = "New Year's Day",
+                            StateId = (int?)null
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CountryId = 3,
+                            Date = new DateOnly(2026, 3, 31),
+                            Name = "Cesar Chavez Day",
                             StateId = 3
                         });
                 });
@@ -125,6 +148,11 @@ namespace VacationOptimizer.Server.Migrations
                     b.Property<int>("CountryId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -132,7 +160,8 @@ namespace VacationOptimizer.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CountryId");
+                    b.HasIndex("CountryId", "Code")
+                        .IsUnique();
 
                     b.ToTable("States");
 
@@ -140,18 +169,21 @@ namespace VacationOptimizer.Server.Migrations
                         new
                         {
                             Id = 1,
+                            Code = "AT-9",
                             CountryId = 1,
                             Name = "Vienna"
                         },
                         new
                         {
                             Id = 2,
+                            Code = "DE-BY",
                             CountryId = 2,
                             Name = "Bavaria"
                         },
                         new
                         {
                             Id = 3,
+                            Code = "US-CA",
                             CountryId = 3,
                             Name = "California"
                         });
@@ -159,11 +191,18 @@ namespace VacationOptimizer.Server.Migrations
 
             modelBuilder.Entity("VacationOptimizer.Server.Models.Holiday", b =>
                 {
+                    b.HasOne("VacationOptimizer.Server.Models.Country", "Country")
+                        .WithMany("Holidays")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("VacationOptimizer.Server.Models.State", "State")
                         .WithMany("Holidays")
                         .HasForeignKey("StateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Country");
 
                     b.Navigation("State");
                 });
@@ -181,6 +220,8 @@ namespace VacationOptimizer.Server.Migrations
 
             modelBuilder.Entity("VacationOptimizer.Server.Models.Country", b =>
                 {
+                    b.Navigation("Holidays");
+
                     b.Navigation("States");
                 });
 

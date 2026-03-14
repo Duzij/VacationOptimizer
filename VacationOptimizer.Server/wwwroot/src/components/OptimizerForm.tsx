@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useCountries } from "../api/vacationApi";
+import { useEffect, useState } from "react";
+import { useCountries, useStates } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest } from "../types/models";
 import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
 import CustomFreeDaysManager from "./CustomFreeDaysManager";
@@ -14,6 +14,7 @@ interface Props {
 export default function OptimizerForm({ onResult, isLoading, customFreeDays, onCustomFreeDaysChange }: Props) {
     const currentYear = new Date().getFullYear();
     const [country, setCountry] = useState("ES");
+    const [state, setState] = useState("");
     const [year, setYear] = useState(currentYear);
     const [vacationDays, setVacationDays] = useState(25);
     const [showAdvanced, setShowAdvanced] = useState(false);
@@ -26,6 +27,13 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
 
 
     const { data: countries, isLoading: countriesLoading } = useCountries();
+    const { data: states, isLoading: statesLoading } = useStates(country);
+
+    useEffect(() => {
+        if (!states?.some((entry) => entry.code === state)) {
+            setState("");
+        }
+    }, [state, states]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,6 +47,9 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
         }
         if (maximumDaysPerRange !== null) {
             request.maximumDaysPerRange = maximumDaysPerRange;
+        }
+        if (state) {
+            request.state = state;
         }
         if (customFreeDays.length > 0) {
             request.customFreeDays = customFreeDays;
@@ -76,6 +87,33 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
                     ))}
                 </select>
             </div>
+
+            {states && states.length > 0 && (
+                <div className="space-y-1.5">
+                    <label
+                        htmlFor="state"
+                        className="text-sm font-medium text-text-muted"
+                    >
+                        State / Region
+                    </label>
+                    <select
+                        id="state"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                        disabled={statesLoading}
+                        className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text
+                     focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
+                     transition-all appearance-none cursor-pointer"
+                    >
+                        <option value="">National holidays only</option>
+                        {states.map((entry) => (
+                            <option key={entry.code} value={entry.code}>
+                                {entry.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
             {/* Year */}
             {/* Year */}

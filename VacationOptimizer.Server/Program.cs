@@ -10,10 +10,14 @@ using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var isRunningInContainer = string.Equals(
+    Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+    "true",
+    StringComparison.OrdinalIgnoreCase);
 
 builder.Services.AddOpenApi();
 
-if (builder.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment() && !isRunningInContainer)
 {
     builder.WebHost.ConfigureKestrel(options =>
     {
@@ -96,7 +100,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
+if (!builder.Environment.IsDevelopment() || !isRunningInContainer)
+{
+    app.UseHttpsRedirection();
+}
 
 // API Endpoints
 var api = app.MapGroup("/api/vacations");
@@ -114,14 +121,25 @@ api.MapPost("/optimize", (OptimizeRequest request, VacationOptimizerService opti
     }
 });
 
-api.MapGet("/countries", (IPublicHolidayService holidayService) =>
+api.MapGet("/countries", (IPublicHolidayService holidayService, AppDbContext dbContext) =>
 {
     var countries = holidayService.GetSupportedCountries();
+    var dbCountryNames = dbContext.Countries
+        .ToDictionary(country => country.IsoCode, country => country.Name);
+
     return countries.Select(code => new
     {
         code,
-        name = PublicHolidayService.GetCountryName(code)
+        name = dbCountryNames.TryGetValue(code, out var dbName)
+            ? dbName
+            : PublicHolidayService.GetCountryName(code)
     }).OrderBy(c => c.name);
+});
+
+api.MapGet("/countries/{countryCode}/states", (string countryCode, IPublicHolidayService holidayService) =>
+{
+    var states = holidayService.GetStates(countryCode);
+    return states.Count == 0 ? Results.NotFound() : Results.Ok(states);
 });
 
 // SPA hosting
