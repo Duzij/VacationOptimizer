@@ -42,10 +42,10 @@ docker compose -f docker-compose.dev.yaml down
 
 - Docker and Docker Compose plugin installed
 - DNS for `optimize-vacation-for.me` pointing to the server IP
-- Ports `80` and `443` open on the server
+- Ports `22` and `443` open on the server, the rest are closed by custom firewall
 - A valid `.env` file in the project root
 
-Create `.env` from `.env.example` and set a strong database password before starting production:
+Update `.env` from `.env.example` and set a strong database password before starting production:
 
 ```bash
 cp .env.example .env
