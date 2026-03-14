@@ -12,8 +12,8 @@ using VacationOptimizer.Server.Data;
 namespace VacationOptimizer.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260314205343_IndiaSeedAdded")]
-    partial class IndiaSeedAdded
+    [Migration("20260314222848_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2297,17 +2297,17 @@ namespace VacationOptimizer.Server.Migrations
                         {
                             Id = 274,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 8, 15),
-                            Name = "Independence Day (National)",
-                            StateId = 32
+                            Date = new DateOnly(2026, 8, 26),
+                            Name = "Onam",
+                            StateId = 15
                         },
                         new
                         {
                             Id = 275,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 8, 26),
-                            Name = "Onam",
-                            StateId = 15
+                            Date = new DateOnly(2026, 8, 28),
+                            Name = "Raksha Bandhan",
+                            StateId = 8
                         },
                         new
                         {
@@ -2315,7 +2315,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 8, 28),
                             Name = "Raksha Bandhan",
-                            StateId = 8
+                            StateId = 10
                         },
                         new
                         {
@@ -2323,7 +2323,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 8, 28),
                             Name = "Raksha Bandhan",
-                            StateId = 10
+                            StateId = 11
                         },
                         new
                         {
@@ -2331,7 +2331,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 8, 28),
                             Name = "Raksha Bandhan",
-                            StateId = 11
+                            StateId = 16
                         },
                         new
                         {
@@ -2339,7 +2339,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 8, 28),
                             Name = "Raksha Bandhan",
-                            StateId = 16
+                            StateId = 24
                         },
                         new
                         {
@@ -2347,7 +2347,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 8, 28),
                             Name = "Raksha Bandhan",
-                            StateId = 24
+                            StateId = 30
                         },
                         new
                         {
@@ -2355,15 +2355,15 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 8, 28),
                             Name = "Raksha Bandhan",
-                            StateId = 30
+                            StateId = 29
                         },
                         new
                         {
                             Id = 282,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 8, 28),
-                            Name = "Raksha Bandhan",
-                            StateId = 29
+                            Date = new DateOnly(2026, 9, 4),
+                            Name = "Janmashtami",
+                            StateId = 4
                         },
                         new
                         {
@@ -2371,7 +2371,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 4
+                            StateId = 7
                         },
                         new
                         {
@@ -2379,7 +2379,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 7
+                            StateId = 8
                         },
                         new
                         {
@@ -2387,7 +2387,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 8
+                            StateId = 10
                         },
                         new
                         {
@@ -2395,7 +2395,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 10
+                            StateId = 11
                         },
                         new
                         {
@@ -2403,7 +2403,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 11
+                            StateId = 12
                         },
                         new
                         {
@@ -2411,7 +2411,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 12
+                            StateId = 13
                         },
                         new
                         {
@@ -2419,7 +2419,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 13
+                            StateId = 16
                         },
                         new
                         {
@@ -2427,7 +2427,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 16
+                            StateId = 18
                         },
                         new
                         {
@@ -2435,7 +2435,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 18
+                            StateId = 19
                         },
                         new
                         {
@@ -2443,7 +2443,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 19
+                            StateId = 21
                         },
                         new
                         {
@@ -2451,7 +2451,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 21
+                            StateId = 22
                         },
                         new
                         {
@@ -2459,7 +2459,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 22
+                            StateId = 23
                         },
                         new
                         {
@@ -2467,7 +2467,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 23
+                            StateId = 24
                         },
                         new
                         {
@@ -2475,7 +2475,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 24
+                            StateId = 25
                         },
                         new
                         {
@@ -2483,7 +2483,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 25
+                            StateId = 26
                         },
                         new
                         {
@@ -2491,7 +2491,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 26
+                            StateId = 27
                         },
                         new
                         {
@@ -2499,7 +2499,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 27
+                            StateId = 28
                         },
                         new
                         {
@@ -2507,7 +2507,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 28
+                            StateId = 29
                         },
                         new
                         {
@@ -2515,15 +2515,15 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 4),
                             Name = "Janmashtami",
-                            StateId = 29
+                            StateId = 30
                         },
                         new
                         {
                             Id = 302,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 9, 4),
-                            Name = "Janmashtami",
-                            StateId = 30
+                            Date = new DateOnly(2026, 9, 14),
+                            Name = "Ganesh Chaturthi",
+                            StateId = 4
                         },
                         new
                         {
@@ -2531,7 +2531,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 14),
                             Name = "Ganesh Chaturthi",
-                            StateId = 4
+                            StateId = 9
                         },
                         new
                         {
@@ -2539,7 +2539,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 14),
                             Name = "Ganesh Chaturthi",
-                            StateId = 9
+                            StateId = 10
                         },
                         new
                         {
@@ -2547,7 +2547,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 14),
                             Name = "Ganesh Chaturthi",
-                            StateId = 10
+                            StateId = 14
                         },
                         new
                         {
@@ -2555,7 +2555,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 14),
                             Name = "Ganesh Chaturthi",
-                            StateId = 14
+                            StateId = 17
                         },
                         new
                         {
@@ -2563,7 +2563,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 14),
                             Name = "Ganesh Chaturthi",
-                            StateId = 17
+                            StateId = 27
                         },
                         new
                         {
@@ -2571,19 +2571,11 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 9, 14),
                             Name = "Ganesh Chaturthi",
-                            StateId = 27
-                        },
-                        new
-                        {
-                            Id = 309,
-                            CountryId = 4,
-                            Date = new DateOnly(2026, 9, 14),
-                            Name = "Ganesh Chaturthi",
                             StateId = 26
                         },
                         new
                         {
-                            Id = 310,
+                            Id = 309,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2591,7 +2583,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 311,
+                            Id = 310,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2599,7 +2591,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 312,
+                            Id = 311,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2607,7 +2599,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 313,
+                            Id = 312,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2615,7 +2607,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 314,
+                            Id = 313,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2623,7 +2615,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 315,
+                            Id = 314,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2631,7 +2623,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 316,
+                            Id = 315,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2639,7 +2631,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 317,
+                            Id = 316,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2647,7 +2639,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 318,
+                            Id = 317,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2655,7 +2647,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 319,
+                            Id = 318,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2663,7 +2655,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 320,
+                            Id = 319,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2671,7 +2663,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 321,
+                            Id = 320,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2679,7 +2671,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 322,
+                            Id = 321,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2687,7 +2679,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 323,
+                            Id = 322,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2695,7 +2687,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 324,
+                            Id = 323,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2703,7 +2695,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 325,
+                            Id = 324,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2711,7 +2703,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 326,
+                            Id = 325,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2719,7 +2711,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 327,
+                            Id = 326,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2727,7 +2719,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 328,
+                            Id = 327,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2735,7 +2727,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 329,
+                            Id = 328,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2743,7 +2735,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 330,
+                            Id = 329,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2751,7 +2743,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 331,
+                            Id = 330,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2759,7 +2751,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 332,
+                            Id = 331,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2767,7 +2759,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 333,
+                            Id = 332,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2775,7 +2767,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 334,
+                            Id = 333,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2783,7 +2775,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 335,
+                            Id = 334,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2791,7 +2783,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 336,
+                            Id = 335,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 2),
                             Name = "Mahatma Gandhi Jayanti (National)",
@@ -2799,15 +2791,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 337,
-                            CountryId = 4,
-                            Date = new DateOnly(2026, 10, 2),
-                            Name = "Mahatma Gandhi Jayanti (National)",
-                            StateId = 31
-                        },
-                        new
-                        {
-                            Id = 338,
+                            Id = 336,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 11),
                             Name = "First Day of Sharad Navratri",
@@ -2815,7 +2799,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 339,
+                            Id = 337,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 11),
                             Name = "First Day of Sharad Navratri",
@@ -2823,7 +2807,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 340,
+                            Id = 338,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 17),
                             Name = "First Day of Durga Puja Festivities",
@@ -2831,7 +2815,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 341,
+                            Id = 339,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 17),
                             Name = "First Day of Durga Puja Festivities",
@@ -2839,7 +2823,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 342,
+                            Id = 340,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 17),
                             Name = "First Day of Durga Puja Festivities",
@@ -2847,7 +2831,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 343,
+                            Id = 341,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 18),
                             Name = "Maha Saptami",
@@ -2855,7 +2839,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 344,
+                            Id = 342,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 18),
                             Name = "Maha Saptami",
@@ -2863,7 +2847,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 345,
+                            Id = 343,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 18),
                             Name = "Maha Saptami",
@@ -2871,7 +2855,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 346,
+                            Id = 344,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 18),
                             Name = "Maha Saptami",
@@ -2879,10 +2863,26 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 347,
+                            Id = 345,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 2),
+                            Name = "Mahatma Gandhi Jayanti (National)",
+                            StateId = 31
+                        },
+                        new
+                        {
+                            Id = 346,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 18),
                             Name = "Maha Saptami",
+                            StateId = 31
+                        },
+                        new
+                        {
+                            Id = 347,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 19),
+                            Name = "Maha Ashtami",
                             StateId = 31
                         },
                         new
@@ -2969,9 +2969,9 @@ namespace VacationOptimizer.Server.Migrations
                         {
                             Id = 358,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 10, 19),
-                            Name = "Maha Ashtami",
-                            StateId = 31
+                            Date = new DateOnly(2026, 10, 20),
+                            Name = "Dussehra",
+                            StateId = 4
                         },
                         new
                         {
@@ -2979,7 +2979,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 4
+                            StateId = 5
                         },
                         new
                         {
@@ -2987,7 +2987,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 5
+                            StateId = 6
                         },
                         new
                         {
@@ -2995,7 +2995,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 6
+                            StateId = 7
                         },
                         new
                         {
@@ -3003,7 +3003,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 7
+                            StateId = 8
                         },
                         new
                         {
@@ -3011,7 +3011,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 8
+                            StateId = 9
                         },
                         new
                         {
@@ -3019,7 +3019,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 9
+                            StateId = 10
                         },
                         new
                         {
@@ -3027,7 +3027,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 10
+                            StateId = 11
                         },
                         new
                         {
@@ -3035,7 +3035,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 11
+                            StateId = 12
                         },
                         new
                         {
@@ -3043,7 +3043,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 12
+                            StateId = 13
                         },
                         new
                         {
@@ -3051,7 +3051,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 13
+                            StateId = 14
                         },
                         new
                         {
@@ -3059,7 +3059,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 14
+                            StateId = 15
                         },
                         new
                         {
@@ -3067,7 +3067,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 15
+                            StateId = 16
                         },
                         new
                         {
@@ -3075,7 +3075,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 16
+                            StateId = 17
                         },
                         new
                         {
@@ -3083,7 +3083,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 17
+                            StateId = 19
                         },
                         new
                         {
@@ -3091,7 +3091,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 19
+                            StateId = 20
                         },
                         new
                         {
@@ -3099,7 +3099,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 20
+                            StateId = 21
                         },
                         new
                         {
@@ -3107,7 +3107,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 21
+                            StateId = 22
                         },
                         new
                         {
@@ -3115,7 +3115,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 22
+                            StateId = 23
                         },
                         new
                         {
@@ -3123,7 +3123,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 23
+                            StateId = 24
                         },
                         new
                         {
@@ -3131,7 +3131,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 24
+                            StateId = 25
                         },
                         new
                         {
@@ -3139,7 +3139,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 25
+                            StateId = 26
                         },
                         new
                         {
@@ -3147,7 +3147,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 26
+                            StateId = 27
                         },
                         new
                         {
@@ -3155,7 +3155,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 27
+                            StateId = 28
                         },
                         new
                         {
@@ -3163,7 +3163,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 28
+                            StateId = 29
                         },
                         new
                         {
@@ -3171,7 +3171,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 29
+                            StateId = 30
                         },
                         new
                         {
@@ -3179,19 +3179,11 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 20),
                             Name = "Dussehra",
-                            StateId = 30
-                        },
-                        new
-                        {
-                            Id = 385,
-                            CountryId = 4,
-                            Date = new DateOnly(2026, 10, 20),
-                            Name = "Dussehra",
                             StateId = 31
                         },
                         new
                         {
-                            Id = 386,
+                            Id = 385,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 26),
                             Name = "Maharshi Valmiki Jayanti",
@@ -3199,7 +3191,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 387,
+                            Id = 386,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 26),
                             Name = "Maharshi Valmiki Jayanti",
@@ -3207,7 +3199,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 388,
+                            Id = 387,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 26),
                             Name = "Maharshi Valmiki Jayanti",
@@ -3215,7 +3207,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 389,
+                            Id = 388,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 26),
                             Name = "Maharshi Valmiki Jayanti",
@@ -3223,10 +3215,18 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 390,
+                            Id = 389,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 26),
                             Name = "Maharshi Valmiki Jayanti",
+                            StateId = 23
+                        },
+                        new
+                        {
+                            Id = 390,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 29),
+                            Name = "Karaka Chaturthi (Karva Chauth)",
                             StateId = 23
                         },
                         new
@@ -3235,7 +3235,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 29),
                             Name = "Karaka Chaturthi (Karva Chauth)",
-                            StateId = 23
+                            StateId = 12
                         },
                         new
                         {
@@ -3243,7 +3243,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 29),
                             Name = "Karaka Chaturthi (Karva Chauth)",
-                            StateId = 12
+                            StateId = 11
                         },
                         new
                         {
@@ -3251,7 +3251,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 29),
                             Name = "Karaka Chaturthi (Karva Chauth)",
-                            StateId = 11
+                            StateId = 29
                         },
                         new
                         {
@@ -3259,19 +3259,11 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 29),
                             Name = "Karaka Chaturthi (Karva Chauth)",
-                            StateId = 29
-                        },
-                        new
-                        {
-                            Id = 395,
-                            CountryId = 4,
-                            Date = new DateOnly(2026, 10, 29),
-                            Name = "Karaka Chaturthi (Karva Chauth)",
                             StateId = 24
                         },
                         new
                         {
-                            Id = 396,
+                            Id = 395,
                             CountryId = 4,
                             Date = new DateOnly(2026, 10, 31),
                             Name = "Halloween",
@@ -3279,15 +3271,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 397,
-                            CountryId = 4,
-                            Date = new DateOnly(2026, 10, 31),
-                            Name = "Halloween",
-                            StateId = 33
-                        },
-                        new
-                        {
-                            Id = 398,
+                            Id = 396,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 8),
                             Name = "Naraka Chaturdashi",
@@ -3295,7 +3279,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 399,
+                            Id = 397,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 8),
                             Name = "Naraka Chaturdashi",
@@ -3303,7 +3287,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 400,
+                            Id = 398,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 8),
                             Name = "Naraka Chaturdashi",
@@ -3311,7 +3295,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 401,
+                            Id = 399,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 8),
                             Name = "Naraka Chaturdashi",
@@ -3319,7 +3303,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 402,
+                            Id = 400,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 8),
                             Name = "Naraka Chaturdashi",
@@ -3327,7 +3311,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 403,
+                            Id = 401,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 8),
                             Name = "Naraka Chaturdashi",
@@ -3335,7 +3319,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 404,
+                            Id = 402,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 9),
                             Name = "Govardhan Puja",
@@ -3343,7 +3327,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 405,
+                            Id = 403,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 9),
                             Name = "Govardhan Puja",
@@ -3351,7 +3335,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 406,
+                            Id = 404,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 9),
                             Name = "Govardhan Puja",
@@ -3359,7 +3343,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 407,
+                            Id = 405,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 9),
                             Name = "Govardhan Puja",
@@ -3367,7 +3351,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 408,
+                            Id = 406,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 9),
                             Name = "Govardhan Puja",
@@ -3375,10 +3359,26 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 409,
+                            Id = 407,
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 9),
                             Name = "Govardhan Puja",
+                            StateId = 24
+                        },
+                        new
+                        {
+                            Id = 408,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 11, 11),
+                            Name = "Bhai Dooj",
+                            StateId = 10
+                        },
+                        new
+                        {
+                            Id = 409,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 11, 11),
+                            Name = "Bhai Dooj",
                             StateId = 24
                         },
                         new
@@ -3387,7 +3387,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 11),
                             Name = "Bhai Dooj",
-                            StateId = 10
+                            StateId = 25
                         },
                         new
                         {
@@ -3395,7 +3395,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 11),
                             Name = "Bhai Dooj",
-                            StateId = 24
+                            StateId = 30
                         },
                         new
                         {
@@ -3403,23 +3403,23 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 11),
                             Name = "Bhai Dooj",
-                            StateId = 25
+                            StateId = 29
                         },
                         new
                         {
                             Id = 413,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 11, 11),
-                            Name = "Bhai Dooj",
-                            StateId = 30
+                            Date = new DateOnly(2026, 11, 15),
+                            Name = "Chhat Puja",
+                            StateId = 6
                         },
                         new
                         {
                             Id = 414,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 11, 11),
-                            Name = "Bhai Dooj",
-                            StateId = 29
+                            Date = new DateOnly(2026, 11, 15),
+                            Name = "Chhat Puja",
+                            StateId = 7
                         },
                         new
                         {
@@ -3427,7 +3427,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 15),
                             Name = "Chhat Puja",
-                            StateId = 6
+                            StateId = 8
                         },
                         new
                         {
@@ -3435,23 +3435,23 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 15),
                             Name = "Chhat Puja",
-                            StateId = 7
+                            StateId = 13
                         },
                         new
                         {
                             Id = 417,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 11, 15),
-                            Name = "Chhat Puja",
-                            StateId = 8
+                            Date = new DateOnly(2026, 11, 24),
+                            Name = "Guru Nanak Jayanti",
+                            StateId = 5
                         },
                         new
                         {
                             Id = 418,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 11, 15),
-                            Name = "Chhat Puja",
-                            StateId = 13
+                            Date = new DateOnly(2026, 11, 24),
+                            Name = "Guru Nanak Jayanti",
+                            StateId = 6
                         },
                         new
                         {
@@ -3459,7 +3459,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 5
+                            StateId = 8
                         },
                         new
                         {
@@ -3467,7 +3467,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 6
+                            StateId = 10
                         },
                         new
                         {
@@ -3475,7 +3475,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 8
+                            StateId = 11
                         },
                         new
                         {
@@ -3483,7 +3483,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 10
+                            StateId = 12
                         },
                         new
                         {
@@ -3491,7 +3491,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 11
+                            StateId = 13
                         },
                         new
                         {
@@ -3499,7 +3499,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 12
+                            StateId = 16
                         },
                         new
                         {
@@ -3507,7 +3507,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 13
+                            StateId = 17
                         },
                         new
                         {
@@ -3515,7 +3515,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 16
+                            StateId = 20
                         },
                         new
                         {
@@ -3523,7 +3523,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 17
+                            StateId = 21
                         },
                         new
                         {
@@ -3531,7 +3531,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 20
+                            StateId = 23
                         },
                         new
                         {
@@ -3539,7 +3539,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 21
+                            StateId = 24
                         },
                         new
                         {
@@ -3547,7 +3547,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 23
+                            StateId = 27
                         },
                         new
                         {
@@ -3555,7 +3555,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 24
+                            StateId = 29
                         },
                         new
                         {
@@ -3563,7 +3563,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 27
+                            StateId = 30
                         },
                         new
                         {
@@ -3571,23 +3571,23 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 11, 24),
                             Name = "Guru Nanak Jayanti",
-                            StateId = 29
+                            StateId = 31
                         },
                         new
                         {
                             Id = 434,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 11, 24),
-                            Name = "Guru Nanak Jayanti",
-                            StateId = 30
+                            Date = new DateOnly(2026, 12, 5),
+                            Name = "First Day of Hanukkah",
+                            StateId = 14
                         },
                         new
                         {
                             Id = 435,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 11, 24),
-                            Name = "Guru Nanak Jayanti",
-                            StateId = 31
+                            Date = new DateOnly(2026, 12, 5),
+                            Name = "First Day of Hanukkah",
+                            StateId = 17
                         },
                         new
                         {
@@ -3595,23 +3595,23 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 5),
                             Name = "First Day of Hanukkah",
-                            StateId = 14
+                            StateId = 18
                         },
                         new
                         {
                             Id = 437,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 12, 5),
-                            Name = "First Day of Hanukkah",
-                            StateId = 17
+                            Date = new DateOnly(2026, 12, 12),
+                            Name = "Last Day of Hanukkah",
+                            StateId = 14
                         },
                         new
                         {
                             Id = 438,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 12, 5),
-                            Name = "First Day of Hanukkah",
-                            StateId = 18
+                            Date = new DateOnly(2026, 12, 12),
+                            Name = "Last Day of Hanukkah",
+                            StateId = 17
                         },
                         new
                         {
@@ -3619,23 +3619,23 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 12),
                             Name = "Last Day of Hanukkah",
-                            StateId = 14
+                            StateId = 18
                         },
                         new
                         {
                             Id = 440,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 12, 12),
-                            Name = "Last Day of Hanukkah",
-                            StateId = 17
+                            Date = new DateOnly(2026, 12, 22),
+                            Name = "December Solstice",
+                            StateId = 26
                         },
                         new
                         {
                             Id = 441,
                             CountryId = 4,
-                            Date = new DateOnly(2026, 12, 12),
-                            Name = "Last Day of Hanukkah",
-                            StateId = 18
+                            Date = new DateOnly(2026, 12, 22),
+                            Name = "December Solstice",
+                            StateId = 4
                         },
                         new
                         {
@@ -3643,7 +3643,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 22),
                             Name = "December Solstice",
-                            StateId = 26
+                            StateId = 27
                         },
                         new
                         {
@@ -3651,7 +3651,7 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 22),
                             Name = "December Solstice",
-                            StateId = 4
+                            StateId = 14
                         },
                         new
                         {
@@ -3659,27 +3659,11 @@ namespace VacationOptimizer.Server.Migrations
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 22),
                             Name = "December Solstice",
-                            StateId = 27
-                        },
-                        new
-                        {
-                            Id = 445,
-                            CountryId = 4,
-                            Date = new DateOnly(2026, 12, 22),
-                            Name = "December Solstice",
-                            StateId = 14
-                        },
-                        new
-                        {
-                            Id = 446,
-                            CountryId = 4,
-                            Date = new DateOnly(2026, 12, 22),
-                            Name = "December Solstice",
                             StateId = 23
                         },
                         new
                         {
-                            Id = 447,
+                            Id = 445,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 23),
                             Name = "Hazarat Ali’s Birthday",
@@ -3687,7 +3671,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 448,
+                            Id = 446,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 24),
                             Name = "Christmas Eve",
@@ -3695,7 +3679,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 449,
+                            Id = 447,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 24),
                             Name = "Christmas Eve",
@@ -3703,7 +3687,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 450,
+                            Id = 448,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3711,7 +3695,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 451,
+                            Id = 449,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3719,7 +3703,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 452,
+                            Id = 450,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3727,7 +3711,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 453,
+                            Id = 451,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3735,7 +3719,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 454,
+                            Id = 452,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3743,7 +3727,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 455,
+                            Id = 453,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3751,7 +3735,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 456,
+                            Id = 454,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3759,7 +3743,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 457,
+                            Id = 455,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3767,7 +3751,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 458,
+                            Id = 456,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3775,7 +3759,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 459,
+                            Id = 457,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3783,7 +3767,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 460,
+                            Id = 458,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3791,7 +3775,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 461,
+                            Id = 459,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3799,7 +3783,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 462,
+                            Id = 460,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3807,7 +3791,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 463,
+                            Id = 461,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3815,7 +3799,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 464,
+                            Id = 462,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3823,7 +3807,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 465,
+                            Id = 463,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3831,7 +3815,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 466,
+                            Id = 464,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3839,7 +3823,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 467,
+                            Id = 465,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3847,7 +3831,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 468,
+                            Id = 466,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3855,7 +3839,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 469,
+                            Id = 467,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3863,7 +3847,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 470,
+                            Id = 468,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3871,7 +3855,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 471,
+                            Id = 469,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3879,7 +3863,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 472,
+                            Id = 470,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3887,7 +3871,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 473,
+                            Id = 471,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3895,7 +3879,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 474,
+                            Id = 472,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3903,7 +3887,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 475,
+                            Id = 473,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3911,7 +3895,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 476,
+                            Id = 474,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3919,7 +3903,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 477,
+                            Id = 475,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 25),
                             Name = "Christmas (National)",
@@ -3927,7 +3911,7 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 478,
+                            Id = 476,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 31),
                             Name = "New Year’s Eve",
@@ -3935,11 +3919,283 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
-                            Id = 479,
+                            Id = 477,
                             CountryId = 4,
                             Date = new DateOnly(2026, 12, 31),
                             Name = "New Year’s Eve",
                             StateId = 20
+                        },
+                        new
+                        {
+                            Id = 478,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 1, 14),
+                            Name = "Makara Sankranti",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 479,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 1, 1),
+                            Name = "New Year’s Day",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 480,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 1, 26),
+                            Name = "Republic Day (National)",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 481,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 2, 17),
+                            Name = "Lunar New Year",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 482,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 2, 19),
+                            Name = "Ramadan Start (Tentative Date)",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 483,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 3, 4),
+                            Name = "Holi",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 484,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 3, 19),
+                            Name = "Ugadi",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 485,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 3, 20),
+                            Name = "March Equinox",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 486,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 3, 21),
+                            Name = "Ramzan Id (Tentative Date)",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 487,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 3, 26),
+                            Name = "Rama Navami",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 488,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 4, 3),
+                            Name = "Good Friday",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 489,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 5, 27),
+                            Name = "Bakrid (Tentative Date)",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 490,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 6, 26),
+                            Name = "Muharram/Ashura (Tentative Date)",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 491,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 8, 15),
+                            Name = "Independence Day (National)",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 492,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 9, 4),
+                            Name = "Janmashtami",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 493,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 9, 14),
+                            Name = "Ganesh Chaturthi",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 494,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 2),
+                            Name = "Mahatma Gandhi Jayanti (National)",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 495,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 19),
+                            Name = "Maha Ashtami",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 496,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 20),
+                            Name = "Dussehra",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 497,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 11, 8),
+                            Name = "Naraka Chaturdashi",
+                            StateId = 32
+                        },
+                        new
+                        {
+                            Id = 498,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 31),
+                            Name = "Halloween",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 499,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 1, 23),
+                            Name = "Vasant Panchami",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 500,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 1, 26),
+                            Name = "Republic Day (National)",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 501,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 4, 3),
+                            Name = "Good Friday",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 502,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 4, 14),
+                            Name = "Ambedkar Jayanti",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 503,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 5, 1),
+                            Name = "Buddha Purnima/Vaisakhadi",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 504,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 5, 27),
+                            Name = "Bakrid (Tentative Date)",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 505,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 8, 15),
+                            Name = "Independence Day (National)",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 506,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 2),
+                            Name = "Mahatma Gandhi Jayanti (National)",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 507,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 18),
+                            Name = "Maha Saptami",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 508,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 19),
+                            Name = "Maha Ashtami",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 509,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 10, 20),
+                            Name = "Dussehra",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 510,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 11, 24),
+                            Name = "Guru Nanak Jayanti",
+                            StateId = 33
+                        },
+                        new
+                        {
+                            Id = 511,
+                            CountryId = 4,
+                            Date = new DateOnly(2026, 12, 25),
+                            Name = "Christmas (National)",
+                            StateId = 33
                         });
                 });
 

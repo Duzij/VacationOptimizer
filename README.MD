@@ -118,6 +118,12 @@ Logs:
 docker compose logs -f vacation-app nginx postgres
 ```
 
+Remove postgres data volume (danger: deletes local DB data):
+
+```bash
+docker compose stop postgres; docker compose rm -f postgres; docker volume rm vacation-app_pgdata
+```
+
 Stop:
 
 ```bash
