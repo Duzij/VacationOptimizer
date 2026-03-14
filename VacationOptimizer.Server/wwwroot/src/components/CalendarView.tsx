@@ -6,7 +6,7 @@ import { useLongPress } from "../hooks/useLongPress";
 interface Props {
     calendar: CalendarDay[];
     year: number;
-    onDayLongPress?: (date: string) => void;
+    onDayLongPress?: (day: CalendarDay) => void;
 }
 
 const MONTH_NAMES = [
@@ -53,30 +53,36 @@ export default function CalendarView({ calendar, year, onDayLongPress }: Props) 
     );
 }
 
-function DayCell({ day, onDayLongPress }: { day: CalendarDay; onDayLongPress?: (date: string) => void }) {
+function DayCell({ day, onDayLongPress }: { day: CalendarDay; onDayLongPress?: (day: CalendarDay) => void }) {
+    // const isLongPressEnabled = day.type !== "PassedDay";
+    const isLongPressEnabled = true;
+
     const handleLongPress = useCallback(() => {
-        onDayLongPress?.(day.date);
-    }, [day.date, onDayLongPress]);
+        if (!isLongPressEnabled) {
+            return;
+        }
+        onDayLongPress?.(day);
+    }, [day, isLongPressEnabled, onDayLongPress]);
 
     const { isPressed, ...longPressHandlers } = useLongPress(handleLongPress);
     const dayNum = parseDate(day.date).getUTCDate();
 
     return (
         <div
-            className={`aspect-square flex items-center justify-center rounded-md text-[11px] leading-none transition-colors cursor-pointer select-none ${getDayClass(day.type)} ${isPressed ? "day-pressing" : ""}`}
+            className={`aspect-square flex items-center justify-center rounded-md text-[11px] leading-none transition-colors select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""}`}
             title={
                 day.holidayName ? day.holidayName
                     : day.type === "Vacation" ? "Vacation day"
                         : undefined
             }
-            {...longPressHandlers}
+            {...(isLongPressEnabled ? longPressHandlers : {})}
         >
             {dayNum}
         </div>
     );
 }
 
-function MonthGrid({ days, monthIndex, year, onDayLongPress }: { days: CalendarDay[]; monthIndex: number; year: number; onDayLongPress?: (date: string) => void }) {
+function MonthGrid({ days, monthIndex, year, onDayLongPress }: { days: CalendarDay[]; monthIndex: number; year: number; onDayLongPress?: (day: CalendarDay) => void }) {
     const firstDay = new Date(Date.UTC(year, monthIndex, 1));
     const startOffset = (firstDay.getUTCDay() + 6) % 7;
     const sortedDays = [...days].sort((a, b) => a.date.localeCompare(b.date));

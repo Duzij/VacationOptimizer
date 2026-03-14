@@ -1,5 +1,6 @@
 using PublicHoliday;
 using System.Reflection;
+using VacationOptimizer.Server.Data;
 
 namespace VacationOptimizer.Server.Services;
 
@@ -13,6 +14,7 @@ public interface IPublicHolidayService
 
 public class PublicHolidayService : IPublicHolidayService
 {
+    private readonly AppDbContext _dbContext;
     private readonly Dictionary<string, Func<IPublicHolidays>> _countryFactories;
 
     // Maps known class names to ISO 3166-1 alpha-2 codes
@@ -79,8 +81,9 @@ public class PublicHolidayService : IPublicHolidayService
         { "ZA", "South Africa" },
     };
 
-    public PublicHolidayService()
+    public PublicHolidayService(AppDbContext dbContext)
     {
+        _dbContext = dbContext;
         _countryFactories = new Dictionary<string, Func<IPublicHolidays>>(StringComparer.OrdinalIgnoreCase);
 
         // Discover all IPublicHolidays implementations via reflection
@@ -101,6 +104,18 @@ public class PublicHolidayService : IPublicHolidayService
 
     public IList<HolidayInfo> GetHolidays(string countryCode, int year)
     {
+        // 1. Try to get from database first
+        var dbHolidays = _dbContext.Holidays
+            .Where(h => h.State!.Country!.IsoCode == countryCode && h.Date.Year == year)
+            .Select(h => new HolidayInfo(h.Date, h.Name))
+            .ToList();
+
+        if (dbHolidays.Any())
+        {
+            return dbHolidays.OrderBy(h => h.Date).ToList();
+        }
+
+        // 2. Fallback to NuGet package
         if (!_countryFactories.TryGetValue(countryCode, out var factory))
             throw new ArgumentException($"Unsupported country code: {countryCode}");
 
@@ -115,7 +130,11 @@ public class PublicHolidayService : IPublicHolidayService
 
     public IList<string> GetSupportedCountries()
     {
-        return _countryFactories.Keys.OrderBy(k => k).ToList();
+        // Get unique country codes from both Database and NuGet fallback
+        var dbCountries = _dbContext.Countries.Select(c => c.IsoCode).ToList();
+        var fallbackCountries = _countryFactories.Keys;
+
+        return dbCountries.Union(fallbackCountries).OrderBy(k => k).ToList();
     }
 
     public static string GetCountryName(string code)

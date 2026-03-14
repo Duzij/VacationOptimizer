@@ -8,15 +8,17 @@ const MONTH_NAMES_FULL = [
 
 interface Props {
     date: string;
-    mode: "add" | "remove";
+    mode: "add" | "remove" | "reportHoliday";
+    holidayName?: string | null;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
-export default function ConfirmCustomDayModal({ date, mode, onConfirm, onCancel }: Props) {
+export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfirm, onCancel }: Props) {
     const [_year, month, day] = date.split("-").map(Number);
     const monthName = MONTH_NAMES_FULL[month - 1];
     const isRemove = mode === "remove";
+    const isHolidayReport = mode === "reportHoliday";
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -37,7 +39,9 @@ export default function ConfirmCustomDayModal({ date, mode, onConfirm, onCancel 
             >
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-semibold text-text">
-                        {isRemove ? "Remove custom vacation day" : "Add custom vacation day"}
+                        {isHolidayReport
+                            ? "Report public holiday"
+                            : isRemove ? "Remove custom vacation day" : "Add custom vacation day"}
                     </h2>
                     <button
                         type="button"
@@ -50,7 +54,9 @@ export default function ConfirmCustomDayModal({ date, mode, onConfirm, onCancel 
                 </div>
 
                 <p className="text-sm text-text-muted">
-                    {isRemove
+                    {isHolidayReport
+                        ? <>Want to report <span className="font-semibold text-text">{holidayName ?? "this public holiday"}</span> on <span className="font-semibold text-text">{monthName} {day}</span> so we can review removing it?</>
+                        : isRemove
                         ? <>Do you want to remove day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span> from custom vacation days?</>
                         : <>Do you want to set day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span> as a custom vacation day?</>
                     }
@@ -72,10 +78,12 @@ export default function ConfirmCustomDayModal({ date, mode, onConfirm, onCancel 
                        text-sm font-semibold text-white active:scale-[0.98]
                        transition-all duration-150 cursor-pointer ${isRemove
                                 ? "bg-red-500 hover:bg-red-600"
+                                : isHolidayReport
+                                    ? "bg-primary hover:bg-primary-hover"
                                 : "optimize-btn bg-primary hover:bg-primary-hover"
                             }`}
                     >
-                        {isRemove ? "Remove" : "OK"}
+                        {isHolidayReport ? "Open report form" : isRemove ? "Remove" : "OK"}
                     </button>
                 </div>
             </div>

@@ -7,7 +7,7 @@ import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
 import { useOptimize } from "./api/vacationApi";
-import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "./types/models";
+import { DayType, type CalendarDay, type CustomFreeDay, type OptimizeRequest, type OptimizeResult } from "./types/models";
 import { Sun, Moon, TreePalm } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -23,9 +23,14 @@ export default function App() {
 function Main() {
   const [result, setResult] = useState<OptimizeResult | null>(null);
   const [activeRequest, setActiveRequest] = useState<OptimizeRequest | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackDraft, setFeedbackDraft] = useState<{
+    title: string;
+    description?: string;
+    message: string;
+    submitLabel?: string;
+  } | null>(null);
   const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>([]);
-  const [confirmDay, setConfirmDay] = useState<{ date: string; mode: "add" | "remove" } | null>(null);
+  const [confirmDay, setConfirmDay] = useState<{ date: string; mode: "add" | "remove" | "reportHoliday"; holidayName?: string | null } | null>(null);
   const optimize = useOptimize();
 
   const [isDark, setIsDark] = useState(() => {
@@ -50,13 +55,13 @@ function Main() {
 
   // Close modal on Escape
   useEffect(() => {
-    if (!showFeedback) return;
+    if (!feedbackDraft) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowFeedback(false);
+      if (e.key === "Escape") setFeedbackDraft(null);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [showFeedback]);
+  }, [feedbackDraft]);
 
   const handleOptimize = (req: OptimizeRequest) => {
     setActiveRequest(req);
@@ -65,16 +70,61 @@ function Main() {
     });
   };
 
-  const handleDayLongPress = (date: string) => {
-    const isExisting = customFreeDays.some((d) => d.date === date);
-    setConfirmDay({ date, mode: isExisting ? "remove" : "add" });
+  const formatReportDate = (date: string) => {
+    const [year, month, day] = date.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+  };
+
+  const openHolidayReport = (day: CalendarDay) => {
+    const country = activeRequest?.country ?? "unknown";
+    setFeedbackDraft({
+      title: "Report public holiday",
+      description: "Send a report if this holiday looks incorrect and should be removed from the calendar.",
+      submitLabel: "Send report",
+      message: [
+        "Issue type: Public holiday removal request",
+        `Country: ${country}`,
+        `Date: ${formatReportDate(day.date)} (${day.date})`,
+        `Holiday name: ${day.holidayName ?? "Unknown"}`,
+        "",
+        "Why this holiday should be removed:",
+      ].join("\n"),
+    });
+  };
+
+  const handleDayLongPress = (day: CalendarDay) => {
+    if (day.type === DayType.PassedDay) {
+      return;
+    }
+
+    if (day.type === DayType.PublicHoliday) {
+      setConfirmDay({ date: day.date, mode: "reportHoliday", holidayName: day.holidayName });
+      return;
+    }
+
+    const isExisting = customFreeDays.some((d) => d.date === day.date);
+    setConfirmDay({ date: day.date, mode: isExisting ? "remove" : "add" });
   };
 
   const handleConfirmCustomDay = () => {
     if (!confirmDay || !activeRequest) {
-
       return;
     }
+
+    if (confirmDay.mode === "reportHoliday") {
+      const holidayDay = result?.calendar.find((day) => day.date === confirmDay.date);
+      if (holidayDay) {
+        openHolidayReport(holidayDay);
+      }
+      setConfirmDay(null);
+      return;
+    }
+
     const updatedDays = confirmDay.mode === "remove"
       ? customFreeDays.filter((d) => d.date !== confirmDay.date)
       : [...customFreeDays, { date: confirmDay.date }];
@@ -143,18 +193,22 @@ function Main() {
         </span>
         <button
           type="button"
-          onClick={() => setShowFeedback(true)}
+          onClick={() => setFeedbackDraft({
+            title: "Share feedback",
+            message: "",
+          })}
           className="ml-auto text-[11px] text-text-muted/50 hover:text-text-muted transition-colors cursor-pointer underline-offset-2 hover:underline"
         >
           Share feedback
         </button>
       </footer>
 
-      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+      {feedbackDraft && <FeedbackModal onClose={() => setFeedbackDraft(null)} draft={feedbackDraft} />}
       {confirmDay && (
         <ConfirmCustomDayModal
           date={confirmDay.date}
           mode={confirmDay.mode}
+          holidayName={confirmDay.holidayName}
           onConfirm={handleConfirmCustomDay}
           onCancel={() => setConfirmDay(null)}
         />

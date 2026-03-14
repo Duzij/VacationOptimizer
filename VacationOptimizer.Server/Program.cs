@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Headers;
 using Scalar.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+using VacationOptimizer.Server.Data;
 using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
 
@@ -27,10 +29,16 @@ else
     });
 }
 
+// Add DB Context (using connection string from appsettings or env)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Host=localhost;Database=vacation_optimizer;Username=postgres;Password=postgres";
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
 // Register services
-builder.Services.AddSingleton<IPublicHolidayService, PublicHolidayService>();
-builder.Services.AddSingleton<CalendarService>();
-builder.Services.AddSingleton<VacationOptimizerService>();
+builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
+builder.Services.AddScoped<CalendarService>();
+builder.Services.AddScoped<VacationOptimizerService>();
 
 builder.Services.AddEndpointsApiExplorer().AddControllers().AddJsonOptions(o =>
 {
@@ -50,6 +58,19 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Run migrations automatically on startup if not testing
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        if (db.Database.IsRelational())
+        {
+            db.Database.Migrate();
+        }
+    }
+}
 
 app.UseCors();
 
@@ -125,3 +146,5 @@ app.UseSpa(spa =>
 });
 
 app.Run();
+
+public partial class Program { }

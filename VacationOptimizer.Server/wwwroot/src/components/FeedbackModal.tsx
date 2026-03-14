@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { X, Send, Loader2 } from "lucide-react";
 
-interface Props {
-    onClose: () => void;
+interface FeedbackDraft {
+    title: string;
+    description?: string;
+    message: string;
+    submitLabel?: string;
 }
 
-export default function FeedbackModal({ onClose }: Props) {
+interface Props {
+    onClose: () => void;
+    draft?: FeedbackDraft;
+}
+
+export default function FeedbackModal({ onClose, draft }: Props) {
     const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -39,7 +47,7 @@ export default function FeedbackModal({ onClose }: Props) {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between">
-                    <h2 className="text-base font-semibold text-text">Share feedback</h2>
+                    <h2 className="text-base font-semibold text-text">{draft?.title ?? "Share feedback"}</h2>
                     <button
                         type="button"
                         onClick={onClose}
@@ -57,6 +65,12 @@ export default function FeedbackModal({ onClose }: Props) {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {draft?.description && (
+                            <p className="text-sm text-text-muted bg-surface-hover rounded-lg px-3 py-2.5">
+                                {draft.description}
+                            </p>
+                        )}
+
                         <div className="space-y-1.5">
                             <label htmlFor="email" className="text-sm font-medium text-text-muted">
                                 Your email
@@ -83,6 +97,7 @@ export default function FeedbackModal({ onClose }: Props) {
                                 name="message"
                                 required
                                 rows={4}
+                                defaultValue={draft?.message}
                                 placeholder="What's on your mind?"
                                 className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text
                            placeholder:text-text-muted/50 resize-none
@@ -108,7 +123,7 @@ export default function FeedbackModal({ onClose }: Props) {
                             ) : (
                                 <Send className="w-4 h-4" />
                             )}
-                            {status === "sending" ? "Sending..." : "Send feedback"}
+                            {status === "sending" ? "Sending..." : draft?.submitLabel ?? "Send feedback"}
                         </button>
                     </form>
                 )}
