@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using Microsoft.AspNetCore.Http.Headers;
 using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Npgsql;
 using VacationOptimizer.Server.Data;
 using VacationOptimizer.Server.Models;
@@ -39,7 +40,15 @@ else
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? "Host=localhost;Database=vacation_optimizer;Username=postgres;Password=postgres";
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+{
+    options.UseNpgsql(connectionString);
+
+    if (!builder.Environment.IsDevelopment())
+    {
+        options.ConfigureWarnings(warnings =>
+            warnings.Log(RelationalEventId.PendingModelChangesWarning));
+    }
+});
 
 // Register services
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
