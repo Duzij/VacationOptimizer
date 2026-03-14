@@ -120,3 +120,32 @@ Stop and remove volumes (danger: deletes local DB data):
 ```bash
 docker compose down -v
 ```
+
+## 6. Reset PostgreSQL completely
+
+Use this when you want a fully clean database after rewriting migrations or seed data.
+
+Production-style stack:
+
+```bash
+docker compose down -v
+docker volume rm vacationoptimizer_pgdata 2>/dev/null || true
+docker compose up -d --build
+```
+
+Local dev hot-reload stack:
+
+```bash
+docker compose -f docker-compose.dev.yaml down -v
+docker volume rm vacationoptimizer_pgdata-dev 2>/dev/null || true
+docker compose -f docker-compose.dev.yaml up -d
+```
+
+If you want to remove only the PostgreSQL container and volume:
+
+```bash
+docker compose stop postgres
+docker compose rm -f postgres
+docker volume rm vacationoptimizer_pgdata
+docker compose up -d postgres
+```

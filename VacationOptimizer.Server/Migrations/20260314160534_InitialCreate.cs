@@ -35,6 +35,7 @@ namespace VacationOptimizer.Server.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
                     CountryId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -54,7 +55,8 @@ namespace VacationOptimizer.Server.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    StateId = table.Column<int>(type: "integer", nullable: false),
+                    CountryId = table.Column<int>(type: "integer", nullable: false),
+                    StateId = table.Column<int>(type: "integer", nullable: true),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
                 },
@@ -62,11 +64,17 @@ namespace VacationOptimizer.Server.Migrations
                 {
                     table.PrimaryKey("PK_Holidays", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Holidays_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Holidays_States_StateId",
                         column: x => x.StateId,
                         principalTable: "States",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.InsertData(
@@ -80,24 +88,45 @@ namespace VacationOptimizer.Server.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "States",
-                columns: new[] { "Id", "CountryId", "Name" },
+                table: "Holidays",
+                columns: new[] { "Id", "CountryId", "Date", "Name", "StateId" },
                 values: new object[,]
                 {
-                    { 1, 1, "Vienna" },
-                    { 2, 2, "Bavaria" },
-                    { 3, 3, "California" }
+                    { 1, 1, new DateOnly(2026, 1, 1), "New Year's Day", null },
+                    { 3, 3, new DateOnly(2026, 1, 1), "New Year's Day", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "States",
+                columns: new[] { "Id", "Code", "CountryId", "Name" },
+                values: new object[,]
+                {
+                    { 1, "AT-9", 1, "Vienna" },
+                    { 2, "DE-BY", 2, "Bavaria" },
+                    { 3, "US-CA", 3, "California" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Holidays",
-                columns: new[] { "Id", "Date", "Name", "StateId" },
+                columns: new[] { "Id", "CountryId", "Date", "Name", "StateId" },
                 values: new object[,]
                 {
-                    { 1, new DateOnly(2026, 1, 1), "New Year's Day", 1 },
-                    { 2, new DateOnly(2026, 1, 1), "New Year's Day", 2 },
-                    { 3, new DateOnly(2026, 1, 1), "New Year's Day", 3 }
+                    { 2, 2, new DateOnly(2026, 1, 6), "Epiphany", 2 },
+                    { 4, 3, new DateOnly(2026, 3, 31), "Cesar Chavez Day", 3 }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Countries_IsoCode",
+                table: "Countries",
+                column: "IsoCode",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Holidays_CountryId_Date_StateId",
+                table: "Holidays",
+                columns: new[] { "CountryId", "Date", "StateId" },
+                unique: true)
+                .Annotation("Npgsql:NullsDistinct", false);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Holidays_StateId",
@@ -105,9 +134,10 @@ namespace VacationOptimizer.Server.Migrations
                 column: "StateId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_States_CountryId",
+                name: "IX_States_CountryId_Code",
                 table: "States",
-                column: "CountryId");
+                columns: new[] { "CountryId", "Code" },
+                unique: true);
         }
 
         /// <inheritdoc />
