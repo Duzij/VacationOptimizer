@@ -7,11 +7,13 @@ namespace VacationOptimizer.Server.Services;
 
 public record HolidayInfo(DateOnly Date, string Name);
 public record StateInfo(string Code, string Name);
+public record CountryInfo(string Code, string Name);
 
 public interface IPublicHolidayService
 {
     IList<HolidayInfo> GetHolidays(string countryCode, int year, string? stateCode = null);
     IList<string> GetSupportedCountries();
+    IList<CountryInfo> GetCountries();
     IList<StateInfo> GetStates(string countryCode);
 }
 
@@ -159,6 +161,22 @@ public class PublicHolidayService : IPublicHolidayService
         var fallbackCountries = _countryFactories.Keys;
 
         return dbCountries.Union(fallbackCountries).OrderBy(k => k).ToList();
+    }
+
+    public IList<CountryInfo> GetCountries()
+    {
+        var countryCodes = GetSupportedCountries();
+        var dbCountryNames = _dbContext.Countries
+            .ToDictionary(country => country.IsoCode, country => country.Name);
+
+        return countryCodes
+            .Select(code => new CountryInfo(
+                code,
+                dbCountryNames.TryGetValue(code, out var dbName)
+                    ? dbName
+                    : GetCountryName(code)))
+            .OrderBy(country => country.Name)
+            .ToList();
     }
 
     public IList<StateInfo> GetStates(string countryCode)

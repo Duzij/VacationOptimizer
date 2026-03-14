@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Http.Headers;
+using Microsoft.Extensions.Caching.Memory;
 using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -17,6 +18,7 @@ var isRunningInContainer = string.Equals(
     StringComparison.OrdinalIgnoreCase);
 
 builder.Services.AddOpenApi();
+builder.Services.AddMemoryCache();
 
 if (builder.Environment.IsDevelopment() && !isRunningInContainer)
 {
@@ -51,7 +53,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 // Register services
-builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
+builder.Services.AddScoped<PublicHolidayService>();
+builder.Services.AddScoped<IPublicHolidayService>(serviceProvider =>
+    new CachedPublicHolidayService(
+        serviceProvider.GetRequiredService<PublicHolidayService>(),
+        serviceProvider.GetRequiredService<IMemoryCache>()));
 builder.Services.AddScoped<CalendarService>();
 builder.Services.AddScoped<VacationOptimizerService>();
 
@@ -130,19 +136,9 @@ api.MapPost("/optimize", (OptimizeRequest request, VacationOptimizerService opti
     }
 });
 
-api.MapGet("/countries", (IPublicHolidayService holidayService, AppDbContext dbContext) =>
+api.MapGet("/countries", (IPublicHolidayService holidayService) =>
 {
-    var countries = holidayService.GetSupportedCountries();
-    var dbCountryNames = dbContext.Countries
-        .ToDictionary(country => country.IsoCode, country => country.Name);
-
-    return countries.Select(code => new
-    {
-        code,
-        name = dbCountryNames.TryGetValue(code, out var dbName)
-            ? dbName
-            : PublicHolidayService.GetCountryName(code)
-    }).OrderBy(c => c.name);
+    return holidayService.GetCountries();
 });
 
 api.MapGet("/countries/{countryCode}/states", (string countryCode, IPublicHolidayService holidayService) =>
