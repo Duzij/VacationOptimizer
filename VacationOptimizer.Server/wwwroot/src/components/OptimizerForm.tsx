@@ -292,11 +292,7 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
             <button
                 type="submit"
                 disabled={isLoading || countriesLoading}
-                className="optimize-btn w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3
-                   text-sm font-semibold text-white
-                   hover:bg-primary-hover active:scale-[0.98]
-                   disabled:opacity-50 disabled:cursor-not-allowed
-                   transition-all duration-150 cursor-pointer"
+                className="action-btn action-btn-primary w-full"
             >
                 {isLoading
                     ? <Loader2 className="w-4 h-4 animate-spin" />

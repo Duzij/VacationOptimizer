@@ -74,12 +74,7 @@ export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfi
                     <button
                         type="button"
                         onClick={onConfirm}
-                        className={`flex-1 flex items-center justify-center rounded-lg px-4 py-2.5
-                       text-sm font-semibold text-white active:scale-[0.98]
-                       transition-all duration-150 cursor-pointer  ${isRemove
-                                ? "bg-red-500 hover:bg-red-600"
-                                : "bg-primary hover:bg-primary-hover"
-                            }`}
+                        className={`action-btn flex-1 ${isRemove ? "action-btn-danger" : "action-btn-primary"}`}
                     >
                         {isHolidayReport ? "Open report form" : isRemove ? "Remove" : "OK"}
                     </button>

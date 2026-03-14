@@ -115,8 +115,7 @@ export default function FeedbackModal({ onClose, draft }: Props) {
                         <button
                             type="submit"
                             disabled={status === "sending"}
-                            className="optimize-btn w-full flex items-center justify-center gap-2
-                         disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="action-btn action-btn-primary w-full"
                         >
                             {status === "sending" ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
