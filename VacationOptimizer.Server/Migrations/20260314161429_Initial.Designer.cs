@@ -9,11 +9,11 @@ using VacationOptimizer.Server.Data;
 
 #nullable disable
 
-namespace VacationOptimizer.Server.Migrations.__TempPendingCheck
+namespace VacationOptimizer.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260314160243___TempPendingCheck")]
-    partial class __TempPendingCheck
+    [Migration("20260314161429_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
