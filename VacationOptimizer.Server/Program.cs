@@ -147,6 +147,34 @@ api.MapGet("/countries/{countryCode}/states", (string countryCode, IPublicHolida
     return states.Count == 0 ? Results.NotFound() : Results.Ok(states);
 });
 
+api.MapGet("/detected-country", (HttpContext httpContext, IPublicHolidayService holidayService) =>
+{
+    var rawHeaderValues = new[]
+    {
+        httpContext.Request.Headers["X-Country-Code"].FirstOrDefault(),
+        httpContext.Request.Headers["CF-IPCountry"].FirstOrDefault(),
+        httpContext.Request.Headers["x-vercel-ip-country"].FirstOrDefault(),
+        httpContext.Request.Headers["Fastly-Client-Country"].FirstOrDefault(),
+    }
+    .Where(value => !string.IsNullOrWhiteSpace(value))
+    .Select(value => value!.Trim().ToUpperInvariant())
+    .ToArray();
+
+    var hasGeoHeaders = rawHeaderValues.Length > 0;
+    var supportedCountryCodes = holidayService
+        .GetCountries()
+        .Select(country => country.Code)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    var detectedCountryCode = rawHeaderValues.FirstOrDefault(supportedCountryCodes.Contains);
+
+    return Results.Ok(new
+    {
+        hasGeoHeaders,
+        countryCode = detectedCountryCode,
+    });
+});
+
 // SPA hosting
 app.UseStaticFiles();
 app.UseRouting();

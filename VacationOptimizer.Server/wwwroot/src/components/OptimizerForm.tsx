@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useCountries, useStates } from "../api/vacationApi";
+import { useCountries, useDetectedCountry, useStates } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest } from "../types/models";
 import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
 import CustomFreeDaysManager from "./CustomFreeDaysManager";
@@ -16,9 +16,35 @@ function supportsNationalHolidaysOnly(countryCode: string) {
     return countryCode !== "IN";
 }
 
+function getBrowserLanguageTags(): string[] {
+    var language = navigator.language || (navigator as any).userLanguage;
+    console.log("Detected browser language:", language);
+    return language ? [language.toLowerCase()] : [];
+}
+
+function isEnglishLanguage(language: string): boolean {
+    return language === "en" || language.startsWith("en-");
+}
+
+function extractSupportedCountryFromLanguages(languages: string[], supportedCountryCodes: Set<string>): string | null {
+    for (const language of languages) {
+        if (isEnglishLanguage(language)) {
+            continue;
+        }
+
+        const segments = language.split(/[-_]/);
+        const region = segments.at(-1)?.toUpperCase();
+        if (region && region.length === 2 && supportedCountryCodes.has(region)) {
+            return region;
+        }
+    }
+
+    return null;
+}
+
 export default function OptimizerForm({ onResult, isLoading, customFreeDays, onCustomFreeDaysChange }: Props) {
     const currentYear = new Date().getFullYear();
-    const [country, setCountry] = useState("ES");
+    const [country, setCountry] = useState("");
     const [state, setState] = useState("");
     const [year, setYear] = useState(currentYear);
     const [vacationDays, setVacationDays] = useState(25);
@@ -32,7 +58,36 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
 
 
     const { data: countries, isLoading: countriesLoading } = useCountries();
+    const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
     const { data: states, isLoading: statesLoading } = useStates(country);
+
+    useEffect(() => {
+        if (countriesLoading || detectedCountryLoading || countries === undefined || detectedCountry === undefined) {
+            return;
+        }
+
+        if (country) {
+            return;
+        }
+
+        const supportedCountryCodes = new Set(countries.map((entry) => entry.code));
+        const browserLanguages = getBrowserLanguageTags();
+        const preferredLocaleCountry = extractSupportedCountryFromLanguages(browserLanguages, supportedCountryCodes);
+        const prefersEnglish = browserLanguages.some(isEnglishLanguage);
+
+        if (preferredLocaleCountry) {
+            setCountry(preferredLocaleCountry);
+            return;
+        }
+
+        if (prefersEnglish) {
+            if (detectedCountry.countryCode && supportedCountryCodes.has(detectedCountry.countryCode)) {
+                setCountry(detectedCountry.countryCode);
+            }
+            return;
+        }
+
+    }, [countries, countriesLoading, country, detectedCountry, detectedCountryLoading]);
 
     useEffect(() => {
         if (!states?.some((entry) => entry.code === state)) {
@@ -79,18 +134,24 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
                     id="country"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    disabled={countriesLoading}
-                    className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text
+                    disabled={countriesLoading || detectedCountryLoading}
+                    className={`w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm
                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-                     transition-all appearance-none cursor-pointer"
+                     transition-all appearance-none cursor-pointer ${country ? "text-text" : "text-text-muted"}`}
                 >
-                    {countriesLoading && <option>Loading...</option>}
+                    {(countriesLoading || detectedCountryLoading) && <option>Loading...</option>}
+                    {!countriesLoading && !detectedCountryLoading && <option value="">Select country</option>}
                     {countries?.map((c) => (
                         <option key={c.code} value={c.code}>
                             {c.name}
                         </option>
                     ))}
                 </select>
+                {detectedCountry?.hasGeoHeaders && !country && (
+                    <p className="text-xs text-text-muted">
+                        Choose your country to continue.
+                    </p>
+                )}
             </div>
 
             {states && states.length > 0 && (
@@ -298,7 +359,7 @@ export default function OptimizerForm({ onResult, isLoading, customFreeDays, onC
             {/* Submit */}
             <button
                 type="submit"
-                disabled={isLoading || countriesLoading}
+                disabled={isLoading || countriesLoading || detectedCountryLoading || !country}
                 className="action-btn action-btn-primary w-full"
             >
                 {isLoading

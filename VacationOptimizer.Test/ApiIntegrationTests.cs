@@ -107,4 +107,47 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetDetectedCountry_ReturnsMatchingSupportedCountryFromHeaders()
+    {
+        var client = _factory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/vacations/detected-country");
+        request.Headers.Add("CF-IPCountry", "XX");
+
+        var response = await client.SendAsync(request);
+
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"hasGeoHeaders\":true", json);
+        Assert.Contains("\"countryCode\":\"XX\"", json);
+    }
+
+    [Fact]
+    public async Task GetDetectedCountry_ReturnsNullCountryWhenHeadersDoNotMatchSupportedCountry()
+    {
+        var client = _factory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/vacations/detected-country");
+        request.Headers.Add("CF-IPCountry", "ZZ");
+
+        var response = await client.SendAsync(request);
+
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"hasGeoHeaders\":true", json);
+        Assert.Contains("\"countryCode\":null", json);
+    }
+
+    [Fact]
+    public async Task GetDetectedCountry_ReturnsNoHeadersWhenGeoHeadersAreMissing()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/detected-country");
+
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"hasGeoHeaders\":false", json);
+        Assert.Contains("\"countryCode\":null", json);
+    }
 }

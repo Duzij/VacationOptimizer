@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import type { Country, OptimizeRequest, OptimizeResult, StateOption } from "../types/models";
+import type { Country, DetectedCountry, OptimizeRequest, OptimizeResult, StateOption } from "../types/models";
 
 const BASE = "/api/vacations";
 
@@ -13,6 +13,12 @@ export async function fetchStates(countryCode: string): Promise<StateOption[] | 
     const res = await fetch(`${BASE}/countries/${countryCode}/states`);
     if (res.status === 404) return null;
     if (!res.ok) throw new Error("Failed to fetch states");
+    return res.json();
+}
+
+export async function fetchDetectedCountry(): Promise<DetectedCountry> {
+    const res = await fetch(`${BASE}/detected-country`);
+    if (!res.ok) throw new Error("Failed to detect country");
     return res.json();
 }
 
@@ -45,6 +51,14 @@ export function useStates(countryCode: string) {
         queryFn: () => fetchStates(countryCode),
         staleTime: Infinity,
         enabled: Boolean(countryCode),
+    });
+}
+
+export function useDetectedCountry() {
+    return useQuery({
+        queryKey: ["detected-country"],
+        queryFn: fetchDetectedCountry,
+        staleTime: Infinity,
     });
 }
 

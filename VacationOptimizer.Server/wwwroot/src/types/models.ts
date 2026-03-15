@@ -8,6 +8,11 @@ export interface StateOption {
     name: string;
 }
 
+export interface DetectedCountry {
+    hasGeoHeaders: boolean;
+    countryCode: string | null;
+}
+
 export const DayType = {
     WorkDay: "WorkDay",
     Weekend: "Weekend",
