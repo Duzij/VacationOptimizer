@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCountries, useDetectedCountry, useStates } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest } from "../types/models";
+import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear, hasNonDefaultAdvancedSettings } from "../optimizerDefaults";
 import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
 import CustomFreeDaysManager from "./CustomFreeDaysManager";
 
@@ -9,6 +10,7 @@ interface Props {
     isLoading: boolean;
     customFreeDays: CustomFreeDay[];
     onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
+    initialRequest?: OptimizeRequest | null;
 }
 
 function supportsNationalHolidaysOnly(countryCode: string) {
@@ -42,24 +44,45 @@ function extractSupportedCountryFromLanguages(languages: string[], supportedCoun
     return null;
 }
 
-export default function OptimizerForm({ onResult, isLoading, customFreeDays, onCustomFreeDaysChange }: Props) {
-    const currentYear = new Date().getFullYear();
-    const [country, setCountry] = useState("");
-    const [state, setState] = useState("");
-    const [year, setYear] = useState(currentYear);
-    const [vacationDays, setVacationDays] = useState(25);
-    const [showAdvanced, setShowAdvanced] = useState(false);
+export default function OptimizerForm({
+    onResult,
+    isLoading,
+    customFreeDays,
+    onCustomFreeDaysChange,
+    initialRequest,
+}: Props) {
+    const currentYear = getDefaultYear();
+    const [country, setCountry] = useState(initialRequest?.country ?? "");
+    const [state, setState] = useState(initialRequest?.state ?? "");
+    const [year, setYear] = useState(initialRequest?.year ?? currentYear);
+    const [vacationDays, setVacationDays] = useState(initialRequest?.vacationDays ?? defaultVacationDays);
+    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
     const [minimumDaysPerRange, setMinimumDaysPerRange] = useState<
         number | null
-    >(4);
+    >(initialRequest?.minimumDaysPerRange ?? defaultMinimumDaysPerRange);
     const [maximumDaysPerRange, setMaximumDaysPerRange] = useState<
         number | null
-    >(14);
+    >(initialRequest?.maximumDaysPerRange ?? defaultMaximumDaysPerRange);
 
 
     const { data: countries, isLoading: countriesLoading } = useCountries();
     const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
     const { data: states, isLoading: statesLoading } = useStates(country);
+
+    useEffect(() => {
+        if (!initialRequest) {
+            return;
+        }
+
+        setCountry(initialRequest.country);
+        setState(initialRequest.state ?? "");
+        setYear(initialRequest.year);
+        setVacationDays(initialRequest.vacationDays);
+        setMinimumDaysPerRange(initialRequest.minimumDaysPerRange ?? defaultMinimumDaysPerRange);
+        setMaximumDaysPerRange(initialRequest.maximumDaysPerRange ?? defaultMaximumDaysPerRange);
+        onCustomFreeDaysChange(initialRequest.customFreeDays ?? []);
+        setShowAdvanced(hasNonDefaultAdvancedSettings(initialRequest));
+    }, [initialRequest, onCustomFreeDaysChange]);
 
     useEffect(() => {
         if (countriesLoading || detectedCountryLoading || countries === undefined || detectedCountry === undefined) {

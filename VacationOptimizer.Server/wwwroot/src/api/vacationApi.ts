@@ -9,9 +9,8 @@ export async function fetchCountries(): Promise<Country[]> {
     return res.json();
 }
 
-export async function fetchStates(countryCode: string): Promise<StateOption[] | null> {
+export async function fetchStates(countryCode: string): Promise<StateOption[]> {
     const res = await fetch(`${BASE}/countries/${countryCode}/states`);
-    if (res.status === 404) return null;
     if (!res.ok) throw new Error("Failed to fetch states");
     return res.json();
 }

@@ -24,6 +24,10 @@ export default defineConfig(({ command }) => {
       emptyOutDir: true,
       manifest: true,
     },
+    test: {
+      environment: "jsdom",
+      clearMocks: true,
+    },
     plugins: [
       react(),
       tailwindcss(),

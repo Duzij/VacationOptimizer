@@ -79,6 +79,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+const string robotsTxt = """
+User-agent: *
+Allow: /app/
+Allow: /app/manifest.json
+Allow: /app/icons/
+""";
 
 // Run migrations automatically on startup if not testing
 if (!app.Environment.IsEnvironment("Testing"))
@@ -144,7 +150,7 @@ api.MapGet("/countries", (IPublicHolidayService holidayService) =>
 api.MapGet("/countries/{countryCode}/states", (string countryCode, IPublicHolidayService holidayService) =>
 {
     var states = holidayService.GetStates(countryCode);
-    return states.Count == 0 ? Results.NotFound() : Results.Ok(states);
+    return Results.Ok(states);
 });
 
 api.MapGet("/detected-country", (HttpContext httpContext, IPublicHolidayService holidayService) =>
@@ -174,6 +180,9 @@ api.MapGet("/detected-country", (HttpContext httpContext, IPublicHolidayService 
         countryCode = detectedCountryCode,
     });
 });
+
+app.MapGet("/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
+app.MapGet("/app/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
 
 // SPA hosting
 app.UseStaticFiles();

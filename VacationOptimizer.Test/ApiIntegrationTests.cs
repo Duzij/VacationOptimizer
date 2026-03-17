@@ -99,13 +99,15 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task GetStates_Returns404WhenCountryHasNoStates()
+    public async Task GetStates_ReturnsEmptyArrayWhenCountryHasNoStates()
     {
         var client = _factory.CreateClient();
 
         var response = await client.GetAsync("/api/vacations/countries/ES/states");
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        response.EnsureSuccessStatusCode();
+        var jsonString = await response.Content.ReadAsStringAsync();
+        Assert.Equal("[]", jsonString.Trim());
     }
 
     [Fact]

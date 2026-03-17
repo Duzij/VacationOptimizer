@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /app/
+Allow: /app/manifest.json
+Allow: /app/icons/
