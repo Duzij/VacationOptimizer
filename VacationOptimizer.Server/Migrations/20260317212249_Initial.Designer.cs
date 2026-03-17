@@ -12,7 +12,7 @@ using VacationOptimizer.Server.Data;
 namespace VacationOptimizer.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260317210547_Initial")]
+    [Migration("20260317212249_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
