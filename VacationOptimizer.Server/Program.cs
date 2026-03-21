@@ -85,6 +85,9 @@ Allow: /app/
 Allow: /app/manifest.json
 Allow: /app/icons/
 """;
+const string adsTxt = """
+google.com, pub-9485445500768000, DIRECT, f08c47fec0942fa0
+""";
 
 // Run migrations automatically on startup if not testing
 if (!app.Environment.IsEnvironment("Testing"))
@@ -183,6 +186,8 @@ api.MapGet("/detected-country", (HttpContext httpContext, IPublicHolidayService 
 
 app.MapGet("/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
 app.MapGet("/app/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
+app.MapGet("/ads.txt", () => Results.Text(adsTxt, "text/plain"));
+app.MapGet("/app/ads.txt", () => Results.Text(adsTxt, "text/plain"));
 
 // SPA hosting
 app.UseStaticFiles();
