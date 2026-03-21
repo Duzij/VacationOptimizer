@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Send, Loader2 } from "lucide-react";
+import Button from "./Button";
 
 interface FeedbackDraft {
     title: string;
@@ -112,10 +113,10 @@ export default function FeedbackModal({ onClose, draft }: Props) {
                             </p>
                         )}
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={status === "sending"}
-                            className="action-btn action-btn-primary w-full"
+                            fullWidth
                         >
                             {status === "sending" ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -123,7 +124,7 @@ export default function FeedbackModal({ onClose, draft }: Props) {
                                 <Send className="w-4 h-4" />
                             )}
                             {status === "sending" ? "Sending..." : draft?.submitLabel ?? "Send feedback"}
-                        </button>
+                        </Button>
                     </form>
                 )}
             </div>

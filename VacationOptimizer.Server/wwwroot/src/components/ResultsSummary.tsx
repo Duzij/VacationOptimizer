@@ -41,7 +41,7 @@ export default function ResultsSummary({ result }: Props) {
                 />
                 <StatCard
                     icon={<PointerIcon className="w-3 h-4 text-holiday-text" />}
-                    label="Long press on a day cell to mark as holiday!"
+                    label="Short or long press on a day cell for interaction"
                     value={""}
                     inverted={true}
                 />

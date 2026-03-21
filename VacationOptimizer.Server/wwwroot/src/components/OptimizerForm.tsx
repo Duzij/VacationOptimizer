@@ -3,6 +3,7 @@ import { useCountries, useDetectedCountry, useStates } from "../api/vacationApi"
 import type { CustomFreeDay, OptimizeRequest } from "../types/models";
 import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear, hasNonDefaultAdvancedSettings } from "../optimizerDefaults";
 import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
+import Button from "./Button";
 import CustomFreeDaysManager from "./CustomFreeDaysManager";
 
 interface Props {
@@ -20,7 +21,6 @@ function supportsNationalHolidaysOnly(countryCode: string) {
 
 function getBrowserLanguageTags(): string[] {
     var language = navigator.language || (navigator as any).userLanguage;
-    console.log("Detected browser language:", language);
     return language ? [language.toLowerCase()] : [];
 }
 
@@ -380,16 +380,16 @@ export default function OptimizerForm({
             </div>
 
             {/* Submit */}
-            <button
+            <Button
                 type="submit"
                 disabled={isLoading || countriesLoading || detectedCountryLoading || !country}
-                className="action-btn action-btn-primary w-full"
+                fullWidth
             >
                 {isLoading
                     ? <Loader2 className="w-4 h-4 animate-spin" />
                     : <Plane className="w-4 h-4" />}
                 {isLoading ? "Optimizing..." : "Optimize"}
-            </button>
+            </Button>
         </form>
     );
 }

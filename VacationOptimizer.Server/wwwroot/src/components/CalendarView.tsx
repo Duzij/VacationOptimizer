@@ -1,7 +1,8 @@
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DayType } from "../types/models";
 import type { CalendarDay } from "../types/models";
 import { useLongPress } from "../hooks/useLongPress";
+import { X } from "lucide-react";
 
 interface Props {
     calendar: CalendarDay[];
@@ -41,22 +42,85 @@ function parseDate(dateStr: string): Date {
 export default function CalendarView({ calendar, year, country, onDayLongPress }: Props) {
     const months: CalendarDay[][] = Array.from({ length: 12 }, () => []);
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
+    const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
 
     calendar.forEach((day) => {
         const d = parseDate(day.date);
         months[d.getUTCMonth()].push(day);
     });
 
+    const selectedDayDetails = useMemo(() => {
+        if (!selectedDay) {
+            return null;
+        }
+
+        const formattedDate = parseDate(selectedDay.date).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            timeZone: "UTC",
+        });
+
+        return {
+            formattedDate,
+            label: getDayLabel(selectedDay),
+            detail: getDayDetail(selectedDay),
+        };
+    }, [selectedDay]);
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full max-w-6xl mx-auto">
-            {months.map((days, monthIdx) => (
-                <MonthGridComponent key={monthIdx} days={days} monthIndex={monthIdx} year={year} onDayLongPress={onDayLongPress} />
-            ))}
+        <div className={`space-y-4 w-full max-w-6xl mx-auto ${selectedDayDetails ? "pb-24 sm:pb-0" : ""}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {months.map((days, monthIdx) => (
+                    <MonthGridComponent
+                        key={monthIdx}
+                        days={days}
+                        monthIndex={monthIdx}
+                        year={year}
+                        onDayLongPress={onDayLongPress}
+                        onDaySelect={setSelectedDay}
+                    />
+                ))}
+            </div>
+
+            {selectedDayDetails && (
+                <div className="fixed inset-x-0 bottom-0 z-20">
+                    <div className="border border-border border-b-0 rounded-t-2xl bg-surface shadow-lg px-4 py-3">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-text">
+                                    {selectedDayDetails.formattedDate}
+                                </p>
+                                <p className="text-sm text-text-muted">
+                                    {selectedDayDetails.label}
+                                    {selectedDayDetails.detail ? ` · ${selectedDayDetails.detail}` : ""}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedDay(null)}
+                                className="rounded-lg p-1 text-text-muted hover:bg-surface-hover hover:text-text transition-colors cursor-pointer"
+                                aria-label="Close day details"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
-function DayCell({ day, onDayLongPress }: { day: CalendarDay; onDayLongPress?: (day: CalendarDay) => void }) {
+function DayCell({
+    day,
+    onDayLongPress,
+    onDaySelect,
+}: {
+    day: CalendarDay;
+    onDayLongPress?: (day: CalendarDay) => void;
+    onDaySelect?: (day: CalendarDay) => void;
+}) {
     // const isLongPressEnabled = day.type !== "PassedDay";
     const isLongPressEnabled = true;
 
@@ -78,6 +142,7 @@ function DayCell({ day, onDayLongPress }: { day: CalendarDay; onDayLongPress?: (
                     : day.type === "Vacation" ? "Vacation day"
                         : undefined
             }
+            onClick={() => onDaySelect?.(day)}
             {...(isLongPressEnabled ? longPressHandlers : {})}
         >
             {dayNum}
@@ -85,7 +150,19 @@ function DayCell({ day, onDayLongPress }: { day: CalendarDay; onDayLongPress?: (
     );
 }
 
-function MonthGrid({ days, monthIndex, year, onDayLongPress }: { days: CalendarDay[]; monthIndex: number; year: number; onDayLongPress?: (day: CalendarDay) => void }) {
+function MonthGrid({
+    days,
+    monthIndex,
+    year,
+    onDayLongPress,
+    onDaySelect,
+}: {
+    days: CalendarDay[];
+    monthIndex: number;
+    year: number;
+    onDayLongPress?: (day: CalendarDay) => void;
+    onDaySelect?: (day: CalendarDay) => void;
+}) {
     const firstDay = new Date(Date.UTC(year, monthIndex, 1));
     const startOffset = (firstDay.getUTCDay() + 6) % 7;
     const sortedDays = [...days].sort((a, b) => a.date.localeCompare(b.date));
@@ -110,14 +187,26 @@ function MonthGrid({ days, monthIndex, year, onDayLongPress }: { days: CalendarD
                 ))}
 
                 {sortedDays.map((day) => (
-                    <DayCell key={day.date} day={day} onDayLongPress={onDayLongPress} />
+                    <DayCell key={day.date} day={day} onDayLongPress={onDayLongPress} onDaySelect={onDaySelect} />
                 ))}
             </div>
         </div>
     );
 }
 
-function USMonthGrid({ days, monthIndex, year, onDayLongPress }: { days: CalendarDay[]; monthIndex: number; year: number; onDayLongPress?: (day: CalendarDay) => void }) {
+function USMonthGrid({
+    days,
+    monthIndex,
+    year,
+    onDayLongPress,
+    onDaySelect,
+}: {
+    days: CalendarDay[];
+    monthIndex: number;
+    year: number;
+    onDayLongPress?: (day: CalendarDay) => void;
+    onDaySelect?: (day: CalendarDay) => void;
+}) {
     const firstDay = new Date(Date.UTC(year, monthIndex, 1));
     const startOffset = firstDay.getUTCDay();
     const sortedDays = [...days].sort((a, b) => a.date.localeCompare(b.date));
@@ -142,9 +231,41 @@ function USMonthGrid({ days, monthIndex, year, onDayLongPress }: { days: Calenda
                 ))}
 
                 {sortedDays.map((day) => (
-                    <DayCell key={day.date} day={day} onDayLongPress={onDayLongPress} />
+                    <DayCell key={day.date} day={day} onDayLongPress={onDayLongPress} onDaySelect={onDaySelect} />
                 ))}
             </div>
         </div>
     );
+}
+
+function getDayLabel(day: CalendarDay): string {
+    switch (day.type) {
+        case DayType.Vacation:
+            return "Vacation day";
+        case DayType.CustomFreeDay:
+            return "Custom free day";
+        case DayType.PublicHoliday:
+            return "Public holiday";
+        case DayType.Weekend:
+            return "Weekend";
+        case DayType.PassedDay:
+            return "Past day";
+        case DayType.Today:
+            return "Today";
+        case DayType.WorkDay:
+        default:
+            return "Work day";
+    }
+}
+
+function getDayDetail(day: CalendarDay): string | null {
+    if (day.holidayName) {
+        return day.holidayName;
+    }
+
+    if (day.type === DayType.Today) {
+        return "Current day";
+    }
+
+    return null;
 }

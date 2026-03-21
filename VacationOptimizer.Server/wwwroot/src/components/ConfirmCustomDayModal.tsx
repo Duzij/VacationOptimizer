@@ -1,5 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import Button from "./Button";
+import CheckboxField from "./CheckboxField";
 
 const MONTH_NAMES_FULL = [
     "January", "February", "March", "April", "May", "June",
@@ -11,15 +13,17 @@ interface Props {
     mode: "add" | "remove" | "reportHoliday";
     holidayName?: string | null;
     onConfirm: () => void;
-    onIgnoreAndReport?: () => void;
+    onIgnoreHoliday?: (reportAsIncorrect: boolean) => Promise<void> | void;
     onCancel: () => void;
 }
 
-export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfirm, onIgnoreAndReport, onCancel }: Props) {
+export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfirm, onIgnoreHoliday, onCancel }: Props) {
     const [_year, month, day] = date.split("-").map(Number);
     const monthName = MONTH_NAMES_FULL[month - 1];
     const isRemove = mode === "remove";
     const isHolidayReport = mode === "reportHoliday";
+    const [reportAsIncorrect, setReportAsIncorrect] = useState(false);
+    const [isSubmittingIgnore, setIsSubmittingIgnore] = useState(false);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -28,6 +32,28 @@ export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfi
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
     }, [onCancel]);
+
+    useEffect(() => {
+        if (!isHolidayReport) {
+            return;
+        }
+
+        setReportAsIncorrect(false);
+        setIsSubmittingIgnore(false);
+    }, [date, isHolidayReport]);
+
+    const handleIgnoreHoliday = async () => {
+        if (!onIgnoreHoliday || isSubmittingIgnore) {
+            return;
+        }
+
+        setIsSubmittingIgnore(true);
+        try {
+            await onIgnoreHoliday(reportAsIncorrect);
+        } finally {
+            setIsSubmittingIgnore(false);
+        }
+    };
 
     return (
         <div
@@ -44,51 +70,64 @@ export default function ConfirmCustomDayModal({ date, mode, holidayName, onConfi
                             ? "Report public holiday"
                             : isRemove ? "Remove custom vacation day" : "Add custom vacation day"}
                     </h2>
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
-                        aria-label="Close"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
+                    {!isHolidayReport && (
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
+                            aria-label="Close"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
 
-                <p className="text-sm text-text-muted">
+                <p className="text-sm text-text">
                     {isHolidayReport
-                        ? <>Want to report <span className="font-semibold text-text">{holidayName ?? "this public holiday"}</span> on <span className="font-semibold text-text">{monthName} {day}</span> so we can review removing it?</>
+                        ? <>Ignore <span className="font-semibold text-text">{holidayName ?? "this public holiday"}</span> on <span className="font-semibold text-text">{monthName} {day}</span> so it no longer affects your plan.</>
                         : isRemove
                         ? <>Do you want to remove day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span> from custom vacation days?</>
                         : <>Do you want to set day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span> as a custom vacation day?</>
                     }
                 </p>
 
-                <div className="flex gap-3 flex-wrap">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-muted
-                       hover:bg-surface-hover transition-colors cursor-pointer"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onConfirm}
-                        className={`action-btn flex-1 ${isRemove ? "action-btn-danger" : "action-btn-primary"}`}
-                    >
-                        {isHolidayReport ? "Report only" : isRemove ? "Remove" : "OK"}
-                    </button>
-                    {isHolidayReport && onIgnoreAndReport && (
-                        <button
+                {isHolidayReport ? (
+                    <>
+                        <CheckboxField
+                            checked={reportAsIncorrect}
+                            onChange={setReportAsIncorrect}
+                            label="Report this holiday as incorrect"
+                        />
+
+                        <div className="flex gap-3">
+                            <Button type="button" onClick={onCancel} variant="secondary" className="flex-1">
+                                Cancel
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleIgnoreHoliday}
+                                disabled={isSubmittingIgnore}
+                                className="flex-1"
+                            >
+                                {isSubmittingIgnore ? "Ignoring..." : "Ignore"}
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex gap-3 flex-wrap">
+                        <Button type="button" onClick={onCancel} variant="secondary" className="flex-1">
+                            Cancel
+                        </Button>
+                        <Button
                             type="button"
-                            onClick={onIgnoreAndReport}
-                            className="action-btn action-btn-primary flex-1"
+                            onClick={onConfirm}
+                            variant={isRemove ? "danger" : "primary"}
+                            className="flex-1"
                         >
-                            Ignore and report
-                        </button>
-                    )}
-                </div>
+                            {isRemove ? "Remove" : "OK"}
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

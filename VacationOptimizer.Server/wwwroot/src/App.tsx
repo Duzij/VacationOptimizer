@@ -9,6 +9,7 @@ import { getDefaultYear } from "./optimizerDefaults";
 import { useTheme } from "./hooks/useTheme";
 import { useOptimizationSession } from "./hooks/useOptimizationSession";
 import { useCalendarInteractions } from "./hooks/useCalendarInteractions";
+import { normalizeCanonicalAppPath } from "./utils/optimizationPersistence";
 import { Sun, Moon, TreePalm } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,8 @@ export default function App() {
 }
 
 function Main() {
+  normalizeCanonicalAppPath();
+
   const currentYear = getDefaultYear();
   const { isDark, setIsDark } = useTheme();
   const {
@@ -43,7 +46,7 @@ function Main() {
     setConfirmDay,
     handleDayLongPress,
     handleConfirmCustomDay,
-    handleIgnoreAndReportHoliday,
+    handleIgnoreHoliday,
   } = useCalendarInteractions({
     activeRequest,
     result,
@@ -128,7 +131,7 @@ function Main() {
           mode={confirmDay.mode}
           holidayName={confirmDay.holidayName}
           onConfirm={handleConfirmCustomDay}
-          onIgnoreAndReport={confirmDay.mode === "reportHoliday" ? handleIgnoreAndReportHoliday : undefined}
+          onIgnoreHoliday={confirmDay.mode === "reportHoliday" ? handleIgnoreHoliday : undefined}
           onCancel={() => setConfirmDay(null)}
         />
       )}

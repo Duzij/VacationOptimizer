@@ -24,6 +24,21 @@ function formatReportDate(date: string) {
   });
 }
 
+async function submitHolidayReport(message: string) {
+  const data = new FormData();
+  data.append("message", message);
+
+  const response = await fetch("https://formspree.io/f/xvzblown", {
+    method: "POST",
+    body: data,
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to submit holiday report.");
+  }
+}
+
 export function useCalendarInteractions({
   activeRequest,
   result,
@@ -63,24 +78,19 @@ export function useCalendarInteractions({
     return () => window.removeEventListener("keydown", handler);
   }, [feedbackDraft]);
 
-  const openHolidayReport = (day: CalendarDay, isIgnoredInApp = ignoredHolidayDates.includes(day.date)) => {
+  const createHolidayReportMessage = (day: CalendarDay, isIgnoredInApp = ignoredHolidayDates.includes(day.date)) => {
     const country = activeRequest?.country ?? "unknown";
     const state = activeRequest?.state ?? "national";
-    setFeedbackDraft({
-      title: "Report public holiday",
-      description: "Send a report if this holiday looks incorrect and should be removed from the calendar.",
-      submitLabel: "Send report",
-      message: [
-        "Issue type: Public holiday removal request",
-        `Ignored in app: ${isIgnoredInApp ? "yes" : "no"}`,
-        `Country: ${country}`,
-        `State: ${state}`,
-        `Date: ${formatReportDate(day.date)} (${day.date})`,
-        `Holiday name: ${day.holidayName ?? "Unknown"}`,
-        "",
-        "Why this holiday should be removed:",
-      ].join("\n"),
-    });
+    return [
+      "Issue type: Public holiday removal request",
+      `Ignored in app: ${isIgnoredInApp ? "yes" : "no"}`,
+      `Country: ${country}`,
+      `State: ${state}`,
+      `Date: ${formatReportDate(day.date)} (${day.date})`,
+      `Holiday name: ${day.holidayName ?? "Unknown"}`,
+      "",
+      "Why this holiday should be removed:",
+    ].join("\n");
   };
 
   const handleDayLongPress = (day: CalendarDay) => {
@@ -103,10 +113,6 @@ export function useCalendarInteractions({
     }
 
     if (confirmDay.mode === "reportHoliday") {
-      const holidayDay = result?.calendar.find((day) => day.date === confirmDay.date);
-      if (holidayDay) {
-        openHolidayReport(holidayDay, ignoredHolidayDates.includes(confirmDay.date));
-      }
       setConfirmDay(null);
       return;
     }
@@ -126,7 +132,7 @@ export function useCalendarInteractions({
     void runOptimization(updatedRequest);
   };
 
-  const handleIgnoreAndReportHoliday = () => {
+  const handleIgnoreHoliday = async (reportAsIncorrect: boolean) => {
     if (!confirmDay || !activeRequest || confirmDay.mode !== "reportHoliday") {
       return;
     }
@@ -141,8 +147,15 @@ export function useCalendarInteractions({
       ? ignoredHolidayDates
       : [...ignoredHolidayDates, confirmDay.date];
 
+    if (reportAsIncorrect) {
+      try {
+        await submitHolidayReport(createHolidayReportMessage(holidayDay, true));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     setIgnoredHolidayDates(updatedIgnoredHolidayDates);
-    openHolidayReport(holidayDay, true);
     setConfirmDay(null);
     void runOptimization(activeRequest, updatedIgnoredHolidayDates);
   };
@@ -154,6 +167,6 @@ export function useCalendarInteractions({
     setConfirmDay,
     handleDayLongPress,
     handleConfirmCustomDay,
-    handleIgnoreAndReportHoliday,
+    handleIgnoreHoliday,
   };
 }

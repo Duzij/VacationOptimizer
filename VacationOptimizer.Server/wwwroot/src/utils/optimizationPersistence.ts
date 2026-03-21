@@ -7,6 +7,22 @@ import {
 const savedRequestStorageKey = "vacationOptimizer.savedRequest";
 const savedResultStorageKey = "vacationOptimizer.savedResult";
 
+export function getCanonicalAppPath(isDevelopment = import.meta.env.DEV) {
+  return isDevelopment ? "/" : "/app";
+}
+
+export function normalizeCanonicalAppPath(isDevelopment = import.meta.env.DEV) {
+  const canonicalPath = getCanonicalAppPath(isDevelopment);
+  const normalizedPathname = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  if (normalizedPathname === canonicalPath) {
+    return;
+  }
+
+  const nextUrl = `${canonicalPath}${window.location.search}${window.location.hash}`;
+  window.history.replaceState(null, "", nextUrl);
+}
+
 export function parseRequestFromUrl(): OptimizeRequest | null {
   return parseRequestFromSearchParams(new URLSearchParams(window.location.search));
 }

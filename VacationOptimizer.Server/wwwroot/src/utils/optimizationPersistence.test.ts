@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  getCanonicalAppPath,
+  normalizeCanonicalAppPath,
   parseRequestFromUrl,
   updateUrlFromRequest,
 } from "./optimizationPersistence";
@@ -38,5 +40,24 @@ describe("optimizationPersistence", () => {
     });
 
     expect(window.location.search).toBe("?country=DE");
+  });
+
+  it("normalizes unknown production paths back to /app while preserving the query string", () => {
+    window.history.replaceState({}, "", "/asfd?country=US&ignoredHolidays=2026-05-25");
+
+    normalizeCanonicalAppPath(false);
+
+    expect(window.location.pathname).toBe("/app");
+    expect(window.location.search).toBe("?country=US&ignoredHolidays=2026-05-25");
+  });
+
+  it("uses / as the canonical path in development", () => {
+    window.history.replaceState({}, "", "/asfd?country=US");
+
+    normalizeCanonicalAppPath(true);
+
+    expect(getCanonicalAppPath(true)).toBe("/");
+    expect(window.location.pathname).toBe("/");
+    expect(window.location.search).toBe("?country=US");
   });
 });
