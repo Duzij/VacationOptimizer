@@ -100,6 +100,10 @@
   border: 1px solid var(--color-border);
 }
 
+.bg-background {
+  background-color: var(--color-background);
+}
+
 .text-text-muted {
   color: var(--color-text-muted);
 }

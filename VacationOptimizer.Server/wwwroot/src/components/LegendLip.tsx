@@ -12,7 +12,7 @@ interface Props {
 export default function LegendLip({ formattedDate, label, detail, onClose }: Props) {
     const content = (
         <div className="fixed inset-x-0 bottom-0 z-20 sm:inset-x-auto sm:left-1/2 sm:bottom-4 sm:w-full sm:max-w-md sm:-translate-x-1/2">
-            <div className="border border-border border-b-0 rounded-t-2xl bg-surface shadow-lg px-4 py-3 sm:border-b sm:rounded-2xl">
+            <div className="border border-border border-b-0 rounded-t-2xl bg-background shadow-lg px-4 py-3 sm:border-b sm:rounded-2xl">
                 <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                         <p className="text-sm font-semibold text-text">
