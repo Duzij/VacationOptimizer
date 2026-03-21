@@ -98,6 +98,7 @@ function Main() {
             <CalendarView
               calendar={result.calendar}
               year={activeRequest?.year ?? currentYear}
+              country={activeRequest?.country}
               onDayLongPress={handleDayLongPress}
             />
           </div>
