@@ -78,4 +78,14 @@ public class PublicHolidayServiceTests
         Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 26) && h.Name == "Republic Day (National)");
         Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 14) && h.Name == "Pongal");
     }
+
+    [Fact]
+    public void GetHolidays_SpainWithRegion_ReturnsNationalAndRegionalHolidays()
+    {
+        var holidays = _holidayService.GetHolidays("ES", 2026, "ES-GA");
+
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 1) && h.Name == "New Year's Day");
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 3, 19) && h.Name == "St Joseph's Day");
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 7, 25) && h.Name == "National Day of Galicia");
+    }
 }

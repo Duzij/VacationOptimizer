@@ -21,8 +21,11 @@ public class ReferenceDataSeederTests
         var spainCountry = Assert.Single(dbContext.Countries.Where(country => country.IsoCode == "ES"));
 
         Assert.Contains(dbContext.States, state => state.Code == "IN-KA");
+        Assert.Contains(dbContext.States, state => state.Code == "ES-AN");
         Assert.Contains(dbContext.States, state => state.Code == "ES-CT");
         Assert.Contains(dbContext.States, state => state.Code == "ES-CT-BCN");
+        Assert.Contains(dbContext.States, state => state.Code == "ES-GA");
+        Assert.Contains(dbContext.States, state => state.Code == "ES-MC");
         Assert.Contains(dbContext.Holidays, holiday => holiday.CountryId == indiaCountry.Id);
         Assert.Contains(dbContext.Holidays, holiday => holiday.CountryId == spainCountry.Id);
     }

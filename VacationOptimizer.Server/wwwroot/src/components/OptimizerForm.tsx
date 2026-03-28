@@ -438,12 +438,14 @@ function SpainCountryOptimizerForm({
                 states={schema?.states ?? []}
             />
 
-            <CitySelectField
-                value={cityCode}
-                onChange={setCityCode}
-                disabled={schemaLoading}
-                cities={availableCities}
-            />
+            {availableCities.length > 0 && (
+                <CitySelectField
+                    value={cityCode}
+                    onChange={setCityCode}
+                    disabled={schemaLoading}
+                    cities={availableCities}
+                />
+            )}
 
             <SharedOptimizerControls
                 sharedDraft={sharedDraft}
