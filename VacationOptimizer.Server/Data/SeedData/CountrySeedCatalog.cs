@@ -6,7 +6,8 @@ public static class CountrySeedCatalog
 {
     public static IReadOnlyList<Country> Countries => new[]
     {
-        IndiaSeedData.Country
+        IndiaSeedData.Country,
+        SpainSeedData.Country,
     };
 
     private static readonly IReadOnlyList<State> NormalizedStates = BuildStates();
@@ -19,6 +20,7 @@ public static class CountrySeedCatalog
     private static IReadOnlyList<State> BuildStates()
     {
         var localStates = IndiaSeedData.States
+            .Concat(SpainSeedData.States)
             .ToList();
 
         return localStates
@@ -34,7 +36,11 @@ public static class CountrySeedCatalog
 
     private static IReadOnlyList<Holiday> BuildHolidays(IReadOnlyList<State> normalizedStates)
     {
-        var stateIdMap = IndiaSeedData.States
+        var localStates = IndiaSeedData.States
+            .Concat(SpainSeedData.States)
+            .ToList();
+
+        var stateIdMap = localStates
             .Zip(normalizedStates, (local, normalized) => new
             {
                 local.CountryId,
@@ -45,7 +51,9 @@ public static class CountrySeedCatalog
                 item => (item.CountryId, item.LocalStateId),
                 item => item.NormalizedStateId);
 
-        var localHolidays = IndiaSeedData.Holidays;
+        var localHolidays = IndiaSeedData.Holidays
+            .Concat(SpainSeedData.Holidays)
+            .ToList();
 
         return localHolidays
             .Select(holiday => new Holiday

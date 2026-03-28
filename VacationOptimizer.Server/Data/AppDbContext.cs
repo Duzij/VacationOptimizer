@@ -41,8 +41,5 @@ public class AppDbContext : DbContext
             .HasForeignKey(h => h.StateId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        modelBuilder.Entity<Country>().HasData(CountrySeedCatalog.Countries);
-        modelBuilder.Entity<State>().HasData(CountrySeedCatalog.States);
-        modelBuilder.Entity<Holiday>().HasData(CountrySeedCatalog.Holidays);
     }
 }

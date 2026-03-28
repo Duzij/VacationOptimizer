@@ -45,7 +45,7 @@ public static class IndiaSeedData
         new State{ Id = 30, Name = "West Bengal (Kolkata)", Code = "IN-WB-KL", CountryId = Country.Id},
    };
 
-    public static IReadOnlyList<Holiday> Holidays =>
+    private static IReadOnlyList<Holiday> RawHolidays =>
     [
 new Holiday { Id = 1, CountryId = Country.Id, StateId = 2, Date = new DateOnly(2026, 1, 1), Name = "New Year’s Day"},
 new Holiday { Id = 2, CountryId = Country.Id, StateId = 16, Date = new DateOnly(2026, 1, 1), Name = "New Year’s Day"},
@@ -581,5 +581,19 @@ new Holiday { Id = 533, CountryId = Country.Id, StateId = 30, Date = new DateOnl
 new Holiday { Id = 534, CountryId = Country.Id, StateId = 30, Date = new DateOnly(2026, 11, 24), Name = "Guru Nanak Jayanti"},
 new Holiday { Id = 535, CountryId = Country.Id, StateId = 30, Date = new DateOnly(2026, 12, 25), Name = "Christmas (National)"},
     ];
+
+    public static IReadOnlyList<Holiday> Holidays => RawHolidays
+        .Select(holiday => holiday.Name.Contains("(National)", StringComparison.Ordinal)
+            ? new Holiday
+            {
+                Id = holiday.Id,
+                CountryId = holiday.CountryId,
+                StateId = null,
+                Date = holiday.Date,
+                Name = holiday.Name,
+            }
+            : holiday)
+        .DistinctBy(holiday => new { holiday.CountryId, holiday.Date, holiday.StateId })
+        .ToArray();
 
 }

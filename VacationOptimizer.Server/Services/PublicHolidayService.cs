@@ -21,6 +21,11 @@ public class PublicHolidayService : IPublicHolidayService
 {
     private readonly AppDbContext _dbContext;
     private readonly Dictionary<string, Func<IPublicHolidays>> _countryFactories;
+    private static readonly Dictionary<string, string> SpainCityParentStates = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ES-CT-BCN"] = "ES-CT",
+        ["ES-MD-MAD"] = "ES-MD",
+    };
 
     // Maps known class names to ISO 3166-1 alpha-2 codes
     private static readonly Dictionary<string, string> ClassNameToCountryCode = new(StringComparer.OrdinalIgnoreCase)
@@ -131,7 +136,8 @@ public class PublicHolidayService : IPublicHolidayService
                     throw new ArgumentException($"Unsupported state code '{stateCode}' for country '{countryCode}'.");
                 }
 
-                query = query.Where(h => h.StateId == null || h.State!.Code == stateCode);
+                var applicableStateCodes = GetApplicableStateCodes(countryCode, stateCode);
+                query = query.Where(h => h.StateId == null || applicableStateCodes.Contains(h.State!.Code));
             }
 
             var dbHolidays = query
@@ -191,5 +197,21 @@ public class PublicHolidayService : IPublicHolidayService
     public static string GetCountryName(string code)
     {
         return CountryNames.TryGetValue(code, out var name) ? name : code;
+    }
+
+    private static HashSet<string> GetApplicableStateCodes(string countryCode, string stateCode)
+    {
+        var codes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            stateCode
+        };
+
+        if (string.Equals(countryCode, "ES", StringComparison.OrdinalIgnoreCase)
+            && SpainCityParentStates.TryGetValue(stateCode, out var parentStateCode))
+        {
+            codes.Add(parentStateCode);
+        }
+
+        return codes;
     }
 }

@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { DayType, type CalendarDay, type CustomFreeDay, type OptimizeRequest, type OptimizeResult } from "../types/models";
+import {
+  DayType,
+  getOptimizeRequestScopeCode,
+  isIndiaOptimizeRequest,
+  type CalendarDay,
+  type CustomFreeDay,
+  type OptimizeRequest,
+  type OptimizeResult,
+} from "../types/models";
 
 export interface FeedbackDraft {
   title: string;
@@ -80,7 +88,10 @@ export function useCalendarInteractions({
 
   const createHolidayReportMessage = (day: CalendarDay, isIgnoredInApp = ignoredHolidayDates.includes(day.date)) => {
     const country = activeRequest?.country ?? "unknown";
-    const state = activeRequest?.state ?? "national";
+    const scopeCode = getOptimizeRequestScopeCode(activeRequest);
+    const state = isIndiaOptimizeRequest(activeRequest)
+      ? (scopeCode || "required state not selected")
+      : (scopeCode || "national");
     return [
       "Issue type: Public holiday removal request",
       `Ignored in app: ${isIgnoredInApp ? "yes" : "no"}`,

@@ -18,6 +18,7 @@ public class CalendarServiceTests
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseVacationOptimizerSeeding()
             .Options;
         var dbContext = new AppDbContext(options);
         dbContext.Database.EnsureCreated();

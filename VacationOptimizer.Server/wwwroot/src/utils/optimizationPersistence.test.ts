@@ -60,4 +60,17 @@ describe("optimizationPersistence", () => {
     expect(window.location.pathname).toBe("/");
     expect(window.location.search).toBe("?country=US");
   });
+
+  it("restores India requests from the new stateCode query param", () => {
+    window.history.replaceState({}, "", "/app?country=IN&stateCode=IN-KA&year=2027");
+
+    expect(parseRequestFromUrl()).toEqual({
+      country: "IN",
+      stateCode: "IN-KA",
+      year: 2027,
+      vacationDays: defaultVacationDays,
+      minimumDaysPerRange: defaultMinimumDaysPerRange,
+      maximumDaysPerRange: defaultMaximumDaysPerRange,
+    });
+  });
 });

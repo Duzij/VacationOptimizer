@@ -68,14 +68,14 @@ describe("App loading state", () => {
     optimizeState.isPending = true;
     mutateAsync.mockReturnValue(new Promise(() => undefined));
 
-    window.localStorage.setItem("vacationOptimizer.savedRequest", JSON.stringify({
+    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify({
       country: "DE",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,
       maximumDaysPerRange: 14,
     }));
-    window.localStorage.setItem("vacationOptimizer.savedResult", JSON.stringify({
+    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify({
       calendar: [],
       selectedVacationDays: [],
       ranges: [],

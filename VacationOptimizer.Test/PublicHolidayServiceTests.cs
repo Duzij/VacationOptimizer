@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using VacationOptimizer.Server.Data;
+using VacationOptimizer.Server.Data.SeedData;
 using VacationOptimizer.Server.Services;
 using Xunit;
 
@@ -16,6 +17,7 @@ public class PublicHolidayServiceTests
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseVacationOptimizerSeeding()
             .Options;
         var dbContext = new AppDbContext(options);
         dbContext.Database.EnsureCreated();
@@ -50,10 +52,30 @@ public class PublicHolidayServiceTests
     }
 
     [Fact]
-    public void GetStates_UnitedStates_ReturnsSeededState()
+    public void GetStates_India_ReturnsSeededState()
     {
-        var states = _holidayService.GetStates("US");
+        var states = _holidayService.GetStates("IN");
 
-        Assert.Contains(states, s => s.Code == "US-CA" && s.Name == "California");
+        Assert.Contains(states, s => s.Code == "IN-KA" && s.Name == "Karnātaka");
+    }
+
+    [Fact]
+    public void GetHolidays_IndiaWithoutState_ReturnsNormalizedNationalHolidays()
+    {
+        var holidays = _holidayService.GetHolidays("IN", 2026);
+
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 26) && h.Name == "Republic Day (National)");
+        Assert.DoesNotContain(holidays, h => h.Date == new DateOnly(2026, 1, 14) && h.Name == "Pongal");
+    }
+
+    [Fact]
+    public void GetHolidays_IndiaWithState_ReturnsNationalAndStateScopedHolidays()
+    {
+        var andhraPradesh = CountrySeedCatalog.States.First(state => state.Code == "IN-AP");
+
+        var holidays = _holidayService.GetHolidays("IN", 2026, andhraPradesh.Code);
+
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 26) && h.Name == "Republic Day (National)");
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 14) && h.Name == "Pongal");
     }
 }

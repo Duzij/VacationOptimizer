@@ -44,6 +44,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
+    options.UseVacationOptimizerSeeding();
 
     if (!builder.Environment.IsDevelopment())
     {
@@ -136,6 +137,16 @@ api.MapPost("/optimize", (OptimizeRequest request, VacationOptimizerService opti
 {
     try
     {
+        if (string.Equals(request.Country, "IN", StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.BadRequest(new { error = "India optimizations must use /api/vacations/countries/IN/optimize." });
+        }
+
+        if (string.Equals(request.Country, "ES", StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.BadRequest(new { error = "Spain optimizations must use /api/vacations/countries/ES/optimize." });
+        }
+
         var result = optimizer.Optimize(request);
         return Results.Ok(result);
     }
@@ -152,8 +163,178 @@ api.MapGet("/countries", (IPublicHolidayService holidayService) =>
 
 api.MapGet("/countries/{countryCode}/states", (string countryCode, IPublicHolidayService holidayService) =>
 {
+    if (string.Equals(countryCode, "IN", StringComparison.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest(new { error = "India state options are exposed through /api/vacations/countries/IN/schema." });
+    }
+
+    if (string.Equals(countryCode, "ES", StringComparison.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest(new { error = "Spain region and city options are exposed through /api/vacations/countries/ES/schema." });
+    }
+
     var states = holidayService.GetStates(countryCode);
     return Results.Ok(states);
+});
+
+api.MapGet("/countries/IN/schema", (IPublicHolidayService holidayService) =>
+{
+    var states = holidayService
+        .GetStates("IN")
+        .Select(state => new OptimizationStateOption(state.Code, state.Name))
+        .ToArray();
+
+    return Results.Ok(new IndiaCountrySchema(
+        CountryCode: "IN",
+        Component: "india",
+        YearRange: new OptimizationYearRange(
+            OptimizationDefaults.MinimumYear,
+            OptimizationDefaults.MaximumYear),
+        Defaults: new OptimizationFormDefaults(
+            OptimizationDefaults.VacationDays,
+            OptimizationDefaults.MinimumDaysPerRange,
+            OptimizationDefaults.MaximumDaysPerRange),
+        StateSelectionRequired: true,
+        States: states));
+});
+
+api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHolidayService holidayService, VacationOptimizerService optimizer) =>
+{
+    try
+    {
+        if (string.IsNullOrWhiteSpace(request.StateCode))
+        {
+            return Results.BadRequest(new { error = "India optimizations require a stateCode." });
+        }
+
+        var state = holidayService
+            .GetStates("IN")
+            .FirstOrDefault(entry => string.Equals(entry.Code, request.StateCode, StringComparison.OrdinalIgnoreCase));
+
+        if (state is null)
+        {
+            return Results.BadRequest(new { error = $"Unsupported state code '{request.StateCode}' for country 'IN'." });
+        }
+
+        var internalRequest = new OptimizeRequest(
+            Country: "IN",
+            Year: request.Year,
+            VacationDays: request.VacationDays,
+            MinimumDaysPerRange: request.MinimumDaysPerRange,
+            MaximumDaysPerRange: request.MaximumDaysPerRange,
+            CustomFreeDays: request.CustomFreeDays,
+            State: state.Code,
+            IgnoredHolidayDates: request.IgnoredHolidayDates);
+
+        var result = optimizer.Optimize(internalRequest);
+
+        return Results.Ok(new IndiaOptimizeResult(
+            CountryCode: "IN",
+            Scope: new IndiaOptimizationScope(
+                Type: "state",
+                StateCode: state.Code,
+                StateName: state.Name),
+            Calendar: result.Calendar,
+            SelectedVacationDays: result.SelectedVacationDays,
+            Ranges: result.Ranges,
+            TotalDaysOff: result.TotalDaysOff,
+            VacationDaysUsed: result.VacationDaysUsed,
+            PublicHolidaysCount: result.PublicHolidaysCount));
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+api.MapGet("/countries/ES/schema", (IPublicHolidayService holidayService) =>
+{
+    var allStates = holidayService.GetStates("ES");
+    var states = allStates
+        .Where(state => !IsSpainCityCode(state.Code))
+        .Select(state => new OptimizationStateOption(state.Code, state.Name))
+        .ToArray();
+    var cities = allStates
+        .Where(state => IsSpainCityCode(state.Code))
+        .Select(state => new SpainCityOption(
+            state.Code,
+            state.Name,
+            GetSpainParentStateCode(state.Code)!))
+        .ToArray();
+
+    return Results.Ok(new SpainCountrySchema(
+        CountryCode: "ES",
+        Component: "spain",
+        YearRange: new OptimizationYearRange(
+            OptimizationDefaults.MinimumYear,
+            OptimizationDefaults.MaximumYear),
+        Defaults: new OptimizationFormDefaults(
+            OptimizationDefaults.VacationDays,
+            OptimizationDefaults.MinimumDaysPerRange,
+            OptimizationDefaults.MaximumDaysPerRange),
+        States: states,
+        Cities: cities));
+});
+
+api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHolidayService holidayService, VacationOptimizerService optimizer) =>
+{
+    try
+    {
+        var availableStates = holidayService.GetStates("ES");
+        var stateMap = availableStates.ToDictionary(state => state.Code, StringComparer.OrdinalIgnoreCase);
+
+        string? normalizedStateCode = string.IsNullOrWhiteSpace(request.StateCode) ? null : request.StateCode.Trim().ToUpperInvariant();
+        string? normalizedCityCode = string.IsNullOrWhiteSpace(request.CityCode) ? null : request.CityCode.Trim().ToUpperInvariant();
+
+        if (normalizedStateCode is not null && (!stateMap.TryGetValue(normalizedStateCode, out var selectedRegion) || IsSpainCityCode(selectedRegion.Code)))
+        {
+            return Results.BadRequest(new { error = $"Unsupported state code '{request.StateCode}' for country 'ES'." });
+        }
+
+        if (normalizedCityCode is not null)
+        {
+            if (!stateMap.TryGetValue(normalizedCityCode, out var selectedCity) || !IsSpainCityCode(selectedCity.Code))
+            {
+                return Results.BadRequest(new { error = $"Unsupported city code '{request.CityCode}' for country 'ES'." });
+            }
+
+            normalizedStateCode = GetSpainParentStateCode(normalizedCityCode);
+        }
+
+        var effectiveStateCode = normalizedCityCode ?? normalizedStateCode;
+        var internalRequest = new OptimizeRequest(
+            Country: "ES",
+            Year: request.Year,
+            VacationDays: request.VacationDays,
+            MinimumDaysPerRange: request.MinimumDaysPerRange,
+            MaximumDaysPerRange: request.MaximumDaysPerRange,
+            CustomFreeDays: request.CustomFreeDays,
+            State: effectiveStateCode,
+            IgnoredHolidayDates: request.IgnoredHolidayDates);
+
+        var result = optimizer.Optimize(internalRequest);
+        stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);
+        stateMap.TryGetValue(normalizedCityCode ?? string.Empty, out var selectedCityResult);
+
+        return Results.Ok(new SpainOptimizeResult(
+            CountryCode: "ES",
+            Scope: new SpainOptimizationScope(
+                Type: normalizedCityCode is not null ? "city" : normalizedStateCode is not null ? "state" : "national",
+                StateCode: normalizedStateCode,
+                StateName: selectedState?.Name,
+                CityCode: normalizedCityCode,
+                CityName: selectedCityResult?.Name),
+            Calendar: result.Calendar,
+            SelectedVacationDays: result.SelectedVacationDays,
+            Ranges: result.Ranges,
+            TotalDaysOff: result.TotalDaysOff,
+            VacationDaysUsed: result.VacationDaysUsed,
+            PublicHolidaysCount: result.PublicHolidaysCount));
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
 });
 
 api.MapGet("/detected-country", (HttpContext httpContext, IPublicHolidayService holidayService) =>
@@ -248,5 +429,14 @@ static bool IsTransientDbStartupException(Exception ex)
 
     return false;
 }
+
+static bool IsSpainCityCode(string code) => code is "ES-CT-BCN" or "ES-MD-MAD";
+
+static string? GetSpainParentStateCode(string code) => code switch
+{
+    "ES-CT-BCN" => "ES-CT",
+    "ES-MD-MAD" => "ES-MD",
+    _ => null,
+};
 
 public partial class Program { }

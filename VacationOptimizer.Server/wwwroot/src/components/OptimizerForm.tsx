@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useCountries, useDetectedCountry, useStates } from "../api/vacationApi";
-import type { CustomFreeDay, OptimizeRequest } from "../types/models";
+import { useCountries, useDetectedCountry, useIndiaSchema, useSpainSchema, useStates } from "../api/vacationApi";
+import { isIndiaOptimizeRequest, isSpainOptimizeRequest, type CustomFreeDay, type OptimizeRequest, type SpainCityOption, type StateOption } from "../types/models";
 import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear, hasNonDefaultAdvancedSettings } from "../optimizerDefaults";
 import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
 import Button from "./Button";
@@ -14,13 +14,37 @@ interface Props {
     initialRequest?: OptimizeRequest | null;
 }
 
-function supportsNationalHolidaysOnly(countryCode: string) {
-    // TODO: replace this hardcoded exception with backend capability metadata.
-    return countryCode !== "IN";
+interface SharedDraft {
+    year: number;
+    vacationDays: number;
+    minimumDaysPerRange: number | null;
+    maximumDaysPerRange: number | null;
+}
+
+function getInitialSharedDraft(initialRequest: OptimizeRequest | null | undefined, currentYear: number): SharedDraft {
+    return {
+        year: initialRequest?.year ?? currentYear,
+        vacationDays: initialRequest?.vacationDays ?? defaultVacationDays,
+        minimumDaysPerRange: initialRequest?.minimumDaysPerRange ?? defaultMinimumDaysPerRange,
+        maximumDaysPerRange: initialRequest?.maximumDaysPerRange ?? defaultMaximumDaysPerRange,
+    };
+}
+
+function buildBaseRequest(country: string, draft: SharedDraft, customFreeDays: CustomFreeDay[]) {
+    const request = {
+        country,
+        year: draft.year,
+        vacationDays: draft.vacationDays,
+        minimumDaysPerRange: draft.minimumDaysPerRange ?? undefined,
+        maximumDaysPerRange: draft.maximumDaysPerRange ?? undefined,
+        customFreeDays: customFreeDays.length > 0 ? customFreeDays : undefined,
+    };
+
+    return request;
 }
 
 function getBrowserLanguageTags(): string[] {
-    var language = navigator.language || (navigator as any).userLanguage;
+    const language = navigator.language || (navigator as Navigator & { userLanguage?: string }).userLanguage;
     return language ? [language.toLowerCase()] : [];
 }
 
@@ -53,21 +77,10 @@ export default function OptimizerForm({
 }: Props) {
     const currentYear = getDefaultYear();
     const [country, setCountry] = useState(initialRequest?.country ?? "");
-    const [state, setState] = useState(initialRequest?.state ?? "");
-    const [year, setYear] = useState(initialRequest?.year ?? currentYear);
-    const [vacationDays, setVacationDays] = useState(initialRequest?.vacationDays ?? defaultVacationDays);
-    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
-    const [minimumDaysPerRange, setMinimumDaysPerRange] = useState<
-        number | null
-    >(initialRequest?.minimumDaysPerRange ?? defaultMinimumDaysPerRange);
-    const [maximumDaysPerRange, setMaximumDaysPerRange] = useState<
-        number | null
-    >(initialRequest?.maximumDaysPerRange ?? defaultMaximumDaysPerRange);
-
+    const [sharedDraft, setSharedDraft] = useState<SharedDraft>(() => getInitialSharedDraft(initialRequest, currentYear));
 
     const { data: countries, isLoading: countriesLoading } = useCountries();
     const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
-    const { data: states, isLoading: statesLoading } = useStates(country);
 
     useEffect(() => {
         if (!initialRequest) {
@@ -75,14 +88,9 @@ export default function OptimizerForm({
         }
 
         setCountry(initialRequest.country);
-        setState(initialRequest.state ?? "");
-        setYear(initialRequest.year);
-        setVacationDays(initialRequest.vacationDays);
-        setMinimumDaysPerRange(initialRequest.minimumDaysPerRange ?? defaultMinimumDaysPerRange);
-        setMaximumDaysPerRange(initialRequest.maximumDaysPerRange ?? defaultMaximumDaysPerRange);
+        setSharedDraft(getInitialSharedDraft(initialRequest, currentYear));
         onCustomFreeDaysChange(initialRequest.customFreeDays ?? []);
-        setShowAdvanced(hasNonDefaultAdvancedSettings(initialRequest));
-    }, [initialRequest, onCustomFreeDaysChange]);
+    }, [currentYear, initialRequest, onCustomFreeDaysChange]);
 
     useEffect(() => {
         if (countriesLoading || detectedCountryLoading || countries === undefined || detectedCountry === undefined) {
@@ -103,49 +111,17 @@ export default function OptimizerForm({
             return;
         }
 
-        if (prefersEnglish) {
-            if (detectedCountry.countryCode && supportedCountryCodes.has(detectedCountry.countryCode)) {
-                setCountry(detectedCountry.countryCode);
-            }
-            return;
+        if (prefersEnglish && detectedCountry.countryCode && supportedCountryCodes.has(detectedCountry.countryCode)) {
+            setCountry(detectedCountry.countryCode);
         }
-
     }, [countries, countriesLoading, country, detectedCountry, detectedCountryLoading]);
 
-    useEffect(() => {
-        if (!states?.some((entry) => entry.code === state)) {
-            setState("");
-        }
-    }, [state, states]);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const request: OptimizeRequest = {
-            country,
-            year,
-            vacationDays,
-        };
-        if (minimumDaysPerRange !== null) {
-            request.minimumDaysPerRange = minimumDaysPerRange;
-        }
-        if (maximumDaysPerRange !== null) {
-            request.maximumDaysPerRange = maximumDaysPerRange;
-        }
-        if (state) {
-            request.state = state;
-        }
-        if (customFreeDays.length > 0) {
-            request.customFreeDays = customFreeDays;
-        }
-        onResult(request);
+    const handleCountryChange = (nextCountry: string) => {
+        setCountry(nextCountry);
     };
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-md mx-auto space-y-5"
-        >
-            {/* Country */}
+        <div className="w-full max-w-md mx-auto space-y-5">
             <div className="space-y-1.5">
                 <label
                     htmlFor="country"
@@ -156,7 +132,7 @@ export default function OptimizerForm({
                 <select
                     id="country"
                     value={country}
-                    onChange={(e) => setCountry(e.target.value)}
+                    onChange={(e) => handleCountryChange(e.target.value)}
                     disabled={countriesLoading || detectedCountryLoading}
                     className={`w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm
                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
@@ -177,37 +153,429 @@ export default function OptimizerForm({
                 )}
             </div>
 
+            {country && (
+                country === "IN" ? (
+                    <IndiaCountryOptimizerForm
+                        key={country}
+                        country={country}
+                        onResult={onResult}
+                        isLoading={isLoading}
+                        customFreeDays={customFreeDays}
+                        onCustomFreeDaysChange={onCustomFreeDaysChange}
+                        initialRequest={initialRequest}
+                        sharedDraft={sharedDraft}
+                        onSharedDraftChange={setSharedDraft}
+                    />
+                ) : country === "ES" ? (
+                    <SpainCountryOptimizerForm
+                        key={country}
+                        country={country}
+                        onResult={onResult}
+                        isLoading={isLoading}
+                        customFreeDays={customFreeDays}
+                        onCustomFreeDaysChange={onCustomFreeDaysChange}
+                        initialRequest={initialRequest}
+                        sharedDraft={sharedDraft}
+                        onSharedDraftChange={setSharedDraft}
+                    />
+                ) : (
+                    <LegacyCountryOptimizerForm
+                        key={country}
+                        country={country}
+                        onResult={onResult}
+                        isLoading={isLoading}
+                        customFreeDays={customFreeDays}
+                        onCustomFreeDaysChange={onCustomFreeDaysChange}
+                        initialRequest={initialRequest}
+                        sharedDraft={sharedDraft}
+                        onSharedDraftChange={setSharedDraft}
+                    />
+                )
+            )}
+        </div>
+    );
+}
+
+function LegacyCountryOptimizerForm({
+    country,
+    onResult,
+    isLoading,
+    customFreeDays,
+    onCustomFreeDaysChange,
+    initialRequest,
+    sharedDraft,
+    onSharedDraftChange,
+}: {
+    country: string;
+    onResult: (req: OptimizeRequest) => void;
+    isLoading: boolean;
+    customFreeDays: CustomFreeDay[];
+    onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
+    initialRequest?: OptimizeRequest | null;
+    sharedDraft: SharedDraft;
+    onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
+}) {
+    const [state, setState] = useState(
+        initialRequest && !isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
+            ? (initialRequest.state ?? "")
+            : ""
+    );
+    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
+    const { data: states, isLoading: statesLoading } = useStates(country);
+
+    useEffect(() => {
+        if (!states?.some((entry) => entry.code === state)) {
+            setState("");
+        }
+    }, [state, states]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const request: OptimizeRequest = {
+            ...buildBaseRequest(country, sharedDraft, customFreeDays),
+            state: state || undefined,
+        };
+
+        onResult(request);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-5">
             {states && states.length > 0 && (
-                <div className="space-y-1.5">
-                    <label
-                        htmlFor="state"
-                        className="text-sm font-medium text-text-muted"
-                    >
-                        State / Region
-                    </label>
-                    <select
-                        id="state"
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        disabled={statesLoading}
-                        className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text
-                     focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-                     transition-all appearance-none cursor-pointer"
-                    >
-                        {supportsNationalHolidaysOnly(country) && (
-                            <option value="">National holidays only</option>
-                        )}
-                        {states.map((entry) => (
-                            <option key={entry.code} value={entry.code}>
-                                {entry.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <StateSelectField
+                    id="state"
+                    label="State / Region"
+                    value={state}
+                    onChange={setState}
+                    disabled={statesLoading}
+                    includeEmptyOption
+                    emptyOptionLabel="National holidays only"
+                    states={states}
+                />
             )}
 
-            {/* Year */}
-            {/* Year */}
+            <SharedOptimizerControls
+                sharedDraft={sharedDraft}
+                onSharedDraftChange={onSharedDraftChange}
+                customFreeDays={customFreeDays}
+                onCustomFreeDaysChange={onCustomFreeDaysChange}
+                isLoading={isLoading}
+                isSubmitDisabled={isLoading}
+                showAdvanced={showAdvanced}
+                onShowAdvancedChange={setShowAdvanced}
+            />
+        </form>
+    );
+}
+
+function IndiaCountryOptimizerForm({
+    country,
+    onResult,
+    isLoading,
+    customFreeDays,
+    onCustomFreeDaysChange,
+    initialRequest,
+    sharedDraft,
+    onSharedDraftChange,
+}: {
+    country: "IN";
+    onResult: (req: OptimizeRequest) => void;
+    isLoading: boolean;
+    customFreeDays: CustomFreeDay[];
+    onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
+    initialRequest?: OptimizeRequest | null;
+    sharedDraft: SharedDraft;
+    onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
+}) {
+    const [stateCode, setStateCode] = useState(
+        initialRequest && isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
+            ? initialRequest.stateCode
+            : ""
+    );
+    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
+    const { data: schema, isLoading: schemaLoading } = useIndiaSchema(true);
+
+    useEffect(() => {
+        if (!schema?.states.some((entry) => entry.code === stateCode)) {
+            setStateCode("");
+        }
+    }, [schema?.states, stateCode]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!stateCode) {
+            return;
+        }
+
+        onResult({
+            ...buildBaseRequest(country, sharedDraft, customFreeDays),
+            country: "IN",
+            stateCode,
+        });
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-5">
+            <StateSelectField
+                id="stateCode"
+                label="State / Region"
+                value={stateCode}
+                onChange={setStateCode}
+                disabled={schemaLoading}
+                includeEmptyOption
+                emptyOptionLabel={schemaLoading ? "Loading..." : "Select state / region"}
+                states={schema?.states ?? []}
+            />
+
+            <SharedOptimizerControls
+                sharedDraft={sharedDraft}
+                onSharedDraftChange={onSharedDraftChange}
+                customFreeDays={customFreeDays}
+                onCustomFreeDaysChange={onCustomFreeDaysChange}
+                isLoading={isLoading}
+                isSubmitDisabled={isLoading || schemaLoading || !stateCode}
+                showAdvanced={showAdvanced}
+                onShowAdvancedChange={setShowAdvanced}
+                yearMin={schema?.yearRange.min}
+                yearMax={schema?.yearRange.max}
+            />
+        </form>
+    );
+}
+
+function SpainCountryOptimizerForm({
+    country,
+    onResult,
+    isLoading,
+    customFreeDays,
+    onCustomFreeDaysChange,
+    initialRequest,
+    sharedDraft,
+    onSharedDraftChange,
+}: {
+    country: "ES";
+    onResult: (req: OptimizeRequest) => void;
+    isLoading: boolean;
+    customFreeDays: CustomFreeDay[];
+    onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
+    initialRequest?: OptimizeRequest | null;
+    sharedDraft: SharedDraft;
+    onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
+}) {
+    const [stateCode, setStateCode] = useState(
+        initialRequest && isSpainOptimizeRequest(initialRequest) && initialRequest.country === country
+            ? (initialRequest.stateCode ?? "")
+            : ""
+    );
+    const [cityCode, setCityCode] = useState(
+        initialRequest && isSpainOptimizeRequest(initialRequest) && initialRequest.country === country
+            ? (initialRequest.cityCode ?? "")
+            : ""
+    );
+    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
+    const { data: schema, isLoading: schemaLoading } = useSpainSchema(true);
+
+    useEffect(() => {
+        if (!schema) {
+            return;
+        }
+
+        if (cityCode) {
+            const city = schema.cities.find((entry) => entry.code === cityCode);
+            if (!city) {
+                setCityCode("");
+                return;
+            }
+
+            if (stateCode !== city.stateCode) {
+                setStateCode(city.stateCode);
+            }
+            return;
+        }
+
+        if (stateCode && !schema.states.some((entry) => entry.code === stateCode)) {
+            setStateCode("");
+        }
+    }, [cityCode, schema, stateCode]);
+
+    const handleStateChange = (nextStateCode: string) => {
+        setStateCode(nextStateCode);
+        if (!nextStateCode) {
+            setCityCode("");
+            return;
+        }
+
+        const selectedCity = schema?.cities.find((entry) => entry.code === cityCode);
+        if (selectedCity && selectedCity.stateCode !== nextStateCode) {
+            setCityCode("");
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        onResult({
+            ...buildBaseRequest(country, sharedDraft, customFreeDays),
+            country: "ES",
+            stateCode: stateCode || undefined,
+            cityCode: cityCode || undefined,
+        });
+    };
+
+    const availableCities = schema?.cities.filter((entry) => !stateCode || entry.stateCode === stateCode) ?? [];
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-5">
+            <StateSelectField
+                id="stateCode"
+                label="Autonomous Region"
+                value={stateCode}
+                onChange={handleStateChange}
+                disabled={schemaLoading}
+                includeEmptyOption
+                emptyOptionLabel={schemaLoading ? "Loading..." : "National holidays only"}
+                states={schema?.states ?? []}
+            />
+
+            <CitySelectField
+                value={cityCode}
+                onChange={setCityCode}
+                disabled={schemaLoading}
+                cities={availableCities}
+            />
+
+            <SharedOptimizerControls
+                sharedDraft={sharedDraft}
+                onSharedDraftChange={onSharedDraftChange}
+                customFreeDays={customFreeDays}
+                onCustomFreeDaysChange={onCustomFreeDaysChange}
+                isLoading={isLoading}
+                isSubmitDisabled={isLoading || schemaLoading}
+                showAdvanced={showAdvanced}
+                onShowAdvancedChange={setShowAdvanced}
+                yearMin={schema?.yearRange.min}
+                yearMax={schema?.yearRange.max}
+            />
+        </form>
+    );
+}
+
+function StateSelectField({
+    id,
+    label,
+    value,
+    onChange,
+    disabled,
+    includeEmptyOption,
+    emptyOptionLabel,
+    states,
+}: {
+    id: string;
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    disabled: boolean;
+    includeEmptyOption: boolean;
+    emptyOptionLabel: string;
+    states: StateOption[];
+}) {
+    return (
+        <div className="space-y-1.5">
+            <label
+                htmlFor={id}
+                className="text-sm font-medium text-text-muted"
+            >
+                {label}
+            </label>
+            <select
+                id={id}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                disabled={disabled}
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text
+                     focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
+                     transition-all appearance-none cursor-pointer"
+            >
+                {includeEmptyOption && <option value="">{emptyOptionLabel}</option>}
+                {states.map((entry) => (
+                    <option key={entry.code} value={entry.code}>
+                        {entry.name}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+}
+
+function CitySelectField({
+    value,
+    onChange,
+    disabled,
+    cities,
+}: {
+    value: string;
+    onChange: (value: string) => void;
+    disabled: boolean;
+    cities: SpainCityOption[];
+}) {
+    return (
+        <div className="space-y-1.5">
+            <label
+                htmlFor="cityCode"
+                className="text-sm font-medium text-text-muted"
+            >
+                City
+            </label>
+            <select
+                id="cityCode"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                disabled={disabled}
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text
+                     focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
+                     transition-all appearance-none cursor-pointer"
+            >
+                <option value="">{disabled ? "Loading..." : "No city selected"}</option>
+                {cities.map((entry) => (
+                    <option key={entry.code} value={entry.code}>
+                        {entry.name}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+}
+
+function SharedOptimizerControls({
+    sharedDraft,
+    onSharedDraftChange,
+    customFreeDays,
+    onCustomFreeDaysChange,
+    isLoading,
+    isSubmitDisabled,
+    showAdvanced,
+    onShowAdvancedChange,
+    yearMin,
+    yearMax,
+}: {
+    sharedDraft: SharedDraft;
+    onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
+    customFreeDays: CustomFreeDay[];
+    onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
+    isLoading: boolean;
+    isSubmitDisabled: boolean;
+    showAdvanced: boolean;
+    onShowAdvancedChange: React.Dispatch<React.SetStateAction<boolean>>;
+    yearMin?: number;
+    yearMax?: number;
+}) {
+    const currentYear = getDefaultYear();
+    const minimumYear = yearMin ?? currentYear;
+    const maximumYear = yearMax ?? currentYear + 5;
+
+    return (
+        <>
             <div className="space-y-1.5">
                 <label
                     htmlFor="year"
@@ -221,10 +589,14 @@ export default function OptimizerForm({
                     <input
                         id="year"
                         type="number"
-                        min={currentYear}
-                        max={currentYear + 5}
-                        value={year}
-                        onChange={(e) => setYear(Number(e.target.value))}
+                        min={minimumYear}
+                        max={maximumYear}
+                        value={sharedDraft.year}
+                        onChange={(e) =>
+                            onSharedDraftChange((draft) => ({
+                                ...draft,
+                                year: Number(e.target.value),
+                            }))}
                         className="flex-1 bg-transparent px-3 py-2.5 text-sm text-text
                        focus:outline-none appearance-none
                        [&::-webkit-inner-spin-button]:appearance-none
@@ -235,9 +607,10 @@ export default function OptimizerForm({
                         <button
                             type="button"
                             onClick={() =>
-                                setYear((y) =>
-                                    Math.min(y + 1, currentYear + 5)
-                                )}
+                                onSharedDraftChange((draft) => ({
+                                    ...draft,
+                                    year: Math.min(draft.year + 1, maximumYear),
+                                }))}
                             className="flex-1 px-2.5 flex items-center justify-center
                            text-text-muted hover:text-text hover:bg-surface-hover
                            transition-colors cursor-pointer"
@@ -249,7 +622,10 @@ export default function OptimizerForm({
                         <button
                             type="button"
                             onClick={() =>
-                                setYear((y) => Math.max(y - 1, currentYear))}
+                                onSharedDraftChange((draft) => ({
+                                    ...draft,
+                                    year: Math.max(draft.year - 1, minimumYear),
+                                }))}
                             className="flex-1 px-2.5 flex items-center justify-center
                            text-text-muted hover:text-text hover:bg-surface-hover
                            transition-colors cursor-pointer"
@@ -261,7 +637,6 @@ export default function OptimizerForm({
                 </div>
             </div>
 
-            {/* Vacation Days */}
             <div className="space-y-1.5">
                 <label
                     htmlFor="vacationDays"
@@ -275,22 +650,24 @@ export default function OptimizerForm({
                         type="range"
                         min={1}
                         max={40}
-                        value={vacationDays}
+                        value={sharedDraft.vacationDays}
                         onChange={(e) =>
-                            setVacationDays(Number(e.target.value))}
+                            onSharedDraftChange((draft) => ({
+                                ...draft,
+                                vacationDays: Number(e.target.value),
+                            }))}
                         className="flex-1 themed-range"
                     />
                     <span className="text-lg font-semibold text-primary min-w-[2ch] text-right tabular-nums">
-                        {vacationDays}
+                        {sharedDraft.vacationDays}
                     </span>
                 </div>
             </div>
 
-            {/* Advanced Options */}
             <div className="pt-1 space-y-3">
                 <button
                     type="button"
-                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    onClick={() => onShowAdvancedChange((value) => !value)}
                     className="w-full flex items-center justify-between gap-2 px-3 py-2.5
                                rounded-lg border border-border bg-surface
                                text-xs font-medium text-text-muted
@@ -299,14 +676,12 @@ export default function OptimizerForm({
                 >
                     <span>Advanced constraints</span>
                     <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""
-                            }`}
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""}`}
                     />
                 </button>
 
                 {showAdvanced && (
                     <div className="space-y-4 px-3 py-3 rounded-lg border border-border bg-surface">
-                        {/* Minimum Days */}
                         <div className="space-y-2">
                             <label
                                 htmlFor="minimumDaysPerRange"
@@ -324,20 +699,20 @@ export default function OptimizerForm({
                                     type="range"
                                     min={1}
                                     max={14}
-                                    value={minimumDaysPerRange ?? 1}
+                                    value={sharedDraft.minimumDaysPerRange ?? 1}
                                     onChange={(e) =>
-                                        setMinimumDaysPerRange(
-                                            Number(e.target.value),
-                                        )}
+                                        onSharedDraftChange((draft) => ({
+                                            ...draft,
+                                            minimumDaysPerRange: Number(e.target.value),
+                                        }))}
                                     className="flex-1 themed-range"
                                 />
                                 <span className="text-sm font-semibold text-accent min-w-[3ch] text-right tabular-nums">
-                                    {minimumDaysPerRange ?? "off"}
+                                    {sharedDraft.minimumDaysPerRange ?? "off"}
                                 </span>
                             </div>
                         </div>
 
-                        {/* Maximum Days */}
                         <div className="space-y-2">
                             <label
                                 htmlFor="maximumDaysPerRange"
@@ -355,20 +730,20 @@ export default function OptimizerForm({
                                     type="range"
                                     min={1}
                                     max={31}
-                                    value={maximumDaysPerRange ?? 31}
+                                    value={sharedDraft.maximumDaysPerRange ?? 31}
                                     onChange={(e) =>
-                                        setMaximumDaysPerRange(
-                                            Number(e.target.value),
-                                        )}
+                                        onSharedDraftChange((draft) => ({
+                                            ...draft,
+                                            maximumDaysPerRange: Number(e.target.value),
+                                        }))}
                                     className="flex-1 themed-range"
                                 />
                                 <span className="text-sm font-semibold text-accent min-w-[3ch] text-right tabular-nums">
-                                    {maximumDaysPerRange ?? "off"}
+                                    {sharedDraft.maximumDaysPerRange ?? "off"}
                                 </span>
                             </div>
                         </div>
 
-                        {/* Custom Free Days */}
                         <div className="space-y-2">
                             <CustomFreeDaysManager
                                 customFreeDays={customFreeDays}
@@ -379,10 +754,9 @@ export default function OptimizerForm({
                 )}
             </div>
 
-            {/* Submit */}
             <Button
                 type="submit"
-                disabled={isLoading || countriesLoading || detectedCountryLoading || !country}
+                disabled={isSubmitDisabled}
                 fullWidth
             >
                 {isLoading
@@ -390,6 +764,6 @@ export default function OptimizerForm({
                     : <Plane className="w-4 h-4" />}
                 {isLoading ? "Optimizing..." : "Optimize"}
             </Button>
-        </form>
+        </>
     );
 }

@@ -4,8 +4,8 @@ import {
   parseRequestFromSearchParams,
   requestsMatch,
 } from "./optimizationRequest";
-const savedRequestStorageKey = "vacationOptimizer.savedRequest";
-const savedResultStorageKey = "vacationOptimizer.savedResult";
+const savedRequestStorageKey = "vacationOptimizer.v2.savedRequest";
+const savedResultStorageKey = "vacationOptimizer.v2.savedResult";
 
 export function getCanonicalAppPath(isDevelopment = import.meta.env.DEV) {
   return isDevelopment ? "/" : "/app";
