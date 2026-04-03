@@ -389,7 +389,29 @@ app.UseSpa(spa =>
             await next();
         });
         app.UsePathBase(spaPath);
-        app.UseSpaStaticFiles();
+        app.UseSpaStaticFiles(new StaticFileOptions
+        {
+            OnPrepareResponse = ctx =>
+            {
+                ResponseHeaders headers = ctx.Context.Response.GetTypedHeaders();
+                if (ctx.Context.Request.Path.Value?.StartsWith("/assets/", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                    {
+                        Public = true,
+                        MaxAge = TimeSpan.FromDays(365)
+                    };
+                }
+                else
+                {
+                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                    {
+                        Public = true,
+                        MaxAge = TimeSpan.FromHours(1)
+                    };
+                }
+            }
+        });
         spa.Options.SourcePath = "wwwroot/dist";
         spa.Options.DefaultPageStaticFileOptions = new StaticFileOptions
         {
