@@ -82,12 +82,27 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 const string robotsTxt = """
 User-agent: *
+Allow: /
 Allow: /app/
 Allow: /app/manifest.json
 Allow: /app/icons/
+Allow: /sitemap.xml
+
+Sitemap: https://optimize-vacation-for.me/sitemap.xml
 """;
 const string adsTxt = """
 google.com, pub-9485445500768000, DIRECT, f08c47fec0942fa0
+""";
+const string sitemapXml = """
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://optimize-vacation-for.me/app/</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
 """;
 
 // Run migrations automatically on startup if not testing
@@ -369,6 +384,8 @@ app.MapGet("/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
 app.MapGet("/app/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
 app.MapGet("/ads.txt", () => Results.Text(adsTxt, "text/plain"));
 app.MapGet("/app/ads.txt", () => Results.Text(adsTxt, "text/plain"));
+app.MapGet("/sitemap.xml", () => Results.Text(sitemapXml, "application/xml"));
+app.MapGet("/app/sitemap.xml", () => Results.Text(sitemapXml, "application/xml"));
 
 // SPA hosting
 app.UseStaticFiles();

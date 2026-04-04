@@ -1,8 +1,8 @@
 {
-    "name": "Vacation Optimizer",
-    "short_name": "Vacation",
+    "name": "Vacation Optimizer – PTO & Holiday Planner",
+    "short_name": "Vacation Opt",
     "id": "/app/",
-    "description": "Optimize your vacation days around public holidays and weekends for maximum time off.",
+    "description": "Free PTO optimization tool that plans vacation days around public holidays and weekends to maximize your continuous time off. Works for any country.",
     "start_url": "/app/",
     "scope": "/app/",
     "display": "standalone",
@@ -18,7 +18,8 @@
     "dir": "ltr",
     "categories": [
         "productivity",
-        "utilities"
+        "utilities",
+        "lifestyle"
     ],
     "prefer_related_applications": false,
     "icons": [
