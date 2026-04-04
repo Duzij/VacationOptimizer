@@ -1,6 +1,63 @@
 @VacationOptimizer.Server_HostAddress = http://localhost:5039
 
-GET {{VacationOptimizer.Server_HostAddress}}/weatherforecast/
+### Detected Country (simulate with header)
+GET {{VacationOptimizer.Server_HostAddress}}/api/vacations/detected-country
+Accept: application/json
+X-Country-Code: ES
+
+### Get supported countries
+GET {{VacationOptimizer.Server_HostAddress}}/api/vacations/countries
 Accept: application/json
 
-###
+### Get states for a generic country (e.g., DE)
+GET {{VacationOptimizer.Server_HostAddress}}/api/vacations/countries/DE/states
+Accept: application/json
+
+### Optimize vacations (General)
+POST {{VacationOptimizer.Server_HostAddress}}/api/vacations/optimize
+Content-Type: application/json
+Accept: application/json
+
+{
+  "country": "DE",
+  "year": 2026,
+  "vacationDays": 25,
+  "minimumDaysPerRange": 4,
+  "maximumDaysPerRange": 14,
+  "state": "DE-BW"
+}
+
+### Get India country schema
+GET {{VacationOptimizer.Server_HostAddress}}/api/vacations/countries/IN/schema
+Accept: application/json
+
+### Optimize vacations (India)
+POST {{VacationOptimizer.Server_HostAddress}}/api/vacations/countries/IN/optimize
+Content-Type: application/json
+Accept: application/json
+
+{
+  "stateCode": "IN-MH",
+  "year": 2026,
+  "vacationDays": 25,
+  "minimumDaysPerRange": 4,
+  "maximumDaysPerRange": 14
+}
+
+### Get Spain country schema
+GET {{VacationOptimizer.Server_HostAddress}}/api/vacations/countries/ES/schema
+Accept: application/json
+
+### Optimize vacations (Spain)
+POST {{VacationOptimizer.Server_HostAddress}}/api/vacations/countries/ES/optimize
+Content-Type: application/json
+Accept: application/json
+
+{
+  "stateCode": "ES-MD",
+  "cityCode": "ES-MD-MAD",
+  "year": 2026,
+  "vacationDays": 25,
+  "minimumDaysPerRange": 4,
+  "maximumDaysPerRange": 14
+}
