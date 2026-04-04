@@ -93,36 +93,11 @@ jobs:
             if [ ! -f "/root/vacation-app/certbot/conf/live/optimize-vacation-for.me/fullchain.pem" ]; then
               log_info "No certificate found, obtaining one..."
 
-              # Step 1: use HTTP-only config temporarily (save the real one first)
-              cp /root/vacation-app/nginx/conf.d/default.conf /root/vacation-app/nginx/conf.d/default.conf.bak
-              cat > /root/vacation-app/nginx/conf.d/default.conf << 'EOF'
-            server {
-                listen 80;
-                server_name optimize-vacation-for.me;
-                location /.well-known/acme-challenge/ {
-                    root /var/www/certbot;
-                }
-                location / {
-                    proxy_pass http://vacation-app:80;
-                    proxy_http_version 1.1;
-                    proxy_set_header Host $host;
-                }
-            }
-            EOF
-
-              docker compose -f /root/vacation-app/docker-compose.yaml restart nginx
-              sleep 3
-
-              # Step 2: run certbot
               docker compose -f /root/vacation-app/docker-compose.yaml run --rm certbot certonly --webroot \
                 --webroot-path /var/www/certbot \
                 -d optimize-vacation-for.me \
                 --email your@email.com \
                 --agree-tos --no-eff-email --non-interactive
-
-              # Step 3: restore the original config from git
-              cp /root/vacation-app/nginx/conf.d/default.conf.bak /root/vacation-app/nginx/conf.d/default.conf
-              rm /root/vacation-app/nginx/conf.d/default.conf.bak
 
               docker compose -f /root/vacation-app/docker-compose.yaml restart nginx
               log_success "SSL certificate obtained"

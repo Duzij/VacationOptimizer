@@ -10,6 +10,10 @@ The stack includes:
 - `nginx` (reverse proxy)
 - `certbot` (manual certificate issuance/renewal; not started by default)
 
+Nginx config note:
+- Edit [`nginx/conf.d/default.conf`](/Users/admin/DEV/W001/VacationOptimizer/nginx/conf.d/default.conf) for application routes and proxy rules.
+- The container generates the live server block from the templates and includes that file, so deploys now pick up changes there reliably.
+
 ## 0. Local development (hot reload in containers)
 
 Why old FE appears with `docker compose up -d`:
