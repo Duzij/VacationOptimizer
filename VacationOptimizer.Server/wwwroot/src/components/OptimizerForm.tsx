@@ -121,7 +121,7 @@ export default function OptimizerForm({
     };
 
     return (
-        <div className="w-full max-w-md mx-auto space-y-5">
+        <div className="w-full max-w-md mx-auto space-y-5 xl:mx-0 xl:max-w-[38rem]">
             <div className="space-y-1.5">
                 <label
                     htmlFor="country"

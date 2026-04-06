@@ -176,6 +176,22 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task Sitemap_ListsPublicPagesAndPlanner()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/sitemap.xml");
+
+        response.EnsureSuccessStatusCode();
+        Assert.Equal("application/xml", response.Content.Headers.ContentType?.MediaType);
+        var xml = await response.Content.ReadAsStringAsync();
+        Assert.Contains("https://optimize-vacation-for.me/", xml);
+        Assert.Contains("https://optimize-vacation-for.me/about/", xml);
+        Assert.Contains("https://optimize-vacation-for.me/contact/", xml);
+        Assert.Contains("https://optimize-vacation-for.me/app/", xml);
+    }
+
+    [Fact]
     public async Task GetIndiaSchema_ReturnsIndiaSpecificContract()
     {
         var client = _factory.CreateClient();

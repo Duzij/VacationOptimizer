@@ -4,8 +4,9 @@ import {
   parseRequestFromSearchParams,
   requestsMatch,
 } from "./optimizationRequest";
-const savedRequestStorageKey = "vacationOptimizer.v2.savedRequest";
-const savedResultStorageKey = "vacationOptimizer.v2.savedResult";
+export const savedRequestStorageKey = "vacationOptimizer.v2.savedRequest";
+export const savedResultStorageKey = "vacationOptimizer.v2.savedResult";
+export const themeStorageKey = "theme";
 
 export function getCanonicalAppPath(isDevelopment = import.meta.env.DEV) {
   return isDevelopment ? "/" : "/app";
@@ -16,6 +17,12 @@ export function normalizeCanonicalAppPath(isDevelopment = import.meta.env.DEV) {
   const normalizedPathname = window.location.pathname.replace(/\/+$/, "") || "/";
 
   if (normalizedPathname === canonicalPath) {
+    return;
+  }
+
+  // Once the public marketing/legal pages exist, the app should only
+  // normalize its own entry path instead of hijacking unrelated URLs.
+  if (!isDevelopment && !normalizedPathname.startsWith(`${canonicalPath}/`)) {
     return;
   }
 
@@ -56,6 +63,16 @@ export function readSavedResult(): OptimizeResult | null {
 export function persistOptimization(request: OptimizeRequest, result: OptimizeResult) {
   window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(request));
   window.localStorage.setItem(savedResultStorageKey, JSON.stringify(result));
+}
+
+export function clearStoredOptimizationData() {
+  window.localStorage.removeItem(savedRequestStorageKey);
+  window.localStorage.removeItem(savedResultStorageKey);
+}
+
+export function clearAppLocalStorage() {
+  clearStoredOptimizationData();
+  window.localStorage.removeItem(themeStorageKey);
 }
 
 export function updateUrlFromRequest(request: OptimizeRequest | null) {

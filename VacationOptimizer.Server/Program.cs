@@ -80,12 +80,26 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+var sitemapPages = new[]
+{
+    new SitemapPage("/", new DateOnly(2026, 4, 6), "weekly", 1.0m),
+    new SitemapPage("/about", new DateOnly(2026, 4, 6), "monthly", 0.8m),
+    new SitemapPage("/contact", new DateOnly(2026, 4, 6), "monthly", 0.7m),
+    new SitemapPage("/privacy", new DateOnly(2026, 4, 6), "monthly", 0.6m),
+    new SitemapPage("/terms", new DateOnly(2026, 4, 6), "monthly", 0.6m),
+    new SitemapPage("/app", new DateOnly(2026, 4, 6), "weekly", 0.9m),
+};
+
 const string robotsTxt = """
 User-agent: *
 Allow: /
 Allow: /app/
-Allow: /app/manifest.json
-Allow: /app/icons/
+Allow: /manifest.json
+Allow: /icons/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
 Allow: /sitemap.xml
 
 Sitemap: https://optimize-vacation-for.me/sitemap.xml
@@ -93,17 +107,7 @@ Sitemap: https://optimize-vacation-for.me/sitemap.xml
 const string adsTxt = """
 google.com, pub-9485445500768000, DIRECT, f08c47fec0942fa0
 """;
-const string sitemapXml = """
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://optimize-vacation-for.me/app/</loc>
-    <lastmod>2026-04-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-</urlset>
-""";
+var sitemapXml = BuildSitemapXml(sitemapPages);
 
 // Run migrations automatically on startup if not testing
 if (!app.Environment.IsEnvironment("Testing"))
@@ -391,21 +395,10 @@ app.MapGet("/app/sitemap.xml", () => Results.Text(sitemapXml, "application/xml")
 app.UseStaticFiles();
 app.UseRouting();
 
-var spaPath = "/app";
 app.UseSpa(spa =>
 {
     if (app.Environment.IsProduction())
     {
-        app.Use(async (context, next) =>
-        {
-            if (context.Request.Path == "/")
-            {
-                context.Response.Redirect("/app");
-                return;
-            }
-            await next();
-        });
-        app.UsePathBase(spaPath);
         app.UseSpaStaticFiles(new StaticFileOptions
         {
             OnPrepareResponse = ctx =>
@@ -477,5 +470,26 @@ static string? GetSpainParentStateCode(string code) => code switch
     "ES-MD-MAD" => "ES-MD",
     _ => null,
 };
+
+static string BuildSitemapXml(IEnumerable<SitemapPage> pages)
+{
+    var entries = string.Join(Environment.NewLine, pages.Select(page => $"""
+  <url>
+    <loc>https://optimize-vacation-for.me{page.Path}/</loc>
+    <lastmod>{page.LastModified:yyyy-MM-dd}</lastmod>
+    <changefreq>{page.ChangeFrequency}</changefreq>
+    <priority>{page.Priority:0.0}</priority>
+  </url>
+""".Replace($"{page.Path}//", $"{page.Path}/").Replace("https://optimize-vacation-for.me//", "https://optimize-vacation-for.me/")));
+
+    return $$"""
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{{entries}}
+</urlset>
+""";
+}
+
+public sealed record SitemapPage(string Path, DateOnly LastModified, string ChangeFrequency, decimal Priority);
 
 public partial class Program { }

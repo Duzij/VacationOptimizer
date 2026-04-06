@@ -1,8 +1,12 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  clearAppLocalStorage,
   getCanonicalAppPath,
   normalizeCanonicalAppPath,
   parseRequestFromUrl,
+  savedRequestStorageKey,
+  savedResultStorageKey,
+  themeStorageKey,
   updateUrlFromRequest,
 } from "./optimizationPersistence";
 import {
@@ -42,13 +46,22 @@ describe("optimizationPersistence", () => {
     expect(window.location.search).toBe("?country=DE");
   });
 
-  it("normalizes unknown production paths back to /app while preserving the query string", () => {
-    window.history.replaceState({}, "", "/asfd?country=US&ignoredHolidays=2026-05-25");
+  it("normalizes nested production app paths back to /app while preserving the query string", () => {
+    window.history.replaceState({}, "", "/app/results?country=US&ignoredHolidays=2026-05-25");
 
     normalizeCanonicalAppPath(false);
 
     expect(window.location.pathname).toBe("/app");
     expect(window.location.search).toBe("?country=US&ignoredHolidays=2026-05-25");
+  });
+
+  it("does not rewrite non-app production routes", () => {
+    window.history.replaceState({}, "", "/about?country=US");
+
+    normalizeCanonicalAppPath(false);
+
+    expect(window.location.pathname).toBe("/about");
+    expect(window.location.search).toBe("?country=US");
   });
 
   it("uses / as the canonical path in development", () => {
@@ -72,5 +85,19 @@ describe("optimizationPersistence", () => {
       minimumDaysPerRange: defaultMinimumDaysPerRange,
       maximumDaysPerRange: defaultMaximumDaysPerRange,
     });
+  });
+
+  it("clears only the app-owned local storage entries", () => {
+    window.localStorage.setItem(savedRequestStorageKey, "{}");
+    window.localStorage.setItem(savedResultStorageKey, "{}");
+    window.localStorage.setItem(themeStorageKey, "dark");
+    window.localStorage.setItem("unrelated.key", "keep-me");
+
+    clearAppLocalStorage();
+
+    expect(window.localStorage.getItem(savedRequestStorageKey)).toBeNull();
+    expect(window.localStorage.getItem(savedResultStorageKey)).toBeNull();
+    expect(window.localStorage.getItem(themeStorageKey)).toBeNull();
+    expect(window.localStorage.getItem("unrelated.key")).toBe("keep-me");
   });
 });

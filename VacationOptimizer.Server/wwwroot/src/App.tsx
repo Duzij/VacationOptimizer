@@ -1,32 +1,137 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import OptimizerForm from "./components/OptimizerForm";
-import CalendarView from "./components/CalendarView";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
+import AppHeader from "./components/AppHeader";
+import {
+  AboutPage,
+  ContactPage,
+  HomePage,
+  NotFoundPage,
+  PrivacyPage,
+  PublicFooter,
+  RouteMeta,
+  TermsPage,
+} from "./components/PublicPages";
+import OptimizerForm from "./components/OptimizerForm";
+import CalendarView from "./components/CalendarView";
 import { getDefaultYear } from "./optimizerDefaults";
 import { useTheme } from "./hooks/useTheme";
 import { useOptimizationSession } from "./hooks/useOptimizationSession";
 import { useCalendarInteractions } from "./hooks/useCalendarInteractions";
-import { normalizeCanonicalAppPath } from "./utils/optimizationPersistence";
-import { Sun, Moon, TreePalm } from "lucide-react";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Main />
+      <BrowserRouter>
+        <Main />
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
 
 function Main() {
-  normalizeCanonicalAppPath();
-
-  const currentYear = getDefaultYear();
   const { isDark, setIsDark } = useTheme();
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <AppHeader isDark={isDark} onToggleTheme={() => setIsDark((prev) => !prev)} />
+
+      <main className="flex-1 px-4 py-8 space-y-8">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <RouteMeta
+                  title="Vacation Optimizer | Plan PTO Around Public Holidays"
+                  description="Learn how Vacation Optimizer helps employees turn limited PTO into longer breaks. Explore planning guidance, examples, FAQs, and the interactive planner."
+                  canonicalPath="/"
+                />
+                <HomePage />
+              </>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <>
+                <RouteMeta
+                  title="About Vacation Optimizer"
+                  description="Learn what Vacation Optimizer is, who it helps, and how it combines public guidance with an interactive PTO planning tool."
+                  canonicalPath="/about"
+                />
+                <AboutPage />
+              </>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <>
+                <RouteMeta
+                  title="Contact Vacation Optimizer"
+                  description="Use the same feedback channel as the planner to report product issues, data corrections, accessibility concerns, or feature requests."
+                  canonicalPath="/contact"
+                />
+                <ContactPage />
+              </>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <>
+                <RouteMeta
+                  title="Privacy Policy | Vacation Optimizer"
+                  description="Read the Vacation Optimizer privacy overview and understand the expectations around data minimization, consent, and deployment accuracy."
+                  canonicalPath="/privacy"
+                />
+                <PrivacyPage />
+              </>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <>
+                <RouteMeta
+                  title="Terms of Use | Vacation Optimizer"
+                  description="Read the Vacation Optimizer terms overview, including informational use, holiday data limitations, and user responsibility."
+                  canonicalPath="/terms"
+                />
+                <TermsPage />
+              </>
+            }
+          />
+          <Route path="/app" element={<PlannerPage />} />
+          <Route
+            path="*"
+            element={
+              <>
+                <RouteMeta
+                  title="Page Not Found | Vacation Optimizer"
+                  description="The page could not be found."
+                  canonicalPath="/"
+                />
+                <NotFoundPage />
+              </>
+            }
+          />
+        </Routes>
+      </main>
+
+      <PublicFooter />
+    </div>
+  );
+}
+
+function PlannerPage() {
+  const currentYear = getDefaultYear();
   const {
     initialRequest,
     result,
@@ -58,71 +163,80 @@ function Main() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-border bg-surface/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2">
-          <h1 className="text-base font-bold bg-gradient-to-r bg-clip-text">
-            Vacation Optimizer
-          </h1>
-          <TreePalm className="w-5 h-5 text-primary" />
-          <button
-            onClick={() => setIsDark((prev) => !prev)}
-            className="ml-auto p-2 rounded-full border border-border bg-surface hover:bg-surface-hover transition-colors flex items-center justify-center cursor-pointer"
-            aria-label="Toggle dark mode"
-          >
-            {isDark ? (
-              <Sun className="w-5 h-5 text-primary" />
-            ) : (
-              <Moon className="w-5 h-5 text-primary" />
-            )}
-          </button>
-        </div>
-      </header>
+    <>
+      <RouteMeta
+        title="Vacation Planner | Vacation Optimizer"
+        description="Use the Vacation Optimizer planner to compare PTO scenarios around public holidays, weekends, and custom free days."
+        canonicalPath="/app"
+      />
 
-      <main className="flex-1 px-4 py-8 space-y-8">
-        <OptimizerForm
-          onResult={runOptimization}
-          isLoading={isUserOptimizing}
-          customFreeDays={customFreeDays}
-          onCustomFreeDaysChange={setCustomFreeDays}
-          initialRequest={initialRequest}
-        />
-
-        {optimize.isError && (
-          <div className="max-w-md mx-auto text-center text-sm text-holiday-text bg-holiday/30 rounded-lg px-4 py-3">
-            {optimize.error.message}
+      <section id="planner" className="scroll-mt-24">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold text-text sm:text-4xl">Vacation planner</h1>
+            <p className="max-w-3xl text-sm leading-6 text-text-muted">
+              Enter your country and PTO rules, then generate suggested vacation ranges. Results are meant to support planning,
+              not replace checking your employer policy, local holiday changes, or team availability.
+            </p>
           </div>
-        )}
 
-        {result && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <ResultsSummary result={result} />
-            <Legend />
-            <CalendarView
-              calendar={result.calendar}
-              year={activeRequest?.year ?? currentYear}
-              country={activeRequest?.country}
-              onDayLongPress={handleDayLongPress}
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)] xl:items-start">
+            <OptimizerForm
+              onResult={runOptimization}
+              isLoading={isUserOptimizing}
+              customFreeDays={customFreeDays}
+              onCustomFreeDaysChange={setCustomFreeDays}
+              initialRequest={initialRequest}
             />
-          </div>
-        )}
-      </main>
 
-      <footer className="border-t border-border py-4 px-4 flex items-center justify-center">
-        <span className="text-[11px] text-text-muted/50">
-          Vacation Optimizer · {new Date().getFullYear()}
-        </span>
-        <button
-          type="button"
-          onClick={() => setFeedbackDraft({
-            title: "Share feedback",
-            message: "",
-          })}
-          className="ml-auto text-[11px] text-text-muted/50 hover:text-text-muted transition-colors cursor-pointer underline-offset-2 hover:underline"
-        >
-          Share feedback
-        </button>
-      </footer>
+            <aside className="rounded-3xl border border-border bg-surface/55 p-6 space-y-5">
+              <div className="space-y-3">
+                <h2 className="text-xl font-semibold text-text">How to use the planner well</h2>
+                <div className="space-y-3 text-sm leading-6 text-text-muted">
+                  <p>Start with holiday clusters, decide whether you want one long break or several smaller ones, then add local context such as office closures or school schedules.</p>
+                  <p>Use the planner to compare real date combinations instead of guessing, then verify the best option against approvals, cost, team coverage, and travel constraints.</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 border-t border-border pt-5">
+                <h3 className="text-base font-semibold text-text">Need help or spotted something off?</h3>
+                <p className="text-sm leading-6 text-text-muted">
+                  Share feedback if you notice incorrect holiday data, confusing behavior, or a missing planning detail we should support.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackDraft({
+                    title: "Share feedback",
+                    message: "",
+                  })}
+                  className="inline-flex items-center justify-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover cursor-pointer"
+                >
+                  Share feedback
+                </button>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      {optimize.isError && (
+        <div className="max-w-md mx-auto text-center text-sm text-holiday-text bg-holiday/30 rounded-lg px-4 py-3">
+          {optimize.error.message}
+        </div>
+      )}
+
+      {result && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <ResultsSummary result={result} />
+          <Legend />
+          <CalendarView
+            calendar={result.calendar}
+            year={activeRequest?.year ?? currentYear}
+            country={activeRequest?.country}
+            onDayLongPress={handleDayLongPress}
+          />
+        </div>
+      )}
 
       {feedbackDraft && <FeedbackModal onClose={() => setFeedbackDraft(null)} draft={feedbackDraft} />}
       {confirmDay && (
@@ -135,6 +249,6 @@ function Main() {
           onCancel={() => setConfirmDay(null)}
         />
       )}
-    </div>
+    </>
   );
 }

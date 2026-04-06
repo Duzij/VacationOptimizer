@@ -6,7 +6,7 @@ export default defineConfig(({ command }) => {
   const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? "https://localhost:8080";
 
   return {
-    base: command === "serve" ? "/" : "/app",
+    base: "/",
     server: command === "serve" ? {
       host: "0.0.0.0",
       port: 3001,

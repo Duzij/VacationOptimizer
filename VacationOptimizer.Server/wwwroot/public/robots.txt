@@ -1,8 +1,12 @@
 User-agent: *
 Allow: /
 Allow: /app/
-Allow: /app/manifest.json
-Allow: /app/icons/
+Allow: /manifest.json
+Allow: /icons/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
 Allow: /sitemap.xml
 
 Sitemap: https://optimize-vacation-for.me/sitemap.xml
