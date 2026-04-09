@@ -42,6 +42,9 @@
 
   <!-- ═══ Monetisation ═══ -->
   <meta name="google-adsense-account" content="ca-pub-9485445500768000">
+  <script async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9485445500768000"
+    crossorigin="anonymous"></script>
 
   <!-- ═══ Icons & Manifest ═══ -->
   <link rel="manifest" href="/manifest.json" />
@@ -82,7 +85,20 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <main style="max-width:960px;margin:0 auto;padding:32px 16px 48px;font-family:Inter,system-ui,sans-serif;line-height:1.6;color:#222">
+      <h1 style="font-size:clamp(2rem,4vw,3.5rem);line-height:1.1;margin:0 0 16px">Vacation Optimizer</h1>
+      <p style="max-width:720px;font-size:1.05rem;margin:0 0 16px">
+        Vacation Optimizer is a PTO planning site that helps people compare vacation-day options around public holidays, weekends, and local calendar constraints.
+      </p>
+      <p style="max-width:720px;font-size:1.05rem;margin:0 0 16px">
+        The site includes a planner at <strong>/app</strong> plus public pages for contact, privacy, terms, and product information so visitors can understand how the tool works before using it.
+      </p>
+      <p style="max-width:720px;font-size:1.05rem;margin:0">
+        If JavaScript is disabled, you can still review the site purpose and navigate to the public information pages from the browser address bar.
+      </p>
+    </main>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
