@@ -78,7 +78,7 @@ export default function AppHeader({ isDark, onToggleTheme }: AppHeaderProps) {
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen((open) => !open)}
-            className="ml-auto inline-flex md:hidden items-center justify-center rounded-full border border-border bg-background p-2 text-text transition-colors hover:bg-surface-hover"
+            className="ml-auto inline-flex md:hidden items-center justify-center rounded-full bg-background p-2 text-text transition-colors hover:bg-surface-hover"
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-site-menu"
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}

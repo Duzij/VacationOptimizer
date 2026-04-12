@@ -75,6 +75,14 @@ export function clearAppLocalStorage() {
   window.localStorage.removeItem(themeStorageKey);
 }
 
+export function hasAppLocalStorageData() {
+  return [
+    savedRequestStorageKey,
+    savedResultStorageKey,
+    themeStorageKey,
+  ].some((key) => window.localStorage.getItem(key) !== null);
+}
+
 export function updateUrlFromRequest(request: OptimizeRequest | null) {
   const params = buildSearchParamsFromRequest(request);
 

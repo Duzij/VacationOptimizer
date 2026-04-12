@@ -189,7 +189,7 @@ function PlannerPage() {
               initialRequest={initialRequest}
             />
 
-            <aside className="rounded-3xl border border-border bg-surface/55 p-6 space-y-5">
+            <aside className="content-panel space-y-5">
               <div className="space-y-3">
                 <h2 className="text-xl font-semibold text-text">How to use the planner well</h2>
                 <div className="space-y-3 text-sm leading-6 text-text-muted">
