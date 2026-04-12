@@ -24,7 +24,7 @@ function PageSection({
   children: ReactNode;
 }) {
   return (
-    <section className="max-w-6xl mx-auto space-y-6">
+    <section className="max-w-6xl mx-auto py-4 lg:px-0 lg:py-0 space-y-6">
       <div className="space-y-3">
         <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-text sm:text-5xl">{title}</h1>
         <p className="max-w-3xl text-base leading-7 text-text-muted sm:text-lg">{description}</p>
