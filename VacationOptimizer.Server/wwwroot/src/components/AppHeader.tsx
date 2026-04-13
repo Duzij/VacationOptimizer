@@ -39,8 +39,14 @@ export default function AppHeader({ isDark, onToggleTheme }: AppHeaderProps) {
     }`;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-surface/50 backdrop-blur-sm">
-      <div className="w-full max-w-6xl mx-auto px-4 lg:px-0 py-3">
+    <header
+      className={`sticky top-0 z-60 bg-background ${
+        isMobileMenuOpen
+          ? "border-b-0 md:border-b md:border-border"
+          : "border-b border-border"
+      }`}
+    >
+      <div className={"w-full max-w-6xl mx-auto px-4 " + (isMobileMenuOpen ? "pt-4" : "py-4")}>
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2">
             <TreePalm className="w-5 h-5 text-primary" />
@@ -90,7 +96,7 @@ export default function AppHeader({ isDark, onToggleTheme }: AppHeaderProps) {
         {isMobileMenuOpen && (
           <div
             id="mobile-site-menu"
-            className="mx-[-1rem] mt-3 grid gap-2 border-y border-border bg-background/95 px-4 py-3 md:hidden"
+            className="mx-[-1rem] mt-3 grid gap-2 border-b border-border bg-background/95 px-4 pb-3 pt-3 md:hidden"
           >
             {navLinks.map((link) => (
               <NavLink

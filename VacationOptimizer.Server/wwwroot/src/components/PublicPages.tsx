@@ -25,7 +25,7 @@ function PageSection({
   children: ReactNode;
 }) {
   return (
-    <section className="max-w-6xl mx-auto py-4 lg:px-0 lg:py-0 space-y-6">
+    <section className="max-w-6xl mx-auto px-4 py-4 lg:py-0 space-y-6">
       <div className="space-y-3">
         <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-text sm:text-5xl">
           {title}
@@ -203,7 +203,7 @@ export function PublicFooter() {
 
   return (
     <footer className="border-t border-border py-4 px-4">
-      <div className="max-w-6xl mx-auto px-4 lg:px-0 flex flex-wrap items-center justify-between gap-3 text-[11px] text-text-muted/60">
+      <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-[11px] text-text-muted/60">
         <span>Vacation Optimizer · {new Date().getFullYear()}</span>
         <div className="ml-auto flex flex-wrap items-center gap-3">
           <Link to="/contact" className={footerLinkClass}>Contact</Link>
