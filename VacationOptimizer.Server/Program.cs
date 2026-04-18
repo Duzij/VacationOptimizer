@@ -110,8 +110,8 @@ google.com, pub-9485445500768000, DIRECT, f08c47fec0942fa0
 var sitemapXml = BuildSitemapXml(sitemapPages);
 
 // Run migrations automatically on startup if not testing
-if (!app.Environment.IsEnvironment("Testing"))
-{
+// if (!app.Environment.IsEnvironment("Testing"))
+// {
     const int maxAttempts = 10;
     var delay = TimeSpan.FromSeconds(3);
 
@@ -123,7 +123,7 @@ if (!app.Environment.IsEnvironment("Testing"))
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             if (db.Database.IsRelational())
             {
-                db.Database.Migrate();
+                db.Database.EnsureCreated();
             }
 
             break;
@@ -134,7 +134,7 @@ if (!app.Environment.IsEnvironment("Testing"))
             Thread.Sleep(delay);
         }
     }
-}
+// }
 
 app.UseCors();
 
