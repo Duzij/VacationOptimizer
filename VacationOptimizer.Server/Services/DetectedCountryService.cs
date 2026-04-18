@@ -3,7 +3,7 @@ using VacationOptimizer.Server.Services;
 public class DetectCountryResponse
 {
     public bool HasGeoHeaders { get; set; }
-    public string CountryCode { get; set; } = string.Empty;
+    public string? CountryCode { get; set; }
 }
 
 public interface IDetectCountryService
@@ -27,7 +27,7 @@ public class DetectedCountryService : IDetectCountryService
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext == null)
         {
-            return new DetectCountryResponse { HasGeoHeaders = false, CountryCode = string.Empty };
+            return new DetectCountryResponse { HasGeoHeaders = false, CountryCode = null };
         }
 
         var rawHeaderValues = new[]
@@ -50,7 +50,7 @@ public class DetectedCountryService : IDetectCountryService
         return new DetectCountryResponse 
         { 
             HasGeoHeaders = hasGeoHeaders,
-            CountryCode = detectedCountryCode ?? string.Empty
+            CountryCode = detectedCountryCode
         };
     }
 }

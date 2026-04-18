@@ -1,10 +1,11 @@
 namespace VacationOptimizer.Server.Models;
 
 public record OptimizeResult(
-    List<CalendarDay> Calendar,
+    CalendarData Calendar,
     List<DateOnly> SelectedVacationDays,
     List<VacationRange> Ranges,
     int TotalDaysOff,
     int VacationDaysUsed,
-    int PublicHolidaysCount
+    int PublicHolidaysCount,
+    string ResultHash
 );

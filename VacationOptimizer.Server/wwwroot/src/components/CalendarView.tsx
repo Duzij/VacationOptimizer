@@ -10,7 +10,7 @@ function parseDate(dateStr: string): Date {
 }
 
 interface Props {
-    calendar: CalendarDay[];
+    calendar?: CalendarDay[];
     year: number;
     country?: string;
     onDayLongPress?: (day: CalendarDay) => void;
@@ -24,11 +24,13 @@ export default function CalendarView({ calendar, year, country, locale, onDayLon
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
     const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
 
-    calendar.forEach((day) => {
-        const d = parseDate(day.date);
-        const currentMonth = months.find((m) => m.monthIndex === d.getUTCMonth());
-        currentMonth?.addDay(day);
-    });
+    if (calendar) {
+        calendar.forEach((day) => {
+            const d = parseDate(day.date);
+            const currentMonth = months.find((m) => m.monthIndex === d.getUTCMonth());
+            currentMonth?.addDay(day);
+        });
+    }
 
     const selectedDayDetails = useMemo(() => {
         if (!selectedDay) {
@@ -54,6 +56,7 @@ export default function CalendarView({ calendar, year, country, locale, onDayLon
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {months.map((month, _) => (
                     <MonthGridComponent
+                        key={month.monthIndex}
                         month={month}
                         year={year}
                         onDayLongPress={onDayLongPress}

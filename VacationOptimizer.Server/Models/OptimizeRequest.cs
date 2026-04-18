@@ -9,7 +9,9 @@ public record OptimizeRequest(
     Dictionary<Month, int>? MaxNumberOfVacationsPerMonth = null,
     List<CustomFreeDay>? CustomFreeDays = null,
     string? State = null,
-    List<DateOnly>? IgnoredHolidayDates = null
+    List<DateOnly>? IgnoredHolidayDates = null,
+    int? Seed = null,
+    List<string>? UsedResultHashes = null
 );
 
 public enum Month

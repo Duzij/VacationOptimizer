@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using VacationOptimizer.Server.Models;
 
 namespace VacationOptimizer.Server.Services;
@@ -13,12 +16,38 @@ public class VacationOptimizerService
 
     public OptimizeResult Optimize(OptimizeRequest request)
     {
-        var calendar = _calendarService.BuildCalendar(
+        var initialCalendar = _calendarService.BuildCalendar(
             request.Country,
             request.Year,
             request.State,
             request.CustomFreeDays,
             request.IgnoredHolidayDates);
+
+        var usedResultHashes = request.UsedResultHashes?.ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>();
+        var seedBase = request.Seed ?? 0;
+        const int maxAttempts = 16;
+
+        OptimizeResult? lastResult = null;
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            var calendar = CloneCalendar(initialCalendar);
+            var rng = new Random(seedBase + attempt);
+            var result = OptimizeCalendar(calendar, request, rng);
+
+            if (!usedResultHashes.Contains(result.ResultHash))
+            {
+                return result;
+            }
+
+            lastResult = result;
+        }
+
+        return lastResult ?? throw new InvalidOperationException("Unable to generate an optimization result.");
+    }
+
+    private static OptimizeResult OptimizeCalendar(CalendarData calendar, OptimizeRequest request, Random rng)
+    {
         int remainingBudget = request.VacationDays;
 
         if (remainingBudget <= 0)
@@ -26,34 +55,32 @@ public class VacationOptimizerService
             return BuildResult(calendar, request.MinimumDaysPerRange, request.MaximumDaysPerRange);
         }
 
-        // Iterative greedy: find best bridge, pick it, recalculate, repeat
         while (remainingBudget > 0)
         {
-            var candidates = FindBridgeCandidates(calendar);
+            var candidates = FindBridgeCandidates(calendar.Days)
+                .Where(c => c.WorkDaysCount <= remainingBudget)
+                .Where(c => c.TotalDaysOff >= request.MinimumDaysPerRange && c.TotalDaysOff <= request.MaximumDaysPerRange)
+                .OrderByDescending(c => c.Score)
+                .ThenBy(c => c.WorkDaysCount)
+                .Take(5)
+                .ToList();
 
             if (candidates.Count == 0)
                 break;
 
-            // Pick the best candidate that:
-            // 1. Fits the budget
-            // 2. Results in a range that meets min/max constraints
-            var best = candidates
-                .Where(c => c.WorkDaysCount <= remainingBudget)
-                .Where(c => c.TotalDaysOff >= request.MinimumDaysPerRange && c.TotalDaysOff <= request.MaximumDaysPerRange)
-                .OrderByDescending(c => c.Score)
-                .ThenBy(c => c.WorkDaysCount) // prefer fewer days if same score
-                .FirstOrDefault();
+            var selected = candidates[rng.Next(candidates.Count)];
 
-            if (best == null)
-                break;
-
-            // Mark the working days in this bridge as vacation
-            MarkSegmentAsVacation(calendar, best.StartIndex, best.EndIndex);
-
-            remainingBudget -= best.WorkDaysCount;
+            MarkSegmentAsVacation(calendar.Days, selected.StartIndex, selected.EndIndex);
+            remainingBudget -= selected.WorkDaysCount;
         }
 
         return BuildResult(calendar, request.MinimumDaysPerRange, request.MaximumDaysPerRange);
+    }
+
+    private static CalendarData CloneCalendar(CalendarData calendar)
+    {
+        var clonedDays = calendar.Days.Select(day => day with { }).ToList();
+        return new CalendarData(clonedDays, calendar.Hash);
     }
 
     /// <summary>
@@ -100,25 +127,43 @@ public class VacationOptimizerService
         return candidates;
     }
 
-    private static OptimizeResult BuildResult(List<CalendarDay> calendar, int minimumDaysPerRange = 1, int maximumDaysPerRange = 365)
+    private static OptimizeResult BuildResult(CalendarData calendar, int minimumDaysPerRange = 1, int maximumDaysPerRange = 365)
     {
-        var selectedVacationDays = calendar
+        var selectedVacationDays = calendar.Days
             .Where(d => d.Type == DayType.Vacation)
             .Select(d => d.Date)
             .ToList();
 
-        var ranges = BuildRanges(calendar, minimumDaysPerRange, maximumDaysPerRange);
+        var ranges = BuildRanges(calendar.Days, minimumDaysPerRange, maximumDaysPerRange);
         int totalDaysOff = ranges.Sum(r => r.TotalDaysOff);
-        int publicHolidaysCount = calendar.Count(d => d.Type == DayType.PublicHoliday);
+        int publicHolidaysCount = calendar.Days.Count(d => d.Type == DayType.PublicHoliday);
 
-        return new OptimizeResult(
+        var result = new OptimizeResult(
             Calendar: calendar,
             SelectedVacationDays: selectedVacationDays,
             Ranges: ranges,
             TotalDaysOff: totalDaysOff,
             VacationDaysUsed: selectedVacationDays.Count,
-            PublicHolidaysCount: publicHolidaysCount
+            PublicHolidaysCount: publicHolidaysCount,
+            ResultHash: string.Empty
         );
+
+        return result with { ResultHash = ComputeResultHash(result) };
+    }
+
+    private static string ComputeResultHash(OptimizeResult result)
+    {
+        var payload = new
+        {
+            calendarHash = result.Calendar.Hash,
+            selectedVacationDays = result.SelectedVacationDays
+                .OrderBy(date => date)
+                .Select(date => date.ToString("yyyy-MM-dd"))
+                .ToArray(),
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
     }
 
     /// <summary>

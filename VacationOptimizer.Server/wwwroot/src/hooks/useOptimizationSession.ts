@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { useOptimize } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/models";
 import { getInitialOptimizationState, persistOptimization, updateUrlFromRequest } from "../utils/optimizationPersistence";
@@ -30,6 +30,7 @@ export function useOptimizationSession() {
   const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>(
     initialStateRef.current.initialRequest?.customFreeDays ?? [],
   );
+  const usedResultHashesRef = useRef<string[]>([]);
 
   const executeOptimization = useEffectEvent(async (
     req: OptimizeRequest,
@@ -47,6 +48,7 @@ export function useOptimizationSession() {
 
     const requestWithIgnoredDates = withIgnoredHolidayDates(normalizedRequest, effectiveIgnoredHolidayDates);
 
+    usedResultHashesRef.current = [];
     setActiveRequest(requestWithIgnoredDates);
     updateUrlFromRequest(requestWithIgnoredDates);
 
@@ -58,6 +60,10 @@ export function useOptimizationSession() {
       const data = await optimize.mutateAsync(requestWithIgnoredDates);
       setResult(data);
       persistOptimization(requestWithIgnoredDates, data);
+
+      if (data.resultHash) {
+        usedResultHashesRef.current = [...usedResultHashesRef.current, data.resultHash];
+      }
 
       return { data, request: requestWithIgnoredDates };
     } finally {
@@ -87,6 +93,33 @@ export function useOptimizationSession() {
     });
   }, [restoreOptimization]);
 
+  const shuffleOptimization = useCallback(async () => {
+    if (!activeRequest) {
+      return;
+    }
+
+    setIsUserOptimizing(true);
+    try {
+      const shuffleRequest: OptimizeRequest = {
+        ...activeRequest,
+        seed: Math.floor(Math.random() * 1_000_000),
+        usedResultHashes: usedResultHashesRef.current.length > 0
+          ? usedResultHashesRef.current
+          : undefined,
+      };
+
+      const data = await optimize.mutateAsync(shuffleRequest);
+      setResult(data);
+      persistOptimization(activeRequest, data);
+
+      if (data.resultHash) {
+        usedResultHashesRef.current = [...usedResultHashesRef.current, data.resultHash];
+      }
+    } finally {
+      setIsUserOptimizing(false);
+    }
+  }, [activeRequest, optimize]);
+
   return {
     initialRequest: initialStateRef.current.initialRequest,
     result,
@@ -99,5 +132,6 @@ export function useOptimizationSession() {
     optimize,
     restoreOptimization,
     runOptimization,
+    shuffleOptimization,
   };
 }

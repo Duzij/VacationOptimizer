@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using VacationOptimizer.Server.Models;
 
 namespace VacationOptimizer.Server.Services;
@@ -11,7 +14,7 @@ public class CalendarService
         _holidayService = holidayService;
     }
 
-    public List<CalendarDay> BuildCalendar(
+    public CalendarData BuildCalendar(
         string country,
         int year,
         string? stateCode = null,
@@ -70,6 +73,9 @@ public class CalendarService
             });
         }
 
-        return days;
+        var json = JsonSerializer.Serialize(days);
+        var hash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
+
+        return new CalendarData(days, hash);
     }
 }

@@ -60,12 +60,16 @@ export interface CustomFreeDay {
 }
 
 export interface OptimizationResultBase {
-    calendar: CalendarDay[];
+    calendar: {
+        days: CalendarDay[];
+        hash: string;
+    };
     selectedVacationDays: string[];
     ranges: VacationRange[];
     totalDaysOff: number;
     vacationDaysUsed: number;
     publicHolidaysCount: number;
+    resultHash: string;
 }
 
 export interface IndiaOptimizeScope {
@@ -107,6 +111,8 @@ export interface SharedOptimizeRequestFields {
     maximumDaysPerRange?: number;
     customFreeDays?: CustomFreeDay[];
     ignoredHolidayDates?: string[];
+    seed?: number;
+    usedResultHashes?: string[];
 }
 
 export interface LegacyOptimizeRequest extends SharedOptimizeRequestFields {

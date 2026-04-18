@@ -42,7 +42,9 @@ public record IndiaOptimizeRequest(
     int MinimumDaysPerRange = OptimizationDefaults.MinimumDaysPerRange,
     int MaximumDaysPerRange = OptimizationDefaults.MaximumDaysPerRange,
     List<CustomFreeDay>? CustomFreeDays = null,
-    List<DateOnly>? IgnoredHolidayDates = null
+    List<DateOnly>? IgnoredHolidayDates = null,
+    int? Seed = null,
+    List<string>? UsedResultHashes = null
 );
 
 public record IndiaOptimizationScope(
@@ -54,12 +56,13 @@ public record IndiaOptimizationScope(
 public record IndiaOptimizeResult(
     string CountryCode,
     IndiaOptimizationScope Scope,
-    List<CalendarDay> Calendar,
+    CalendarData Calendar,
     List<DateOnly> SelectedVacationDays,
     List<VacationRange> Ranges,
     int TotalDaysOff,
     int VacationDaysUsed,
-    int PublicHolidaysCount
+    int PublicHolidaysCount,
+    string ResultHash
 );
 
 public record SpainCityOption(
@@ -85,7 +88,9 @@ public record SpainOptimizeRequest(
     int MinimumDaysPerRange = OptimizationDefaults.MinimumDaysPerRange,
     int MaximumDaysPerRange = OptimizationDefaults.MaximumDaysPerRange,
     List<CustomFreeDay>? CustomFreeDays = null,
-    List<DateOnly>? IgnoredHolidayDates = null
+    List<DateOnly>? IgnoredHolidayDates = null,
+    int? Seed = null,
+    List<string>? UsedResultHashes = null
 );
 
 public record SpainOptimizationScope(
@@ -99,10 +104,11 @@ public record SpainOptimizationScope(
 public record SpainOptimizeResult(
     string CountryCode,
     SpainOptimizationScope Scope,
-    List<CalendarDay> Calendar,
+    CalendarData Calendar,
     List<DateOnly> SelectedVacationDays,
     List<VacationRange> Ranges,
     int TotalDaysOff,
     int VacationDaysUsed,
-    int PublicHolidaysCount
+    int PublicHolidaysCount,
+    string ResultHash
 );

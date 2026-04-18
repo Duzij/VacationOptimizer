@@ -148,7 +148,7 @@ export function useCalendarInteractions({
       return;
     }
 
-    const holidayDay = result?.calendar.find((day) => day.date === confirmDay.date);
+    const holidayDay = result?.calendar.days.find((day) => day.date === confirmDay.date);
     if (!holidayDay) {
       setConfirmDay(null);
       return;

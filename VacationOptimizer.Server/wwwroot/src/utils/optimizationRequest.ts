@@ -67,6 +67,8 @@ function normalizeBaseFields(request: OptimizeRequest) {
     maximumDaysPerRange: clamp(request.maximumDaysPerRange ?? defaultMaximumDaysPerRange, 1, 31),
     customFreeDays: normalizeCustomFreeDays(request.customFreeDays),
     ignoredHolidayDates: normalizeIgnoredHolidayDates(request.ignoredHolidayDates),
+    seed: request.seed,
+    usedResultHashes: request.usedResultHashes,
   };
 }
 

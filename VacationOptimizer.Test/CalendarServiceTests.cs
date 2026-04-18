@@ -32,7 +32,7 @@ public class CalendarServiceTests
     {
         var calendar = _calendarService.BuildCalendar(DefaultCountry, DefaultYear);
         int expectedDays = DateTime.IsLeapYear(DefaultYear) ? 366 : 365;
-        Assert.Equal(expectedDays, calendar.Count);
+        Assert.Equal(expectedDays, calendar.Days.Count);
     }
 
     [Fact]
@@ -41,19 +41,19 @@ public class CalendarServiceTests
         var calendar = _calendarService.BuildCalendar(DefaultCountry, DefaultYear);
 
         // Find the first Saturday of the year
-        var firstSaturday = calendar.First(d => d.Date.DayOfWeek == DayOfWeek.Saturday).Date;
-        AssertDayType(calendar, firstSaturday, DayType.Weekend);
+        var firstSaturday = calendar.Days.First(d => d.Date.DayOfWeek == DayOfWeek.Saturday).Date;
+        AssertDayType(calendar.Days, firstSaturday, DayType.Weekend);
 
         // Find the first Sunday of the year
-        var firstSunday = calendar.First(d => d.Date.DayOfWeek == DayOfWeek.Sunday).Date;
-        AssertDayType(calendar, firstSunday, DayType.Weekend);
+        var firstSunday = calendar.Days.First(d => d.Date.DayOfWeek == DayOfWeek.Sunday).Date;
+        AssertDayType(calendar.Days, firstSunday, DayType.Weekend);
     }
 
     [Fact]
     public void BuildCalendar_OnlyOneTodayDayIsMarked()
     {
         var calendar = _calendarService.BuildCalendar(DefaultCountry, DateTime.Now.Year);
-        var todayCount = calendar.Count(d => d.Type == DayType.Today);
+        var todayCount = calendar.Days.Count(d => d.Type == DayType.Today);
         Assert.Equal(1, todayCount);
     }
 
@@ -62,7 +62,7 @@ public class CalendarServiceTests
     {
         var calendar = _calendarService.BuildCalendar(DefaultCountry, DefaultYear);
 
-        var newYear = GetDayFromCalendar(calendar, new DateOnly(DefaultYear, 1, 1));
+        var newYear = GetDayFromCalendar(calendar.Days, new DateOnly(DefaultYear, 1, 1));
         Assert.Equal(DayType.PublicHoliday, newYear.Type);
         Assert.NotNull(newYear.HolidayName);
     }
@@ -77,7 +77,7 @@ public class CalendarServiceTests
             DefaultYear,
             ignoredHolidayDates: new List<DateOnly> { ignoredDate });
 
-        var newYear = GetDayFromCalendar(calendar, ignoredDate);
+        var newYear = GetDayFromCalendar(calendar.Days, ignoredDate);
         Assert.NotEqual(DayType.PublicHoliday, newYear.Type);
         Assert.Null(newYear.HolidayName);
     }

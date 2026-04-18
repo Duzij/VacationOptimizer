@@ -245,7 +245,9 @@ api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHoli
             MaximumDaysPerRange: request.MaximumDaysPerRange,
             CustomFreeDays: request.CustomFreeDays,
             State: state.Code,
-            IgnoredHolidayDates: request.IgnoredHolidayDates);
+            IgnoredHolidayDates: request.IgnoredHolidayDates,
+            Seed: request.Seed,
+            UsedResultHashes: request.UsedResultHashes);
 
         var result = optimizer.Optimize(internalRequest);
 
@@ -260,7 +262,8 @@ api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHoli
             Ranges: result.Ranges,
             TotalDaysOff: result.TotalDaysOff,
             VacationDaysUsed: result.VacationDaysUsed,
-            PublicHolidaysCount: result.PublicHolidaysCount));
+            PublicHolidaysCount: result.PublicHolidaysCount,
+            ResultHash: result.ResultHash));
     }
     catch (ArgumentException ex)
     {
@@ -331,7 +334,9 @@ api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHoli
             MaximumDaysPerRange: request.MaximumDaysPerRange,
             CustomFreeDays: request.CustomFreeDays,
             State: effectiveStateCode,
-            IgnoredHolidayDates: request.IgnoredHolidayDates);
+            IgnoredHolidayDates: request.IgnoredHolidayDates,
+            Seed: request.Seed,
+            UsedResultHashes: request.UsedResultHashes);
 
         var result = optimizer.Optimize(internalRequest);
         stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);
@@ -350,7 +355,8 @@ api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHoli
             Ranges: result.Ranges,
             TotalDaysOff: result.TotalDaysOff,
             VacationDaysUsed: result.VacationDaysUsed,
-            PublicHolidaysCount: result.PublicHolidaysCount));
+            PublicHolidaysCount: result.PublicHolidaysCount,
+            ResultHash: result.ResultHash));
     }
     catch (ArgumentException ex)
     {

@@ -29,12 +29,13 @@ describe("useOptimizationSession", () => {
 
   it("sends an optimize request when a bookmark restores a valid request", async () => {
     mutateAsync.mockResolvedValue({
-      calendar: [],
+      calendar: {days: [], hash: ""},
       selectedVacationDays: [],
       ranges: [],
       totalDaysOff: 0,
       vacationDaysUsed: 0,
       publicHolidaysCount: 0,
+      resultHash: "",
     });
     window.history.replaceState({}, "", "/app?country=DE");
 
@@ -54,12 +55,13 @@ describe("useOptimizationSession", () => {
 
   it("treats empty numeric params as defaults before sending the restore request", async () => {
     mutateAsync.mockResolvedValue({
-      calendar: [],
+      calendar: {days: [], hash: ""},
       selectedVacationDays: [],
       ranges: [],
       totalDaysOff: 0,
       vacationDaysUsed: 0,
       publicHolidaysCount: 0,
+      resultHash: "",
     });
     window.history.replaceState({}, "", "/app?country=DE&vacationDays=&minDays=&maxDays=");
 
