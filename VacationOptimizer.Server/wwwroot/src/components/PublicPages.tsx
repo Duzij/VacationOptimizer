@@ -204,13 +204,16 @@ export function PublicFooter() {
 
   return (
     <footer className="border-t border-border py-4 px-4">
-      <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-[11px] text-text-muted/60">
-        <span>Vacation Optimizer · {new Date().getFullYear()}</span>
-        <div className="ml-auto flex flex-wrap items-center gap-3">
-          <Link to="/contact" className={footerLinkClass}>Contact</Link>
-          <Link to="/privacy" className={footerLinkClass}>Privacy</Link>
-          <Link to="/terms" className={footerLinkClass}>Terms</Link>
-          <Link to="/about" className={footerLinkClass}>About</Link>
+      <div className="max-w-6xl mx-auto">
+        {/* Mobile layout: centered, links horizontal */}
+        <div className="flex flex-col items-center gap-3 text-[11px] text-text-muted/60">
+          <span>Vacation Optimizer · {new Date().getFullYear()}</span>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Link to="/contact" className={footerLinkClass}>Contact</Link>
+            <Link to="/privacy" className={footerLinkClass}>Privacy</Link>
+            <Link to="/terms" className={footerLinkClass}>Terms</Link>
+            <Link to="/about" className={footerLinkClass}>About</Link>
+          </div>
         </div>
       </div>
     </footer>

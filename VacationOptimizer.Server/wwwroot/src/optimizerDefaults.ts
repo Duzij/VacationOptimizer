@@ -16,13 +16,3 @@ export function getDefaultOptimizerRequest(year: number): OptimizeRequest {
     maximumDaysPerRange: defaultMaximumDaysPerRange,
   };
 }
-
-export function hasNonDefaultAdvancedSettings(request: Partial<OptimizeRequest> | null | undefined) {
-  if (!request) {
-    return false;
-  }
-
-  return (request.minimumDaysPerRange ?? defaultMinimumDaysPerRange) !== defaultMinimumDaysPerRange
-    || (request.maximumDaysPerRange ?? defaultMaximumDaysPerRange) !== defaultMaximumDaysPerRange
-    || (request.customFreeDays?.length ?? 0) > 0;
-}

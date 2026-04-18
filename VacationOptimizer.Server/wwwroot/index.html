@@ -2,8 +2,10 @@
 <html lang="en">
 
 <head>
+  <!-- ═══ Critical Meta Tags ═══ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
   <!-- ═══ Primary SEO ═══ -->
   <title>Vacation Optimizer | Plan PTO Around Public Holidays</title>
@@ -40,23 +42,22 @@
   <meta name="apple-mobile-web-app-title" content="Vacation Optimizer" />
   <meta name="application-name" content="Vacation Optimizer" />
 
-  <!-- ═══ Monetisation ═══ -->
-  <meta name="google-adsense-account" content="ca-pub-9485445500768000">
-  <script async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9485445500768000"
-    crossorigin="anonymous"></script>
+  <!-- ═══ Resource Hints for External Resources (reduce DNS lookup time) ═══ -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- ═══ Icons & Manifest ═══ -->
+  <!-- ═══ Icons & Manifest (non-blocking) ═══ -->
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-  <!-- ═══ Fonts ═══ -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- ═══ Fonts with display=swap for faster text rendering ═══ -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- ═══ Structured Data (JSON-LD) ═══ -->
+  <!-- ═══ Structured Data (JSON-LD, non-blocking) ═══ -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -82,6 +83,14 @@
     "keywords": "PTO optimization, public holiday calendar, maximizing vacation days, vacation planner, time off planner"
   }
   </script>
+
+  <!-- ═══ Google AdSense (async, loads in background) ═══ -->
+  <meta name="google-adsense-account" content="ca-pub-9485445500768000">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9485445500768000"
+    crossorigin="anonymous"></script>
+
+  <!-- ═══ App Bootstrap (deferred for fast first paint) ═══ -->
+  <script type="module" src="/src/main.tsx" defer></script>
 </head>
 
 <body>

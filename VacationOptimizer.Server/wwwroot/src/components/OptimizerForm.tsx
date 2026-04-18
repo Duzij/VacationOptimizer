@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCountries, useIndiaSchema, useSpainSchema, useStates } from "../api/vacationApi";
 import { isIndiaOptimizeRequest, isSpainOptimizeRequest, type CustomFreeDay, type DetectedCountry, type OptimizeRequest, type SpainCityOption, type StateOption } from "../types/models";
-import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear, hasNonDefaultAdvancedSettings } from "../optimizerDefaults";
+import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear } from "../optimizerDefaults";
 import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
 import Button from "./Button";
 import CustomFreeDaysManager from "./CustomFreeDaysManager";
@@ -221,7 +221,7 @@ function LegacyCountryOptimizerForm({
             ? (initialRequest.state ?? "")
             : ""
     );
-    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const { data: states, isLoading: statesLoading } = useStates(country);
 
     useEffect(() => {
@@ -294,7 +294,7 @@ function IndiaCountryOptimizerForm({
             ? initialRequest.stateCode
             : ""
     );
-    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const { data: schema, isLoading: schemaLoading } = useIndiaSchema(true);
 
     useEffect(() => {
@@ -374,7 +374,7 @@ function SpainCountryOptimizerForm({
             ? (initialRequest.cityCode ?? "")
             : ""
     );
-    const [showAdvanced, setShowAdvanced] = useState(hasNonDefaultAdvancedSettings(initialRequest));
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const { data: schema, isLoading: schemaLoading } = useSpainSchema(true);
 
     useEffect(() => {

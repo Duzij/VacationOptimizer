@@ -1,8 +1,10 @@
+import { useEffect, useRef } from "react";
 import type { OptimizeResult, VacationRange } from "../types/models";
 import { Calendar, Palmtree, PointerIcon, Sun } from "lucide-react";
 
 interface Props {
     result: OptimizeResult;
+    shouldScroll?: boolean;
 }
 
 function formatDate(dateStr: string): string {
@@ -19,7 +21,21 @@ function formatRange(range: VacationRange): string {
     return `${formatDate(range.start)} – ${formatDate(range.end)}`;
 }
 
-export default function ResultsSummary({ result }: Props) {
+export default function ResultsSummary({ result, shouldScroll = false }: Props) {
+    const timeOffRangesRef = useRef<HTMLHeadingElement>(null);
+
+    useEffect(() => {
+        if (result.ranges.length > 0 && timeOffRangesRef.current && shouldScroll) {
+            // Small delay to ensure DOM is fully rendered
+            setTimeout(() => {
+                timeOffRangesRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+            }, 100);
+        }
+    }, [result, shouldScroll]);
+
     return (
         <div className="w-full max-w-6xl mx-auto space-y-5">
             {/* Stats row */}
@@ -50,7 +66,10 @@ export default function ResultsSummary({ result }: Props) {
             {/* Vacation ranges */}
             {result.ranges.length > 0 && (
                 <div className="space-y-2">
-                    <h3 className="text-sm font-semibold text-text-muted">
+                    <h3
+                        ref={timeOffRangesRef}
+                        className="text-sm font-semibold text-text-muted"
+                    >
                         Time-off ranges
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -92,12 +111,18 @@ function StatCard({
     inverted?: boolean;
 }) {
     return (
-        <div className={`rounded-lg border border-border bg-surface/50 px-3 py-3 text-center ${inverted ? "inverted" : ""}`}>
+        <div
+            className={`rounded-lg border border-border bg-surface/50 px-3 py-3 text-center ${
+                inverted ? "inverted" : ""
+            }`}
+        >
             <div className="flex items-center justify-center gap-1.5 mb-1">
                 {icon}
-                {value && <span className="text-xl font-bold text-text tabular-nums">
-                    {value}
-                </span>}
+                {value && (
+                    <span className="text-xl font-bold text-text tabular-nums">
+                        {value}
+                    </span>
+                )}
             </div>
             <span className="text-[11px] text-text-muted">{label}</span>
         </div>

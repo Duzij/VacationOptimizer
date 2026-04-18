@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
@@ -22,13 +23,25 @@ import { useTheme } from "./hooks/useTheme";
 import { useOptimizationSession } from "./hooks/useOptimizationSession";
 import { useCalendarInteractions } from "./hooks/useCalendarInteractions";
 import { useDetectedCountry } from "./api/vacationApi";
+import type { OptimizeRequest } from "./types/models";
 
 const queryClient = new QueryClient();
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ScrollToTop />
         <Main />
       </BrowserRouter>
     </QueryClientProvider>
@@ -135,6 +148,7 @@ function PlannerPage() {
 
   const currentYear = getDefaultYear();
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
+  const [shouldScrollResults, setShouldScrollResults] = useState(false);
 
   const {
     initialRequest,
@@ -166,6 +180,11 @@ function PlannerPage() {
     runOptimization,
   });
 
+  const handleRunOptimization = useCallback((req: OptimizeRequest) => {
+    setShouldScrollResults(true);
+    runOptimization(req);
+  }, [runOptimization]);
+
   return (
     <>
       <RouteMeta
@@ -186,7 +205,7 @@ function PlannerPage() {
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)] xl:items-start">
             <OptimizerForm
-              onResult={runOptimization}
+              onResult={handleRunOptimization}
               isLoading={isUserOptimizing || detectedCountryLoading}
               detectedCountry={detectedCountry}
               customFreeDays={customFreeDays}
@@ -232,7 +251,7 @@ function PlannerPage() {
 
       {result && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <ResultsSummary result={result} />
+          <ResultsSummary result={result} shouldScroll={shouldScrollResults} />
           <Legend />
           <CalendarView
             calendar={result.calendar}
