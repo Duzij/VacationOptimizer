@@ -54,6 +54,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 // Register services
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<PublicHolidayService>();
 builder.Services.AddScoped<IPublicHolidayService>(serviceProvider =>
     new CachedPublicHolidayService(
@@ -61,6 +62,7 @@ builder.Services.AddScoped<IPublicHolidayService>(serviceProvider =>
         serviceProvider.GetRequiredService<IMemoryCache>()));
 builder.Services.AddScoped<CalendarService>();
 builder.Services.AddScoped<VacationOptimizerService>();
+builder.Services.AddScoped<IDetectCountryService, DetectedCountryService>();
 
 builder.Services.AddEndpointsApiExplorer().AddControllers().AddJsonOptions(o =>
 {
@@ -356,32 +358,9 @@ api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHoli
     }
 });
 
-api.MapGet("/detected-country", (HttpContext httpContext, IPublicHolidayService holidayService) =>
+api.MapGet("/detected-country", (IDetectCountryService detectCountryService) =>
 {
-    var rawHeaderValues = new[]
-    {
-        httpContext.Request.Headers["X-Country-Code"].FirstOrDefault(),
-        httpContext.Request.Headers["CF-IPCountry"].FirstOrDefault(),
-        httpContext.Request.Headers["x-vercel-ip-country"].FirstOrDefault(),
-        httpContext.Request.Headers["Fastly-Client-Country"].FirstOrDefault(),
-    }
-    .Where(value => !string.IsNullOrWhiteSpace(value))
-    .Select(value => value!.Trim().ToUpperInvariant())
-    .ToArray();
-
-    var hasGeoHeaders = rawHeaderValues.Length > 0;
-    var supportedCountryCodes = holidayService
-        .GetCountries()
-        .Select(country => country.Code)
-        .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-    var detectedCountryCode = rawHeaderValues.FirstOrDefault(supportedCountryCodes.Contains);
-
-    return Results.Ok(new
-    {
-        hasGeoHeaders,
-        countryCode = detectedCountryCode,
-    });
+    return detectCountryService.DetectCountry();
 });
 
 app.MapGet("/robots.txt", () => Results.Text(robotsTxt, "text/plain"));

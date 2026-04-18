@@ -14,3 +14,10 @@
     <p>The planner is designed to work with a small amount of browser-stored state so returning visitors can continue where they left off. The site should not be used to submit sensitive personal or employment information that is unnecessary for vacation planning.</p>
   </div>
 </article>
+<article class="content-panel">
+  <h2 class="text-xl font-semibold text-text">Country Detection Headers</h2>
+  <div class="space-y-3 text-sm leading-6 text-text-muted">
+    <p>To provide a better user experience, the system analyzes HTTP headers from your request to detect your country location. This analysis uses headers such as <code>CF-IPCountry</code>, <code>X-Country-Code</code>, <code>x-vercel-ip-country</code>, and <code>Fastly-Client-Country</code> that may be provided by CDN and infrastructure providers.</p>
+    <p>The detected country code is used only to suggest relevant vacation planning options and is not stored in any database, tied to your session, or used for tracking purposes. The detection happens in real-time on each request and no country information is persisted beyond the immediate response.</p>
+  </div>
+</article>
