@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { OptimizeResult, VacationRange } from "../types/models";
-import { Calendar, Palmtree, PointerIcon, Sun } from "lucide-react";
+import { Calendar, ChevronDown, ChevronRight, Palmtree, PointerIcon, Sun } from "lucide-react";
 
 interface Props {
     result: OptimizeResult;
@@ -21,8 +21,27 @@ function formatRange(range: VacationRange): string {
     return `${formatDate(range.start)} – ${formatDate(range.end)}`;
 }
 
+function getMonthIndexFromDate(dateStr: string): number {
+    const [, month] = dateStr.split("-").map(Number);
+    return month - 1; // 0-indexed
+}
+
+function scrollToMonth(dateStr: string) {
+    const monthIndex = getMonthIndexFromDate(dateStr);
+    const el = document.getElementById(`calendar-month-${monthIndex}`);
+    if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+}
+
 export default function ResultsSummary({ result, shouldScroll = false }: Props) {
-    const timeOffRangesRef = useRef<HTMLHeadingElement>(null);
+    const timeOffRangesRef = useRef<HTMLButtonElement>(null);
+    const [isRangesOpen, setIsRangesOpen] = useState(() => {
+        if (typeof window !== "undefined") {
+            return window.innerWidth < 640; // open by default on mobile (<640px)
+        }
+        return true;
+    });
 
     useEffect(() => {
         if (result.ranges.length > 0 && timeOffRangesRef.current && shouldScroll) {
@@ -66,33 +85,46 @@ export default function ResultsSummary({ result, shouldScroll = false }: Props) 
             {/* Vacation ranges */}
             {result.ranges.length > 0 && (
                 <div className="space-y-2">
-                    <h3
+                    <button
                         ref={timeOffRangesRef}
-                        className="text-sm font-semibold text-text-muted"
+                        type="button"
+                        onClick={() => setIsRangesOpen((o) => !o)}
+                        className="flex items-center gap-1.5 text-sm font-semibold text-text-muted hover:text-text transition-colors cursor-pointer appearance-none bg-transparent pt-1"
                     >
+                        {isRangesOpen ? (
+                            <ChevronDown className="w-4 h-4" />
+                        ) : (
+                            <ChevronRight className="w-4 h-4" />
+                        )}
                         Time-off ranges
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {result.ranges.map((range, i) => (
-                            <div
-                                key={i}
-                                className="flex items-center justify-between rounded-lg border border-border
-                           bg-surface/50 px-3 py-2.5 text-sm"
-                            >
-                                <span className="text-text font-medium">
-                                    {formatRange(range)}
-                                </span>
-                                <div className="flex items-center gap-2 text-vacation-text text-xs">
-                                    <span>{range.totalDaysOff}d off</span>
-                                    {range.vacationDaysUsed > 0 && (
-                                        <span className="text-text-muted">
-                                            {range.vacationDaysUsed} vac
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    </button>
+                    {isRangesOpen && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                            {result.ranges.map((range, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => scrollToMonth(range.start)}
+                                    className="flex items-center justify-between rounded-lg border border-border
+                               bg-surface/50 px-3 py-2.5 text-sm cursor-pointer
+                               transition-colors hover:bg-surface-hover group text-left"
+                                >
+                                    <span className="text-text font-medium">
+                                        {formatRange(range)}
+                                    </span>
+                                    <div className="flex items-center gap-2 text-vacation-text text-xs">
+                                        <span>{range.totalDaysOff}d off</span>
+                                        {range.vacationDaysUsed > 0 && (
+                                            <span className="text-text-muted">
+                                                {range.vacationDaysUsed} vac
+                                            </span>
+                                        )}
+                                        <ChevronRight className="w-3.5 h-3.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

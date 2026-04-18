@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DayType } from "../types/models";
 import type { CalendarDay, MonthModel } from "../types/models";
 import { useLongPress } from "../hooks/useLongPress";
@@ -9,6 +9,7 @@ const US_DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 interface GridProps {
     month: MonthModel;
     year: number;
+    id?: string;
     onDayLongPress?: (day: CalendarDay) => void;
     onDaySelect?: (day: CalendarDay) => void;
 }
@@ -45,6 +46,22 @@ function DayCell({
     // const isLongPressEnabled = day.type !== "PassedDay";
     const isLongPressEnabled = true;
 
+    const [isFlashing, setIsFlashing] = useState(false);
+    const prevTypeRef = useRef(day.type);
+
+    useEffect(() => {
+        if (prevTypeRef.current !== day.type) {
+            setIsFlashing(true);
+            prevTypeRef.current = day.type;
+
+            const timer = setTimeout(() => {
+                setIsFlashing(false);
+            }, 600); // match CSS animation duration
+
+            return () => clearTimeout(timer);
+        }
+    }, [day.type]);
+
     const handleLongPress = useCallback(() => {
         if (!isLongPressEnabled) {
             return;
@@ -57,7 +74,7 @@ function DayCell({
 
     return (
         <div
-            className={`aspect-square flex items-center justify-center rounded-md text-[11px] leading-none transition-colors select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""}`}
+            className={`aspect-square flex items-center justify-center rounded-md text-[11px] leading-none select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""} ${isFlashing ? "animate-cell-flash z-10" : "transition-colors"}`}
             title={
                 day.holidayName ? day.holidayName
                     : day.type === "Vacation" ? "Vacation day"
@@ -71,13 +88,13 @@ function DayCell({
     );
 }
 
-export function MonthGrid({ month, year, onDayLongPress, onDaySelect }: GridProps) {
+export function MonthGrid({ month, year, id, onDayLongPress, onDaySelect }: GridProps) {
     const firstDay = new Date(Date.UTC(year, month.monthIndex, 1));
     const startOffset = (firstDay.getUTCDay() + 6) % 7;
     const sortedDays = [...month.days].sort((a, b) => a.date.localeCompare(b.date));
 
     return (
-        <div className="rounded-xl border border-border bg-surface/50 p-3">
+        <div id={id} className="rounded-xl border border-border bg-surface/50 p-3 scroll-mt-24">
             <h3 className="text-sm font-semibold text-text mb-2 text-center">
                 {month.monthName} {year}
             </h3>
@@ -103,13 +120,13 @@ export function MonthGrid({ month, year, onDayLongPress, onDaySelect }: GridProp
     );
 }
 
-export function USMonthGrid({ month, year, onDayLongPress, onDaySelect }: GridProps) {
+export function USMonthGrid({ month, year, id, onDayLongPress, onDaySelect }: GridProps) {
     const firstDay = new Date(Date.UTC(year, month.monthIndex, 1));
     const startOffset = firstDay.getUTCDay();
     const sortedDays = [...month.days].sort((a, b) => a.date.localeCompare(b.date));
 
     return (
-        <div className="rounded-xl border border-border bg-surface/50 p-3">
+        <div id={id} className="rounded-xl border border-border bg-surface/50 p-3 scroll-mt-24">
             <h3 className="text-sm font-semibold text-text mb-2 text-center">
                 {month.monthName} {year}
             </h3>

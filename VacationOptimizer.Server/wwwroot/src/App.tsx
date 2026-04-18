@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { Shuffle } from "lucide-react";
+import ShuffleLip from "./components/ShuffleLip";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
@@ -254,15 +255,14 @@ function PlannerPage() {
       {result && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <ResultsSummary result={result} shouldScroll={shouldScrollResults} />
-
-          <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
+          <div className="w-full max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <Legend />
             <button
-              id="shuffle-optimization"
+              id="shuffle-optimization-desktop"
               type="button"
               disabled={isUserOptimizing}
               onClick={() => void shuffleOptimization()}
-              className="action-btn action-btn-secondary"
+              className="action-btn action-btn-secondary hidden sm:inline-flex"
               title="Shuffle — generate a different optimization with the same settings"
             >
               <Shuffle className="w-4 h-4" />
@@ -278,6 +278,13 @@ function PlannerPage() {
             locale={detectedCountry?.countryCode}
           />
         </div>
+      )}
+
+      {result && (
+        <ShuffleLip
+          isLoading={isUserOptimizing}
+          onShuffle={() => void shuffleOptimization()}
+        />
       )}
 
       {feedbackDraft && <FeedbackModal onClose={() => setFeedbackDraft(null)} draft={feedbackDraft} />}
