@@ -144,12 +144,13 @@ export function PrivacyPage() {
               >
                 Remove all local storage data used by this app
               </button>
-              {clearStatus === "cleared" && (
-                <span className="text-sm text-text-muted">
-                  Local planner data has been removed from this browser.
-                </span>
-              )}
+             
             </p>
+            {clearStatus === "cleared" && (
+              <p className="text-right font-medium">
+                Local storage data cleared. The planner will restore to default.
+              </p>
+            )}
           </div>
         </article>
 

@@ -40,7 +40,7 @@
   --color-surface-hover: #ededed;
   --color-border: #e0e0e0;
   --color-text: #222222;
-  --color-text-muted: rgba(0, 0, 0, 0.8);
+  --color-text-muted: #000000cc;
   --color-primary: #222222;
   --color-primary-hover: #444444;
   --color-accent: #444444;
@@ -72,7 +72,7 @@
   --color-surface-hover: #444444;
   --color-border: #444444;
   --color-text: #f9fafb;
-  --color-text-muted: rgba(255, 255, 255, 0.8);
+  --color-text-muted: #ffffffcc;
   --color-primary: #f9fafb;
   --color-primary-hover: #888888;
   --color-accent: #888888;
@@ -119,6 +119,10 @@
 .inverted {
   background-color: var(--color-primary);
   color: var(--color-background);
+
+  .text-text-muted {
+    color: var(--color-background);
+  }
 }
 
 .action-btn {

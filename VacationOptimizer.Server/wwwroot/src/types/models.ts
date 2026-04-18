@@ -25,6 +25,22 @@ export const DayType = {
 
 export type DayType = (typeof DayType)[keyof typeof DayType];
 
+export class MonthModel {
+    monthIndex: number;
+    monthName: string;
+    days: CalendarDay[];
+
+    constructor(monthIndex: number, locale: string) {
+        this.monthIndex = monthIndex;
+        this.monthName = new Date(0, monthIndex).toLocaleString(locale, { month: "long" });
+        this.days = [];
+    }
+
+    addDay(day: CalendarDay) {
+        this.days.push(day);
+    }
+}
+
 export interface CalendarDay {
     date: string; // "YYYY-MM-DD"
     type: DayType;

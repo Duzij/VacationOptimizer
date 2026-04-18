@@ -20,6 +20,14 @@ public class AppDbContext : DbContext
             .HasIndex(c => c.IsoCode)
             .IsUnique();
 
+        modelBuilder.Entity<Country>()
+            .HasData(
+                AustriaSeedData.Country,
+                GermanySeedData.Country,
+                IndiaSeedData.Country,
+                SpainSeedData.Country,
+                UnitedStatesSeedData.Country);
+
         modelBuilder.Entity<State>()
             .HasIndex(s => new { s.CountryId, s.Code })
             .IsUnique();

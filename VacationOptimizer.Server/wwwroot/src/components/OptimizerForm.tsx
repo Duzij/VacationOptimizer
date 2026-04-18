@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useCountries, useDetectedCountry, useIndiaSchema, useSpainSchema, useStates } from "../api/vacationApi";
-import { isIndiaOptimizeRequest, isSpainOptimizeRequest, type CustomFreeDay, type OptimizeRequest, type SpainCityOption, type StateOption } from "../types/models";
+import { useCountries, useIndiaSchema, useSpainSchema, useStates } from "../api/vacationApi";
+import { isIndiaOptimizeRequest, isSpainOptimizeRequest, type CustomFreeDay, type DetectedCountry, type OptimizeRequest, type SpainCityOption, type StateOption } from "../types/models";
 import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear, hasNonDefaultAdvancedSettings } from "../optimizerDefaults";
 import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
 import Button from "./Button";
@@ -12,6 +12,7 @@ interface Props {
     customFreeDays: CustomFreeDay[];
     onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
     initialRequest?: OptimizeRequest | null;
+    detectedCountry?: DetectedCountry | null;
 }
 
 interface SharedDraft {
@@ -74,13 +75,13 @@ export default function OptimizerForm({
     customFreeDays,
     onCustomFreeDaysChange,
     initialRequest,
+    detectedCountry,
 }: Props) {
     const currentYear = getDefaultYear();
     const [country, setCountry] = useState(initialRequest?.country ?? "");
     const [sharedDraft, setSharedDraft] = useState<SharedDraft>(() => getInitialSharedDraft(initialRequest, currentYear));
 
     const { data: countries, isLoading: countriesLoading } = useCountries();
-    const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
 
     useEffect(() => {
         if (!initialRequest) {
@@ -93,7 +94,7 @@ export default function OptimizerForm({
     }, [currentYear, initialRequest, onCustomFreeDaysChange]);
 
     useEffect(() => {
-        if (countriesLoading || detectedCountryLoading || countries === undefined || detectedCountry === undefined) {
+        if (countriesLoading || countries === undefined || detectedCountry === undefined) {
             return;
         }
 
@@ -111,10 +112,10 @@ export default function OptimizerForm({
             return;
         }
 
-        if (prefersEnglish && detectedCountry.countryCode && supportedCountryCodes.has(detectedCountry.countryCode)) {
+        if (prefersEnglish && detectedCountry?.countryCode && supportedCountryCodes.has(detectedCountry.countryCode)) {
             setCountry(detectedCountry.countryCode);
         }
-    }, [countries, countriesLoading, country, detectedCountry, detectedCountryLoading]);
+    }, [countries, countriesLoading, country, detectedCountry]);
 
     const handleCountryChange = (nextCountry: string) => {
         setCountry(nextCountry);
@@ -133,13 +134,13 @@ export default function OptimizerForm({
                     id="country"
                     value={country}
                     onChange={(e) => handleCountryChange(e.target.value)}
-                    disabled={countriesLoading || detectedCountryLoading}
+                    disabled={countriesLoading}
                     className={`w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm
                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
                      transition-all appearance-none cursor-pointer ${country ? "text-text" : "text-text-muted"}`}
                 >
-                    {(countriesLoading || detectedCountryLoading) && <option>Loading...</option>}
-                    {!countriesLoading && !detectedCountryLoading && <option value="">Select country</option>}
+                    {(countriesLoading) && <option>Loading...</option>}
+                    {!countriesLoading && <option value="">Select country</option>}
                     {countries?.map((c) => (
                         <option key={c.code} value={c.code}>
                             {c.name}

@@ -10,27 +10,4 @@ public static class AustriaSeedData
         Name = "Austria",
         IsoCode = "AT"
     };
-
-    public static IReadOnlyList<State> States => new[]
-    {
-        new State
-        {
-            Id = 1,
-            Name = "Vienna",
-            Code = "AT-9",
-            CountryId = Country.Id
-        }
-    };
-
-    public static IReadOnlyList<Holiday> Holidays => new[]
-    {
-        new Holiday
-        {
-            Id = 1,
-            CountryId = Country.Id,
-            StateId = null,
-            Date = new DateOnly(2026, 1, 1),
-            Name = "New Year's Day"
-        }
-    };
 }

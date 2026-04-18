@@ -1,19 +1,13 @@
 import { useCallback } from "react";
 import { DayType } from "../types/models";
-import type { CalendarDay } from "../types/models";
+import type { CalendarDay, MonthModel } from "../types/models";
 import { useLongPress } from "../hooks/useLongPress";
-
-const MONTH_NAMES = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
 
 const ISO_DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 const US_DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
 interface GridProps {
-    days: CalendarDay[];
-    monthIndex: number;
+    month: MonthModel;
     year: number;
     onDayLongPress?: (day: CalendarDay) => void;
     onDaySelect?: (day: CalendarDay) => void;
@@ -77,15 +71,15 @@ function DayCell({
     );
 }
 
-export function MonthGrid({ days, monthIndex, year, onDayLongPress, onDaySelect }: GridProps) {
-    const firstDay = new Date(Date.UTC(year, monthIndex, 1));
+export function MonthGrid({ month, year, onDayLongPress, onDaySelect }: GridProps) {
+    const firstDay = new Date(Date.UTC(year, month.monthIndex, 1));
     const startOffset = (firstDay.getUTCDay() + 6) % 7;
-    const sortedDays = [...days].sort((a, b) => a.date.localeCompare(b.date));
+    const sortedDays = [...month.days].sort((a, b) => a.date.localeCompare(b.date));
 
     return (
         <div className="rounded-xl border border-border bg-surface/50 p-3">
             <h3 className="text-sm font-semibold text-text mb-2 text-center">
-                {MONTH_NAMES[monthIndex]} {year}
+                {month.monthName} {year}
             </h3>
 
             <div className="grid grid-cols-7 gap-0.5 mb-1">
@@ -109,15 +103,15 @@ export function MonthGrid({ days, monthIndex, year, onDayLongPress, onDaySelect 
     );
 }
 
-export function USMonthGrid({ days, monthIndex, year, onDayLongPress, onDaySelect }: GridProps) {
-    const firstDay = new Date(Date.UTC(year, monthIndex, 1));
+export function USMonthGrid({ month, year, onDayLongPress, onDaySelect }: GridProps) {
+    const firstDay = new Date(Date.UTC(year, month.monthIndex, 1));
     const startOffset = firstDay.getUTCDay();
-    const sortedDays = [...days].sort((a, b) => a.date.localeCompare(b.date));
+    const sortedDays = [...month.days].sort((a, b) => a.date.localeCompare(b.date));
 
     return (
         <div className="rounded-xl border border-border bg-surface/50 p-3">
             <h3 className="text-sm font-semibold text-text mb-2 text-center">
-                {MONTH_NAMES[monthIndex]} {year}
+                {month.monthName} {year}
             </h3>
 
             <div className="grid grid-cols-7 gap-0.5 mb-1">

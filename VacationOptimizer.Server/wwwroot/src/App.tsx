@@ -21,6 +21,7 @@ import { getDefaultYear } from "./optimizerDefaults";
 import { useTheme } from "./hooks/useTheme";
 import { useOptimizationSession } from "./hooks/useOptimizationSession";
 import { useCalendarInteractions } from "./hooks/useCalendarInteractions";
+import { useDetectedCountry } from "./api/vacationApi";
 
 const queryClient = new QueryClient();
 
@@ -131,7 +132,10 @@ function Main() {
 }
 
 function PlannerPage() {
+
   const currentYear = getDefaultYear();
+  const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
+
   const {
     initialRequest,
     result,
@@ -183,7 +187,8 @@ function PlannerPage() {
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)] xl:items-start">
             <OptimizerForm
               onResult={runOptimization}
-              isLoading={isUserOptimizing}
+              isLoading={isUserOptimizing || detectedCountryLoading}
+              detectedCountry={detectedCountry}
               customFreeDays={customFreeDays}
               onCustomFreeDaysChange={setCustomFreeDays}
               initialRequest={initialRequest}
@@ -234,6 +239,7 @@ function PlannerPage() {
             year={activeRequest?.year ?? currentYear}
             country={activeRequest?.country}
             onDayLongPress={handleDayLongPress}
+            locale={detectedCountry?.countryCode}
           />
         </div>
       )}

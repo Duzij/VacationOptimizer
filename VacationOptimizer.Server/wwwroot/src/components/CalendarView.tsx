@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { DayType } from "../types/models";
+import { DayType, MonthModel } from "../types/models";
 import type { CalendarDay } from "../types/models";
 import LegendLip from "./LegendLip";
 import { MonthGrid, USMonthGrid } from "./MonthGrid";
@@ -14,16 +14,20 @@ interface Props {
     year: number;
     country?: string;
     onDayLongPress?: (day: CalendarDay) => void;
+    locale?: string | null | undefined;
 }
 
-export default function CalendarView({ calendar, year, country, onDayLongPress }: Props) {
-    const months: CalendarDay[][] = Array.from({ length: 12 }, () => []);
+export default function CalendarView({ calendar, year, country, locale, onDayLongPress }: Props) {
+    // Start month is determent by the date today
+    const startMonth = new Date().getUTCMonth();
+    const months: MonthModel[] = Array.from({ length: 12 - startMonth }, (_, i) => new MonthModel(startMonth + i, locale || "en-US"));
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
     const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
 
     calendar.forEach((day) => {
         const d = parseDate(day.date);
-        months[d.getUTCMonth()].push(day);
+        const currentMonth = months.find((m) => m.monthIndex === d.getUTCMonth());
+        currentMonth?.addDay(day);
     });
 
     const selectedDayDetails = useMemo(() => {
@@ -48,11 +52,9 @@ export default function CalendarView({ calendar, year, country, onDayLongPress }
     return (
         <div className="space-y-4 w-full max-w-6xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {months.map((days, monthIdx) => (
+                {months.map((month, _) => (
                     <MonthGridComponent
-                        key={monthIdx}
-                        days={days}
-                        monthIndex={monthIdx}
+                        month={month}
                         year={year}
                         onDayLongPress={onDayLongPress}
                         onDaySelect={setSelectedDay}
