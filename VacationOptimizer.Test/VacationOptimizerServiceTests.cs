@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using VacationOptimizer.Server.Data;
 using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
@@ -29,7 +30,7 @@ public class VacationOptimizerServiceTests
         _holidayService = new PublicHolidayService(dbContext);
         _calendarService = new CalendarService(_holidayService);
         _resultTokenService = new ResultTokenService("test-result-token-signing-key");
-        _optimizer = new VacationOptimizerService(_calendarService, _resultTokenService);
+        _optimizer = new VacationOptimizerService(_calendarService, _resultTokenService, new MemoryCache(new MemoryCacheOptions()));
     }
 
     [Fact]
@@ -307,15 +308,12 @@ public class VacationOptimizerServiceTests
     {
         var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
         var firstPayload = _resultTokenService.ParseToken(_optimizer.Optimize(request).ResultToken);
-        var futureToken = _resultTokenService.CreateToken(50, "ffffffffffffffff", firstPayload.RequestFingerprint);
+        var futureToken = _resultTokenService.CreateToken(OptimizationDefaults.MaxUsedResultTokens, "ffffffffffffffff", firstPayload.RequestFingerprint);
 
-        var result = _optimizer.Optimize(request with
+        Assert.Throws<OptimizationResultUnavailableException>(() => _optimizer.Optimize(request with
         {
-            UsedResultTokens = new List<string> { futureToken }
-        });
-        var payload = _resultTokenService.ParseToken(result.ResultToken);
-
-        Assert.Equal(51, payload.Attempt);
+            UsedResultTokens = Enumerable.Repeat(futureToken, 1).ToList()
+        }));
     }
 
     [Fact]
@@ -324,9 +322,9 @@ public class VacationOptimizerServiceTests
         var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
         var token = _optimizer.Optimize(request).ResultToken;
 
-        Assert.Throws<ArgumentException>(() => _optimizer.Optimize(request with
+        Assert.Throws<OptimizationResultUnavailableException>(() => _optimizer.Optimize(request with
         {
-            UsedResultTokens = Enumerable.Repeat(token, 101).ToList()
+            UsedResultTokens = Enumerable.Repeat(token, OptimizationDefaults.MaxUsedResultTokens + 1).ToList()
         }));
     }
 
@@ -350,7 +348,7 @@ public class VacationOptimizerServiceTests
         var payload = _resultTokenService.ParseToken(_optimizer.Optimize(request).ResultToken);
         var terminalToken = _resultTokenService.CreateToken(10_000, "ffffffffffffffff", payload.RequestFingerprint);
 
-        Assert.Throws<OptimizationResultUnavailableException>(() => _optimizer.Optimize(request with
+        Assert.Throws<ArgumentException>(() => _optimizer.Optimize(request with
         {
             UsedResultTokens = new List<string> { terminalToken }
         }));
@@ -366,7 +364,7 @@ public class VacationOptimizerServiceTests
         int vacationDays = DefaultBudget,
         int minimumDaysPerRange = 1,
         int maximumDaysPerRange = 365) =>
-        new OptimizeRequest(country ?? DefaultCountry, year ?? DefaultYear, vacationDays, minimumDaysPerRange, maximumDaysPerRange);
+        new OptimizeRequest(country ?? DefaultCountry, year ?? DefaultYear, vacationDays, minimumDaysPerRange, maximumDaysPerRange, null, null, null, null, []);
 
     private static CalendarDay GetDayFromCalendar(List<CalendarDay> calendar, DateOnly date) =>
         calendar.First(d => d.Date == date);

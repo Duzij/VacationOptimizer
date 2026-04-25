@@ -1,32 +1,52 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using VacationOptimizer.Server.Models;
 
 namespace VacationOptimizer.Server.Services;
 
 public class VacationOptimizerService
 {
-    private const int MaxUsedResultTokens = 50;
-    private const int MaxAttempt = 10_000;
-    private const int AttemptWindow = 32;
-
     private readonly CalendarService _calendarService;
     private readonly IResultTokenService _resultTokenService;
+    private readonly IMemoryCache _memoryCache;
 
-    public VacationOptimizerService(CalendarService calendarService, IResultTokenService resultTokenService)
+    public VacationOptimizerService(CalendarService calendarService, IResultTokenService resultTokenService, IMemoryCache memoryCache)
     {
         _calendarService = calendarService;
         _resultTokenService = resultTokenService;
+        _memoryCache = memoryCache;
     }
 
     public OptimizeResult Optimize(OptimizeRequest request)
     {
-        if (request.UsedResultTokens?.Count > MaxUsedResultTokens)
+        if (request.UsedResultTokens?.Count > OptimizationDefaults.MaxUsedResultTokens)
         {
-            throw new ArgumentException($"At most {MaxUsedResultTokens} used result tokens can be supplied.");
+            throw new OptimizationResultUnavailableException($"At most {OptimizationDefaults.MaxUsedResultTokens} used result tokens can be supplied.");
         }
 
+        var requestFingerprint = ComputeRequestFingerprint(request);
+        var matchingTokens = ParseMatchingTokens(request.UsedResultTokens, requestFingerprint);
+        if(matchingTokens.Any(token => token.Attempt >= OptimizationDefaults.MaxUsedResultTokens))
+        {
+            throw new OptimizationResultUnavailableException("No new optimization result is available. Try changing the planner settings.");
+        }
+
+        var generatedResults = new List<OptimizeResult>();
+
+        var results =_memoryCache.GetOrCreate(requestFingerprint, entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            return GenerateMaxAttemptResults(request, generatedResults, requestFingerprint);
+        });
+
+        return results?.FirstOrDefault(r => !request.UsedResultTokens?.Contains(r.ResultToken) ?? true) ??
+            throw new OptimizationResultUnavailableException("No new optimization result is available. Try changing the planner settings.");
+    }
+
+    private List<OptimizeResult> GenerateMaxAttemptResults(OptimizeRequest request, List<OptimizeResult> generatedResults, string requestFingerprint)
+    {
         var initialCalendar = _calendarService.BuildCalendar(
             request.Country,
             request.Year,
@@ -34,27 +54,29 @@ public class VacationOptimizerService
             request.CustomFreeDays,
             request.IgnoredHolidayDates);
 
-        var requestFingerprint = ComputeRequestFingerprint(request);
-        var matchingTokens = ParseMatchingTokens(request.UsedResultTokens, requestFingerprint);
-        var usedOutputSeeds = matchingTokens.Select(token => token.OutputSeed).ToHashSet(StringComparer.Ordinal);
-        var startAttempt = matchingTokens.Count > 0 ? matchingTokens.Max(token => token.Attempt) + 1 : 0;
-        var endAttempt = Math.Min(startAttempt + AttemptWindow, MaxAttempt + 1);
+        // Parallel.For(0, OptimizationDefaults.MaxUsedResultTokens, attempt =>
+        // {
+        //     var calendar = CloneCalendar(initialCalendar);
+        //     var rng = new Random(attempt);
+        //     var result = OptimizeCalendar(calendar, request, rng);
+        //     var outputSeed = ComputeOutputSeed(result);
+        //     var resultToken = _resultTokenService.CreateToken(attempt, outputSeed, requestFingerprint);
+        //     result = result with { ResultToken = resultToken };
+        //     generatedResults.Add(result);
+        // });
 
-        for (int attempt = startAttempt; attempt < endAttempt; attempt++)
+        for (int attempt = 0; attempt < OptimizationDefaults.MaxUsedResultTokens; attempt++)
         {
             var calendar = CloneCalendar(initialCalendar);
             var rng = new Random(attempt);
             var result = OptimizeCalendar(calendar, request, rng);
             var outputSeed = ComputeOutputSeed(result);
-
-            if (!usedOutputSeeds.Contains(outputSeed))
-            {
-                var resultToken = _resultTokenService.CreateToken(attempt, outputSeed, requestFingerprint);
-                return result with { ResultToken = resultToken };
-            }
+            var resultToken = _resultTokenService.CreateToken(attempt, outputSeed, requestFingerprint);
+            result = result with { ResultToken = resultToken };
+            generatedResults.Add(result);
         }
 
-        throw new OptimizationResultUnavailableException("No new optimization result is available. Try changing the planner settings.");
+        return generatedResults;
     }
 
     private static OptimizeResult OptimizeCalendar(CalendarData calendar, OptimizeRequest request, Random rng)
@@ -174,7 +196,7 @@ public class VacationOptimizerService
         foreach (var token in usedResultTokens)
         {
             var payload = _resultTokenService.ParseToken(token);
-            if (payload.Attempt < 0 || payload.Attempt > MaxAttempt)
+            if (payload.Attempt < 0 || payload.Attempt > OptimizationDefaults.MaxUsedResultTokens)
             {
                 throw new ArgumentException("Result token attempt is out of range.");
             }
@@ -268,8 +290,8 @@ public class VacationOptimizerService
             // 1. Have at least one vacation day OR are interesting (multi-day blocks with holidays)
             // 2. Meet the minimum days requirement
             // 3. Do not exceed the maximum days requirement
-            if ((vacDaysUsed > 0 || totalDaysOff >= 3) && 
-                totalDaysOff >= minimumDaysPerRange && 
+            if ((vacDaysUsed > 0 || totalDaysOff >= 3) &&
+                totalDaysOff >= minimumDaysPerRange &&
                 totalDaysOff <= maximumDaysPerRange)
             {
                 ranges.Add(new VacationRange(

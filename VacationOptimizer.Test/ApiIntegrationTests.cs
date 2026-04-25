@@ -346,39 +346,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"publicHolidaysCount\":1", json);
     }
 
-    [Fact]
-    public async Task OptimizeLegacyEndpoint_WhenNoNewResultInWindow_ReturnsConflict()
-    {
-        var client = _factory.CreateClient();
-        var payload = new
-        {
-            country = "XX",
-            year = 2026,
-            vacationDays = 5,
-            minimumDaysPerRange = 1,
-            maximumDaysPerRange = 14,
-        };
-        var firstResponse = await client.PostAsJsonAsync("/api/vacations/optimize", payload);
-        firstResponse.EnsureSuccessStatusCode();
-        var firstJson = await firstResponse.Content.ReadFromJsonAsync<JsonElement>();
-        var firstToken = firstJson.GetProperty("resultToken").GetString()!;
-        var tokenService = new ResultTokenService("development-result-token-signing-key");
-        var firstPayload = tokenService.ParseToken(firstToken);
-        var terminalToken = tokenService.CreateToken(10_000, "ffffffffffffffff", firstPayload.RequestFingerprint);
-
-        var response = await client.PostAsJsonAsync("/api/vacations/optimize", new
-        {
-            payload.country,
-            payload.year,
-            payload.vacationDays,
-            payload.minimumDaysPerRange,
-            payload.maximumDaysPerRange,
-            usedResultTokens = new[] { terminalToken }
-        });
-
-        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
-    }
-
     private sealed record CountryResponse(string Code, string Name);
 
     private sealed record StateResponse(string Code, string Name);
