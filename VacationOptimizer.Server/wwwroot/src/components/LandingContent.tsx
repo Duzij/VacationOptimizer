@@ -12,7 +12,7 @@ export default function LandingContent() {
             <div className="space-y-6">
               <div className="max-w-2xl space-y-4">
                 <h1 className="text-5xl font-semibold leading-[0.95] tracking-tight text-text md:text-7xl">
-                  The is a better way
+                  There is a better way
                   <br />
                   <span className="text-[var(--landing-accent)] italic">
                     to use PTOs.
