@@ -75,7 +75,7 @@ public class VacationOptimizerServiceTests
             Assert.True(range.Start <= range.End);
             Assert.True(range.TotalDaysOff >= 1);
 
-            var daysInRange = result.Calendar
+            var daysInRange = result.Calendar.Days
                 .Where(d => d.Date >= range.Start && d.Date <= range.End)
                 .ToList();
 
@@ -130,7 +130,7 @@ public class VacationOptimizerServiceTests
             var result = _optimizer.Optimize(new OptimizeRequest(country, DefaultYear, 10));
             Assert.True(result.VacationDaysUsed <= 10, $"Country {country} exceeded budget");
             Assert.NotNull(result.Calendar);
-            Assert.NotEmpty(result.Calendar);
+            Assert.NotEmpty(result.Calendar.Days);
         }
     }
 
@@ -201,12 +201,12 @@ public class VacationOptimizerServiceTests
         ));
 
         // Verify custom free days are in the calendar with correct type
-        var birthdayDay = GetDayFromCalendar(result.Calendar, new DateOnly(DefaultYear, 3, 15));
+        var birthdayDay = GetDayFromCalendar(result.Calendar.Days, new DateOnly(DefaultYear, 3, 15));
         Assert.Equal(DayType.CustomFreeDay, birthdayDay.Type);
         Assert.Equal("Birthday", birthdayDay.HolidayName);
         Assert.Contains(result.Ranges, range => range.Start <= new DateOnly(DefaultYear, 3, 15) && range.End >= new DateOnly(DefaultYear, 3, 15));
 
-        var anniversaryDay = GetDayFromCalendar(result.Calendar, new DateOnly(DefaultYear, 7, 20));
+        var anniversaryDay = GetDayFromCalendar(result.Calendar.Days, new DateOnly(DefaultYear, 7, 20));
         Assert.Equal(DayType.CustomFreeDay, anniversaryDay.Type);
         Assert.Equal("Anniversary", anniversaryDay.HolidayName);
         Assert.Contains(result.Ranges, range => range.Start <= new DateOnly(DefaultYear, 7, 20) && range.End >= new DateOnly(DefaultYear, 7, 20));
@@ -230,7 +230,7 @@ public class VacationOptimizerServiceTests
             CustomFreeDays: customFreeDays
         ));
 
-        var customDay = GetDayFromCalendar(result.Calendar, new DateOnly(DefaultYear, 4, 10));
+        var customDay = GetDayFromCalendar(result.Calendar.Days, new DateOnly(DefaultYear, 4, 10));
         Assert.Equal(DayType.CustomFreeDay, customDay.Type);
         Assert.Equal("Custom free day (Apr 10)", customDay.HolidayName);  // Auto-generated title
     }
@@ -247,14 +247,29 @@ public class VacationOptimizerServiceTests
             IgnoredHolidayDates: new List<DateOnly> { ignoredHolidayDate }
         ));
 
-        var ignoredHoliday = GetDayFromCalendar(result.Calendar, ignoredHolidayDate);
+        var ignoredHoliday = GetDayFromCalendar(result.Calendar.Days, ignoredHolidayDate);
         Assert.NotEqual(DayType.PublicHoliday, ignoredHoliday.Type);
         Assert.Null(ignoredHoliday.HolidayName);
     }
 
+    [Fact]
+    public void Optimize_ResultSeed_IsCompactAndStableForReuse()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+
+        var firstResult = _optimizer.Optimize(request);
+        var nextResult = _optimizer.Optimize(request with
+        {
+            UsedResultSeeds = new List<string> { firstResult.ResultSeed }
+        });
+
+        Assert.Matches("^[0-9a-f]{16}$", firstResult.ResultSeed);
+        Assert.NotEqual(firstResult.ResultSeed, nextResult.ResultSeed);
+    }
+
     // Helper methods
     private List<CalendarDay> BuildDefaultCalendar() =>
-        _calendarService.BuildCalendar(DefaultCountry, DefaultYear);
+        _calendarService.BuildCalendar(DefaultCountry, DefaultYear).Days;
 
     private OptimizeRequest CreateOptimizeRequest(
         string? country = null,

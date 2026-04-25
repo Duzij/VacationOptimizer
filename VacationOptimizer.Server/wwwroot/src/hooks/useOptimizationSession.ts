@@ -1,8 +1,8 @@
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { useOptimize } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/models";
 import { getInitialOptimizationState, persistOptimization, updateUrlFromRequest } from "../utils/optimizationPersistence";
-import { hasSameHolidayScope, normalizeOptimizeRequest, withIgnoredHolidayDates } from "../utils/optimizationRequest";
+import { hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
 
 export interface OptimizationRunOptions {
   showLoading?: boolean;
@@ -30,6 +30,22 @@ export function useOptimizationSession() {
   const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>(
     initialStateRef.current.initialRequest?.customFreeDays ?? [],
   );
+  const usedResultSeedsRef = useRef<string[]>([]);
+
+  const addUsedResultSeeds = useCallback((request: OptimizeRequest): OptimizeRequest => ({
+    ...request,
+    usedResultSeeds: usedResultSeedsRef.current.length > 0
+      ? usedResultSeedsRef.current
+      : undefined,
+  }), []);
+
+  const rememberResultSeed = useCallback((resultSeed: string | undefined) => {
+    if (!resultSeed) {
+      return;
+    }
+
+    usedResultSeedsRef.current = [...new Set([...usedResultSeedsRef.current, resultSeed])];
+  }, []);
 
   const executeOptimization = useEffectEvent(async (
     req: OptimizeRequest,
@@ -46,6 +62,11 @@ export function useOptimizationSession() {
     }
 
     const requestWithIgnoredDates = withIgnoredHolidayDates(normalizedRequest, effectiveIgnoredHolidayDates);
+    const keepResultHistory = requestsMatch(activeRequest, requestWithIgnoredDates);
+    if (!keepResultHistory) {
+      usedResultSeedsRef.current = [];
+    }
+    const requestForApi = addUsedResultSeeds(requestWithIgnoredDates);
 
     setActiveRequest(requestWithIgnoredDates);
     updateUrlFromRequest(requestWithIgnoredDates);
@@ -55,9 +76,11 @@ export function useOptimizationSession() {
     }
 
     try {
-      const data = await optimize.mutateAsync(requestWithIgnoredDates);
+      const data = await optimize.mutateAsync(requestForApi);
       setResult(data);
       persistOptimization(requestWithIgnoredDates, data);
+
+      rememberResultSeed(data.resultSeed);
 
       return { data, request: requestWithIgnoredDates };
     } finally {
@@ -87,6 +110,27 @@ export function useOptimizationSession() {
     });
   }, [restoreOptimization]);
 
+  const shuffleOptimization = useCallback(async () => {
+    if (!activeRequest) {
+      return;
+    }
+
+    setIsUserOptimizing(true);
+    try {
+      const shuffleRequest: OptimizeRequest = {
+        ...addUsedResultSeeds(activeRequest),
+      };
+
+      const data = await optimize.mutateAsync(shuffleRequest);
+      setResult(data);
+      persistOptimization(activeRequest, data);
+
+      rememberResultSeed(data.resultSeed);
+    } finally {
+      setIsUserOptimizing(false);
+    }
+  }, [activeRequest, addUsedResultSeeds, optimize, rememberResultSeed]);
+
   return {
     initialRequest: initialStateRef.current.initialRequest,
     result,
@@ -99,5 +143,6 @@ export function useOptimizationSession() {
     optimize,
     restoreOptimization,
     runOptimization,
+    shuffleOptimization,
   };
 }

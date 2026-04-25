@@ -18,6 +18,10 @@ vi.mock("./api/vacationApi", () => ({
     isError: optimizeState.isError,
     error: optimizeState.error,
   }),
+  useDetectedCountry: () => ({
+    data: null,
+    isLoading: false,
+  }),
 }));
 
 vi.mock("./components/OptimizerForm", () => ({
@@ -76,12 +80,13 @@ describe("App loading state", () => {
       maximumDaysPerRange: 14,
     }));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify({
-      calendar: [],
+      calendar: { days: [] },
       selectedVacationDays: [],
       ranges: [],
       totalDaysOff: 0,
       vacationDaysUsed: 0,
       publicHolidaysCount: 0,
+      resultSeed: "",
     }));
     window.history.replaceState({}, "", "/app?country=DE");
 

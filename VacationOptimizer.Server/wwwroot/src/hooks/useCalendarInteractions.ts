@@ -130,7 +130,7 @@ export function useCalendarInteractions({
 
     const updatedDays = confirmDay.mode === "remove"
       ? customFreeDays.filter((day) => day.date !== confirmDay.date)
-      : [...customFreeDays, { date: confirmDay.date }];
+      : [...customFreeDays, { date: confirmDay.date, title: "" }];
 
     setCustomFreeDays(updatedDays);
     setConfirmDay(null);
@@ -148,7 +148,7 @@ export function useCalendarInteractions({
       return;
     }
 
-    const holidayDay = result?.calendar.find((day) => day.date === confirmDay.date);
+    const holidayDay = result?.calendar.days.find((day) => day.date === confirmDay.date);
     if (!holidayDay) {
       setConfirmDay(null);
       return;

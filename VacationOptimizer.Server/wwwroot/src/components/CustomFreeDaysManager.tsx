@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Trash2, Plus } from "lucide-react";
 import type { CustomFreeDay } from "../types/models";
+import Button from "./Button";
 
 interface Props {
     customFreeDays: CustomFreeDay[];
@@ -40,6 +41,7 @@ export default function CustomFreeDaysManager({ customFreeDays, onUpdate }: Prop
     return (
         <div className="space-y-3">
             <button
+                type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 text-sm text-primary hover:text-primary-hover transition-colors"
             >
@@ -76,13 +78,14 @@ export default function CustomFreeDaysManager({ customFreeDays, onUpdate }: Prop
                         />
                     </div>
 
-                    <button
+                    <Button
+                        type="button"
                         onClick={handleAdd}
                         disabled={!date}
-                        className="w-full px-3 py-2 text-sm font-medium rounded-md bg-primary text-white hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        fullWidth
                     >
                         Add Day
-                    </button>
+                    </Button>
                 </div>
             )}
 
@@ -100,6 +103,7 @@ export default function CustomFreeDaysManager({ customFreeDays, onUpdate }: Prop
                                     {day.title && <p className="text-xs text-text-muted">{day.title}</p>}
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => handleRemove(idx)}
                                     className="p-1 text-text-muted hover:text-accent transition-colors"
                                     title="Remove"

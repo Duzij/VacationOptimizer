@@ -11,7 +11,7 @@ public class CalendarService
         _holidayService = holidayService;
     }
 
-    public List<CalendarDay> BuildCalendar(
+    public CalendarData BuildCalendar(
         string country,
         int year,
         string? stateCode = null,
@@ -70,6 +70,6 @@ public class CalendarService
             });
         }
 
-        return days;
+        return new CalendarData(days);
     }
 }
