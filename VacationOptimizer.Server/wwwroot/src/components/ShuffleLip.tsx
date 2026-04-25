@@ -30,7 +30,7 @@ function useScrollDirection(isLoading: boolean, thresholdPixels = 24) {
 
             requestAnimationFrame(() => {
                 const currentY = window.scrollY;
-                
+
                 // If we recently shuffled, ignore this scroll to avoid layout-shift hiding
                 if (Date.now() < ignoreUntil.current) {
                     lastScrollY.current = currentY;
@@ -42,7 +42,7 @@ function useScrollDirection(isLoading: boolean, thresholdPixels = 24) {
 
                 if (Math.abs(delta) >= thresholdPixels) {
                     // standard pattern: scroll down → hide, scroll up → show
-                    setVisible(delta > 0);
+                    setVisible(delta < 0);
                     lastScrollY.current = currentY;
                 }
 
