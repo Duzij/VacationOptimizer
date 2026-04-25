@@ -10,7 +10,7 @@ public record OptimizeRequest(
     List<CustomFreeDay>? CustomFreeDays = null,
     string? State = null,
     List<DateOnly>? IgnoredHolidayDates = null,
-    List<string>? UsedResultSeeds = null
+    List<string>? UsedResultTokens = null
 );
 
 public enum Month

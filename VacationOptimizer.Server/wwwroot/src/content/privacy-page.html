@@ -21,3 +21,10 @@
     <p>The detected country code is used only to suggest relevant vacation planning options and is not stored in any database, tied to your session, or used for tracking purposes. The detection happens in real-time on each request and no country information is persisted beyond the immediate response.</p>
   </div>
 </article>
+<article class="content-panel">
+  <h2 class="text-xl font-semibold text-text">Session Tokens and History</h2>
+  <div class="space-y-3 text-sm leading-6 text-text-muted">
+    <p>When you generate alternative vacation scenarios, the application uses cryptographic tokens to keep track of which results you have already seen in your current session. These tokens ensure the system provides fresh suggestions rather than repeating previous ones.</p>
+    <p>These tokens contain only an anonymized fingerprint of your request settings and a signature to prevent tampering. They do not contain personally identifiable information, are not used for tracking your identity across visits, and only serve to manage the state of your current planning session.</p>
+  </div>
+</article>

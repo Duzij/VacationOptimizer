@@ -68,7 +68,7 @@ export interface OptimizationResultBase {
     totalDaysOff: number;
     vacationDaysUsed: number;
     publicHolidaysCount: number;
-    resultSeed: string;
+    resultToken: string;
 }
 
 export interface IndiaOptimizeScope {
@@ -110,7 +110,7 @@ export interface SharedOptimizeRequestFields {
     maximumDaysPerRange?: number;
     customFreeDays?: CustomFreeDay[];
     ignoredHolidayDates?: string[];
-    usedResultSeeds?: string[];
+    usedResultTokens?: string[];
 }
 
 export interface LegacyOptimizeRequest extends SharedOptimizeRequestFields {

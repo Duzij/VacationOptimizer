@@ -7,5 +7,5 @@ public record OptimizeResult(
     int TotalDaysOff,
     int VacationDaysUsed,
     int PublicHolidaysCount,
-    string ResultSeed
+    string ResultToken
 );

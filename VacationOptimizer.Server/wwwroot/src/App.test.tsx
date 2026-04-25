@@ -86,7 +86,7 @@ describe("App loading state", () => {
       totalDaysOff: 0,
       vacationDaysUsed: 0,
       publicHolidaysCount: 0,
-      resultSeed: "",
+      resultToken: "",
     }));
     window.history.replaceState({}, "", "/app?country=DE");
 

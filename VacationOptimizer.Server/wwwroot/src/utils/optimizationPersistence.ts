@@ -73,6 +73,8 @@ export function clearStoredOptimizationData() {
 export function clearAppLocalStorage() {
   clearStoredOptimizationData();
   window.localStorage.removeItem(themeStorageKey);
+  window.sessionStorage.clear();
+  window.dispatchEvent(new Event("vacationOptimizer.clearSession"));
 }
 
 export function hasAppLocalStorageData() {

@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import { Shuffle } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 import DetailsLip from "./components/DetailsLip";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
+import ShuffleLimitModal from "./components/ShuffleLimitModal";
 import AppHeader from "./components/AppHeader";
 import {
   AboutPage,
@@ -154,6 +155,7 @@ function PlannerPage() {
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
   const [selectedDayDetails, setSelectedDayDetails] = useState<DayLipDetails | null>(null);
+  const [showShuffleLimitModal, setShowShuffleLimitModal] = useState(false);
 
   const {
     initialRequest,
@@ -165,9 +167,23 @@ function PlannerPage() {
     ignoredHolidayDates,
     setIgnoredHolidayDates,
     isUserOptimizing,
+    canNavigatePrevious,
+    canNavigateNext,
     runOptimization,
     shuffleOptimization,
+    navigatePreviousResult,
+    navigateNextResult,
+    hasReachedShuffleLimit,
   } = useOptimizationSession();
+  const handleCalendarRunOptimization = useCallback((
+    req: OptimizeRequest,
+    overrideIgnoredHolidayDates?: string[],
+    options?: { showLoading?: boolean }
+  ) => {
+    setShouldScrollResults(false);
+    return runOptimization(req, overrideIgnoredHolidayDates, options);
+  }, [runOptimization]);
+
   const {
     feedbackDraft,
     setFeedbackDraft,
@@ -183,7 +199,7 @@ function PlannerPage() {
     setIgnoredHolidayDates,
     customFreeDays,
     setCustomFreeDays,
-    runOptimization,
+    runOptimization: handleCalendarRunOptimization,
   });
 
   const handleRunOptimization = useCallback((req: OptimizeRequest) => {
@@ -191,6 +207,19 @@ function PlannerPage() {
     setSelectedDayDetails(null);
     runOptimization(req);
   }, [runOptimization]);
+
+  const hasShownLimitModalRef = useRef(false);
+
+  useEffect(() => {
+    if (hasReachedShuffleLimit) {
+      if (!hasShownLimitModalRef.current) {
+        hasShownLimitModalRef.current = true;
+        setShowShuffleLimitModal(true);
+      }
+    } else {
+      hasShownLimitModalRef.current = false;
+    }
+  }, [hasReachedShuffleLimit]);
 
   const handleShuffleOptimization = useCallback(() => {
     setShouldScrollResults(false);
@@ -299,21 +328,46 @@ function PlannerPage() {
 
       {result && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <ResultsSummary result={result} shouldScroll={shouldScrollResults} />
-          <div className="w-full max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <Legend />
-            <button
-              id="shuffle-optimization-desktop"
-              type="button"
-              disabled={isUserOptimizing}
-              onClick={handleShuffleOptimization}
-              className="action-btn action-btn-secondary hidden sm:inline-flex"
-              title="Shuffle — generate a different optimization with the same settings"
-            >
-              <Shuffle className="w-4 h-4" />
-              Shuffle
-            </button>
-          </div>
+          <ResultsSummary result={result} shouldScroll={shouldScrollResults}>
+            <div className="w-full max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <Legend />
+              <div className="hidden sm:inline-flex items-center gap-2">
+                <button
+                  id="previous-optimization-desktop"
+                  type="button"
+                  disabled={!canNavigatePrevious || isUserOptimizing}
+                  onClick={navigatePreviousResult}
+                  className="action-btn action-btn-secondary"
+                  aria-label="Previous result"
+                  title="Previous result"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  id="next-optimization-desktop"
+                  type="button"
+                  disabled={!canNavigateNext || isUserOptimizing}
+                  onClick={navigateNextResult}
+                  className="action-btn action-btn-secondary"
+                  aria-label="Next result"
+                  title="Next result"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button
+                  id="shuffle-optimization-desktop"
+                  type="button"
+                  disabled={isUserOptimizing || hasReachedShuffleLimit}
+                  onClick={handleShuffleOptimization}
+                  className="action-btn action-btn-secondary"
+                  title="Shuffle — generate a different optimization with the same settings"
+                >
+                  <Shuffle className="w-4 h-4" />
+                  Shuffle
+                </button>
+              </div>
+            </div>
+          </ResultsSummary>
 
           <CalendarView
             calendar={result.calendar.days}
@@ -330,7 +384,12 @@ function PlannerPage() {
         <DetailsLip
           isLoading={isUserOptimizing}
           onShuffle={handleShuffleOptimization}
+          onPrevious={navigatePreviousResult}
+          onNext={navigateNextResult}
+          canNavigatePrevious={canNavigatePrevious}
+          canNavigateNext={canNavigateNext}
           dayDetails={selectedDayDetails}
+          hasReachedShuffleLimit={hasReachedShuffleLimit}
         />
       )}
 
@@ -345,6 +404,7 @@ function PlannerPage() {
           onCancel={() => setConfirmDay(null)}
         />
       )}
+      {showShuffleLimitModal && <ShuffleLimitModal onClose={() => setShowShuffleLimitModal(false)} />}
     </>
   );
 }

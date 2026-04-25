@@ -61,6 +61,14 @@ builder.Services.AddScoped<IPublicHolidayService>(serviceProvider =>
         serviceProvider.GetRequiredService<PublicHolidayService>(),
         serviceProvider.GetRequiredService<IMemoryCache>()));
 builder.Services.AddScoped<CalendarService>();
+var resultTokenSigningKey = builder.Configuration["Optimization:ResultTokenSigningKey"];
+if (builder.Environment.IsProduction() && string.IsNullOrWhiteSpace(resultTokenSigningKey))
+{
+    throw new InvalidOperationException("Optimization:ResultTokenSigningKey must be configured in Production.");
+}
+
+builder.Services.AddSingleton<IResultTokenService>(
+    new ResultTokenService(resultTokenSigningKey ?? "development-result-token-signing-key"));
 builder.Services.AddScoped<VacationOptimizerService>();
 builder.Services.AddScoped<IDetectCountryService, DetectedCountryService>();
 
@@ -171,6 +179,10 @@ api.MapPost("/optimize", (OptimizeRequest request, VacationOptimizerService opti
         var result = optimizer.Optimize(request);
         return Results.Ok(result);
     }
+    catch (OptimizationResultUnavailableException ex)
+    {
+        return Results.Conflict(new { error = ex.Message });
+    }
     catch (ArgumentException ex)
     {
         return Results.BadRequest(new { error = ex.Message });
@@ -246,7 +258,7 @@ api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHoli
             CustomFreeDays: request.CustomFreeDays,
             State: state.Code,
             IgnoredHolidayDates: request.IgnoredHolidayDates,
-            UsedResultSeeds: request.UsedResultSeeds);
+            UsedResultTokens: request.UsedResultTokens);
 
         var result = optimizer.Optimize(internalRequest);
 
@@ -262,7 +274,11 @@ api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHoli
             TotalDaysOff: result.TotalDaysOff,
             VacationDaysUsed: result.VacationDaysUsed,
             PublicHolidaysCount: result.PublicHolidaysCount,
-            ResultSeed: result.ResultSeed));
+            ResultToken: result.ResultToken));
+    }
+    catch (OptimizationResultUnavailableException ex)
+    {
+        return Results.Conflict(new { error = ex.Message });
     }
     catch (ArgumentException ex)
     {
@@ -334,7 +350,7 @@ api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHoli
             CustomFreeDays: request.CustomFreeDays,
             State: effectiveStateCode,
             IgnoredHolidayDates: request.IgnoredHolidayDates,
-            UsedResultSeeds: request.UsedResultSeeds);
+            UsedResultTokens: request.UsedResultTokens);
 
         var result = optimizer.Optimize(internalRequest);
         stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);
@@ -354,7 +370,11 @@ api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHoli
             TotalDaysOff: result.TotalDaysOff,
             VacationDaysUsed: result.VacationDaysUsed,
             PublicHolidaysCount: result.PublicHolidaysCount,
-            ResultSeed: result.ResultSeed));
+            ResultToken: result.ResultToken));
+    }
+    catch (OptimizationResultUnavailableException ex)
+    {
+        return Results.Conflict(new { error = ex.Message });
     }
     catch (ArgumentException ex)
     {
