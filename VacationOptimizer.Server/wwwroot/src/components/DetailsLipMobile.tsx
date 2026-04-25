@@ -76,7 +76,7 @@ function useScrollDirection(isLoading: boolean, revealKey: unknown, thresholdPix
     return visible;
 }
 
-export default function DetailsLip({
+export default function DetailsLipMobile({
     isLoading,
     onShuffle,
     onPrevious,
@@ -87,11 +87,10 @@ export default function DetailsLip({
     hasReachedShuffleLimit,
 }: Props) {
     const visible = useScrollDirection(isLoading, dayDetails);
-    const isShowingDayDetails = Boolean(dayDetails);
 
     const content = (
         <div
-            className={`fixed inset-x-0 bottom-0 transition-transform duration-300 ease-in-out ${visible ? "translate-y-0" : "translate-y-full"} ${isShowingDayDetails ? "z-20 sm:inset-x-auto sm:left-1/2 sm:bottom-4 sm:w-full sm:max-w-md sm:-translate-x-1/2" : "z-10 sm:hidden"}`}
+            className={`fixed inset-x-0 bottom-0 z-20 sm:hidden transition-transform duration-300 ease-in-out ${visible ? "translate-y-0" : "translate-y-full"}`}
         >
             <div className="border border-border border-b-0 rounded-t-2xl bg-background shadow-lg px-4 py-3 sm:border-b sm:rounded-2xl">
                 {dayDetails ? (

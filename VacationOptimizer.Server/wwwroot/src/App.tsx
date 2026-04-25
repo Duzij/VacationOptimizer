@@ -2,12 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
-import DetailsLip from "./components/DetailsLip";
+import DetailsLipMobile from "./components/DetailsLipMobile";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
 import ShuffleLimitModal from "./components/ShuffleLimitModal";
+import DetailsLipDesktop from "./components/DetailsLipDesktop";
 import AppHeader from "./components/AppHeader";
 import {
   AboutPage,
@@ -28,7 +29,7 @@ import { useCalendarInteractions } from "./hooks/useCalendarInteractions";
 import { useDetectedCountry } from "./api/vacationApi";
 import { DayType } from "./types/models";
 import type { CalendarDay, OptimizeRequest } from "./types/models";
-import type { DayLipDetails } from "./components/DetailsLip";
+import type { DayLipDetails } from "./components/DetailsLipMobile";
 
 const queryClient = new QueryClient();
 
@@ -381,7 +382,7 @@ function PlannerPage() {
       )}
 
       {result && (
-        <DetailsLip
+        <DetailsLipMobile
           isLoading={isUserOptimizing}
           onShuffle={handleShuffleOptimization}
           onPrevious={navigatePreviousResult}
@@ -390,6 +391,15 @@ function PlannerPage() {
           canNavigateNext={canNavigateNext}
           dayDetails={selectedDayDetails}
           hasReachedShuffleLimit={hasReachedShuffleLimit}
+        />
+      )}
+
+      {selectedDayDetails && result && (
+        <DetailsLipDesktop
+          formattedDate={selectedDayDetails.formattedDate}
+          label={selectedDayDetails.label}
+          detail={selectedDayDetails.detail}
+          onClose={() => setSelectedDayDetails(null)}
         />
       )}
 
