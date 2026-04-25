@@ -4,8 +4,12 @@ import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/mo
 import { getInitialOptimizationState, persistOptimization, updateUrlFromRequest } from "../utils/optimizationPersistence";
 import { hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
 
+export const MAX_SHUFFLE_HISTORY = 50;
+
 export interface OptimizationRunOptions {
   showLoading?: boolean;
+  includeResultTokens?: boolean;
+  replaceHistory?: boolean;
 }
 
 export interface RunOptimization {
@@ -21,8 +25,10 @@ export function useOptimizationSession() {
   const didRestoreInitialRequestRef = useRef(false);
   const optimize = useOptimize();
   const [isUserOptimizing, setIsUserOptimizing] = useState(false);
+  const initialResultHistory = initialStateRef.current.initialResult ? [initialStateRef.current.initialResult] : [];
 
-  const [result, setResult] = useState<OptimizeResult | null>(initialStateRef.current.initialResult);
+  const [resultHistory, setResultHistory] = useState<OptimizeResult[]>(initialResultHistory);
+  const [activeResultIndex, setActiveResultIndex] = useState(initialResultHistory.length > 0 ? 0 : -1);
   const [activeRequest, setActiveRequest] = useState<OptimizeRequest | null>(initialStateRef.current.initialRequest);
   const [ignoredHolidayDates, setIgnoredHolidayDates] = useState<string[]>(
     initialStateRef.current.initialRequest?.ignoredHolidayDates ?? [],
@@ -30,22 +36,98 @@ export function useOptimizationSession() {
   const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>(
     initialStateRef.current.initialRequest?.customFreeDays ?? [],
   );
-  const usedResultSeedsRef = useRef<string[]>([]);
+  const resultHistoryRef = useRef<OptimizeResult[]>(initialResultHistory);
+  const activeResultIndexRef = useRef(initialResultHistory.length > 0 ? 0 : -1);
 
-  const addUsedResultSeeds = useCallback((request: OptimizeRequest): OptimizeRequest => ({
-    ...request,
-    usedResultSeeds: usedResultSeedsRef.current.length > 0
-      ? usedResultSeedsRef.current
-      : undefined,
-  }), []);
+  const setResultHistoryState = useCallback((history: OptimizeResult[], index: number) => {
+    resultHistoryRef.current = history;
+    activeResultIndexRef.current = index;
+    setResultHistory(history);
+    setActiveResultIndex(index);
+  }, []);
 
-  const rememberResultSeed = useCallback((resultSeed: string | undefined) => {
-    if (!resultSeed) {
+  const getKnownResultTokens = useCallback(() => (
+    resultHistoryRef.current
+      .map((entry) => entry.resultToken)
+      .filter(Boolean)
+      .slice(-MAX_SHUFFLE_HISTORY)
+  ), []);
+
+  const addUsedResultTokens = useCallback((request: OptimizeRequest): OptimizeRequest => {
+    const knownTokens = getKnownResultTokens();
+
+    return {
+      ...request,
+      usedResultTokens: knownTokens.length > 0
+        ? knownTokens
+        : undefined,
+    };
+  }, [getKnownResultTokens]);
+
+  const replaceResultHistory = useCallback((nextResult: OptimizeResult) => {
+    setResultHistoryState([nextResult], 0);
+  }, [setResultHistoryState]);
+
+  const appendResultHistory = useCallback((nextResult: OptimizeResult) => {
+    const existingIndex = resultHistoryRef.current.findIndex((entry) => entry.resultToken === nextResult.resultToken);
+    if (existingIndex >= 0) {
+      setResultHistoryState(resultHistoryRef.current, existingIndex);
       return;
     }
 
-    usedResultSeedsRef.current = [...new Set([...usedResultSeedsRef.current, resultSeed])];
-  }, []);
+    const nextHistory = [...resultHistoryRef.current, nextResult].slice(-MAX_SHUFFLE_HISTORY);
+    setResultHistoryState(nextHistory, nextHistory.length - 1);
+  }, [setResultHistoryState]);
+
+  const clearResultHistory = useCallback(() => {
+    setResultHistoryState([], -1);
+  }, [setResultHistoryState]);
+
+  useEffect(() => {
+    const handleClearSession = () => {
+      clearResultHistory();
+      setActiveRequest(null);
+    };
+    window.addEventListener("vacationOptimizer.clearSession", handleClearSession);
+    return () => window.removeEventListener("vacationOptimizer.clearSession", handleClearSession);
+  }, [clearResultHistory]);
+
+  const result = activeResultIndex >= 0 ? resultHistory[activeResultIndex] ?? null : null;
+  const canNavigatePrevious = activeResultIndex > 0;
+  const canNavigateNext = activeResultIndex >= 0 && activeResultIndex < resultHistory.length - 1;
+  const hasReachedShuffleLimit = resultHistory.length >= MAX_SHUFFLE_HISTORY;
+
+  const navigatePreviousResult = useCallback(() => {
+    if (!activeRequest || activeResultIndexRef.current <= 0) {
+      return;
+    }
+
+    const nextIndex = activeResultIndexRef.current - 1;
+    const nextResult = resultHistoryRef.current[nextIndex];
+    if (!nextResult) {
+      return;
+    }
+
+    activeResultIndexRef.current = nextIndex;
+    setActiveResultIndex(nextIndex);
+    persistOptimization(activeRequest, nextResult);
+  }, [activeRequest]);
+
+  const navigateNextResult = useCallback(() => {
+    if (!activeRequest || activeResultIndexRef.current >= resultHistoryRef.current.length - 1) {
+      return;
+    }
+
+    const nextIndex = activeResultIndexRef.current + 1;
+    const nextResult = resultHistoryRef.current[nextIndex];
+    if (!nextResult) {
+      return;
+    }
+
+    activeResultIndexRef.current = nextIndex;
+    setActiveResultIndex(nextIndex);
+    persistOptimization(activeRequest, nextResult);
+  }, [activeRequest]);
 
   const executeOptimization = useEffectEvent(async (
     req: OptimizeRequest,
@@ -63,10 +145,10 @@ export function useOptimizationSession() {
 
     const requestWithIgnoredDates = withIgnoredHolidayDates(normalizedRequest, effectiveIgnoredHolidayDates);
     const keepResultHistory = requestsMatch(activeRequest, requestWithIgnoredDates);
-    if (!keepResultHistory) {
-      usedResultSeedsRef.current = [];
-    }
-    const requestForApi = addUsedResultSeeds(requestWithIgnoredDates);
+    const shouldIncludeResultTokens = options?.includeResultTokens ?? keepResultHistory;
+    const requestForApi = shouldIncludeResultTokens
+      ? addUsedResultTokens(requestWithIgnoredDates)
+      : requestWithIgnoredDates;
 
     setActiveRequest(requestWithIgnoredDates);
     updateUrlFromRequest(requestWithIgnoredDates);
@@ -77,10 +159,13 @@ export function useOptimizationSession() {
 
     try {
       const data = await optimize.mutateAsync(requestForApi);
-      setResult(data);
       persistOptimization(requestWithIgnoredDates, data);
 
-      rememberResultSeed(data.resultSeed);
+      if (options?.replaceHistory || !keepResultHistory) {
+        replaceResultHistory(data);
+      } else {
+        appendResultHistory(data);
+      }
 
       return { data, request: requestWithIgnoredDates };
     } finally {
@@ -94,7 +179,11 @@ export function useOptimizationSession() {
     executeOptimization(req, overrideIgnoredHolidayDates, options));
 
   const restoreOptimization = useEffectEvent(async (req: OptimizeRequest) =>
-    executeOptimization(req, undefined, { showLoading: false }));
+    executeOptimization(req, undefined, {
+      showLoading: false,
+      includeResultTokens: false,
+      replaceHistory: true,
+    }));
 
   useEffect(() => {
     const initialRequest = initialStateRef.current.initialRequest;
@@ -117,19 +206,16 @@ export function useOptimizationSession() {
 
     setIsUserOptimizing(true);
     try {
-      const shuffleRequest: OptimizeRequest = {
-        ...addUsedResultSeeds(activeRequest),
-      };
+      const shuffleRequest = addUsedResultTokens(activeRequest);
 
       const data = await optimize.mutateAsync(shuffleRequest);
-      setResult(data);
       persistOptimization(activeRequest, data);
 
-      rememberResultSeed(data.resultSeed);
+      appendResultHistory(data);
     } finally {
       setIsUserOptimizing(false);
     }
-  }, [activeRequest, addUsedResultSeeds, optimize, rememberResultSeed]);
+  }, [activeRequest, addUsedResultTokens, appendResultHistory, optimize]);
 
   return {
     initialRequest: initialStateRef.current.initialRequest,
@@ -140,9 +226,14 @@ export function useOptimizationSession() {
     customFreeDays,
     setCustomFreeDays,
     isUserOptimizing,
+    canNavigatePrevious,
+    canNavigateNext,
     optimize,
     restoreOptimization,
     runOptimization,
     shuffleOptimization,
+    navigatePreviousResult,
+    navigateNextResult,
+    hasReachedShuffleLimit,
   };
 }

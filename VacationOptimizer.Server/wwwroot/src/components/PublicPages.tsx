@@ -133,7 +133,7 @@ export function PrivacyPage() {
             </p>
             <p>
               Use this control if you want to delete the planner information
-              stored on this device through local storage.
+              stored on this device through local storage and session state.
             </p>
             <p className="flex justify-end py-4">
               <button
@@ -142,7 +142,7 @@ export function PrivacyPage() {
                 disabled={!hasLocalData}
                 className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-3 text-sm font-semibold text-text transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-background cursor-pointer"
               >
-                Remove all local storage data used by this app
+                Remove all local storage and session data used by this app
               </button>
              
             </p>

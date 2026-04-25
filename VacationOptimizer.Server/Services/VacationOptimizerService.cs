@@ -7,15 +7,26 @@ namespace VacationOptimizer.Server.Services;
 
 public class VacationOptimizerService
 {
-    private readonly CalendarService _calendarService;
+    private const int MaxUsedResultTokens = 50;
+    private const int MaxAttempt = 10_000;
+    private const int AttemptWindow = 32;
 
-    public VacationOptimizerService(CalendarService calendarService)
+    private readonly CalendarService _calendarService;
+    private readonly IResultTokenService _resultTokenService;
+
+    public VacationOptimizerService(CalendarService calendarService, IResultTokenService resultTokenService)
     {
         _calendarService = calendarService;
+        _resultTokenService = resultTokenService;
     }
 
     public OptimizeResult Optimize(OptimizeRequest request)
     {
+        if (request.UsedResultTokens?.Count > MaxUsedResultTokens)
+        {
+            throw new ArgumentException($"At most {MaxUsedResultTokens} used result tokens can be supplied.");
+        }
+
         var initialCalendar = _calendarService.BuildCalendar(
             request.Country,
             request.Year,
@@ -23,26 +34,27 @@ public class VacationOptimizerService
             request.CustomFreeDays,
             request.IgnoredHolidayDates);
 
-        var usedResultSeeds = request.UsedResultSeeds?.ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>();
-        const int maxAttempts = 16;
+        var requestFingerprint = ComputeRequestFingerprint(request);
+        var matchingTokens = ParseMatchingTokens(request.UsedResultTokens, requestFingerprint);
+        var usedOutputSeeds = matchingTokens.Select(token => token.OutputSeed).ToHashSet(StringComparer.Ordinal);
+        var startAttempt = matchingTokens.Count > 0 ? matchingTokens.Max(token => token.Attempt) + 1 : 0;
+        var endAttempt = Math.Min(startAttempt + AttemptWindow, MaxAttempt + 1);
 
-        OptimizeResult? lastResult = null;
-
-        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        for (int attempt = startAttempt; attempt < endAttempt; attempt++)
         {
             var calendar = CloneCalendar(initialCalendar);
             var rng = new Random(attempt);
             var result = OptimizeCalendar(calendar, request, rng);
+            var outputSeed = ComputeOutputSeed(result);
 
-            if (!usedResultSeeds.Contains(result.ResultSeed))
+            if (!usedOutputSeeds.Contains(outputSeed))
             {
-                return result;
+                var resultToken = _resultTokenService.CreateToken(attempt, outputSeed, requestFingerprint);
+                return result with { ResultToken = resultToken };
             }
-
-            lastResult = result;
         }
 
-        return lastResult ?? throw new InvalidOperationException("Unable to generate an optimization result.");
+        throw new OptimizationResultUnavailableException("No new optimization result is available. Try changing the planner settings.");
     }
 
     private static OptimizeResult OptimizeCalendar(CalendarData calendar, OptimizeRequest request, Random rng)
@@ -144,13 +156,71 @@ public class VacationOptimizerService
             TotalDaysOff: totalDaysOff,
             VacationDaysUsed: selectedVacationDays.Count,
             PublicHolidaysCount: publicHolidaysCount,
-            ResultSeed: string.Empty
+            ResultToken: string.Empty
         );
 
-        return result with { ResultSeed = ComputeResultSeed(result) };
+        return result;
     }
 
-    private static string ComputeResultSeed(OptimizeResult result)
+    private List<ResultTokenPayload> ParseMatchingTokens(List<string>? usedResultTokens, string requestFingerprint)
+    {
+        if (usedResultTokens is null || usedResultTokens.Count == 0)
+        {
+            return [];
+        }
+
+        var matchingTokens = new List<ResultTokenPayload>();
+
+        foreach (var token in usedResultTokens)
+        {
+            var payload = _resultTokenService.ParseToken(token);
+            if (payload.Attempt < 0 || payload.Attempt > MaxAttempt)
+            {
+                throw new ArgumentException("Result token attempt is out of range.");
+            }
+
+            if (string.Equals(payload.RequestFingerprint, requestFingerprint, StringComparison.Ordinal))
+            {
+                matchingTokens.Add(payload);
+            }
+        }
+
+        return matchingTokens;
+    }
+
+    private static string ComputeRequestFingerprint(OptimizeRequest request)
+    {
+        var payload = new
+        {
+            country = request.Country.Trim().ToUpperInvariant(),
+            state = request.State?.Trim().ToUpperInvariant(),
+            year = request.Year,
+            vacationDays = request.VacationDays,
+            minimumDaysPerRange = request.MinimumDaysPerRange,
+            maximumDaysPerRange = request.MaximumDaysPerRange,
+            maxNumberOfVacationsPerMonth = request.MaxNumberOfVacationsPerMonth?
+                .OrderBy(entry => entry.Key)
+                .Select(entry => new { month = (int)entry.Key, count = entry.Value })
+                .ToArray(),
+            customFreeDays = request.CustomFreeDays?
+                .Select(day => day.Date)
+                .Distinct()
+                .OrderBy(date => date)
+                .Select(date => date.ToString("yyyy-MM-dd"))
+                .ToArray(),
+            ignoredHolidayDates = request.IgnoredHolidayDates?
+                .Distinct()
+                .OrderBy(date => date)
+                .Select(date => date.ToString("yyyy-MM-dd"))
+                .ToArray()
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
+        return Convert.ToHexString(hash.AsSpan(0, 16)).ToLowerInvariant();
+    }
+
+    private static string ComputeOutputSeed(OptimizeResult result)
     {
         var payload = new
         {

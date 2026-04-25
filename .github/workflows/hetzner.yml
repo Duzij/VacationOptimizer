@@ -46,13 +46,14 @@ jobs:
           TOKEN: ${{ secrets.TOKEN }}
           JWT_SECRET: ${{ secrets.JWT_SECRET_KEY }}
           SOME_API_KEY: ${{ secrets.SOME_API_KEY }}
+          RESULT_TOKEN_SIGNING_KEY: ${{ secrets.RESULT_TOKEN_SIGNING_KEY }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
           SERVER_HOSTNAME: ${{ secrets.SERVER_HOSTNAME }}
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: TOKEN,JWT_SECRET,SOME_API_KEY,SERVER_IP,SERVER_HOSTNAME
+          envs: TOKEN,JWT_SECRET,SOME_API_KEY,RESULT_TOKEN_SIGNING_KEY,SERVER_IP,SERVER_HOSTNAME
           script: |
             set -e
 
@@ -76,6 +77,7 @@ jobs:
             cat > .env <<EOF
             JWT_SECRET_KEY=${JWT_SECRET}
             SOME_API_KEY=${SOME_API_KEY}
+            Optimization__ResultTokenSigningKey=${RESULT_TOKEN_SIGNING_KEY}
             ASPNETCORE_ENVIRONMENT=Production
             EOF
 

@@ -43,7 +43,7 @@ public record IndiaOptimizeRequest(
     int MaximumDaysPerRange = OptimizationDefaults.MaximumDaysPerRange,
     List<CustomFreeDay>? CustomFreeDays = null,
     List<DateOnly>? IgnoredHolidayDates = null,
-    List<string>? UsedResultSeeds = null
+    List<string>? UsedResultTokens = null
 );
 
 public record IndiaOptimizationScope(
@@ -61,7 +61,7 @@ public record IndiaOptimizeResult(
     int TotalDaysOff,
     int VacationDaysUsed,
     int PublicHolidaysCount,
-    string ResultSeed
+    string ResultToken
 );
 
 public record SpainCityOption(
@@ -88,7 +88,7 @@ public record SpainOptimizeRequest(
     int MaximumDaysPerRange = OptimizationDefaults.MaximumDaysPerRange,
     List<CustomFreeDay>? CustomFreeDays = null,
     List<DateOnly>? IgnoredHolidayDates = null,
-    List<string>? UsedResultSeeds = null
+    List<string>? UsedResultTokens = null
 );
 
 public record SpainOptimizationScope(
@@ -108,5 +108,5 @@ public record SpainOptimizeResult(
     int TotalDaysOff,
     int VacationDaysUsed,
     int PublicHolidaysCount,
-    string ResultSeed
+    string ResultToken
 );

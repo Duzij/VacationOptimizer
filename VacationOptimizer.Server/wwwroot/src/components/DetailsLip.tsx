@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Shuffle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 import { createPortal } from "react-dom";
 import Button from "./Button";
 
@@ -12,7 +12,12 @@ export interface DayLipDetails {
 interface Props {
     isLoading: boolean;
     onShuffle: () => void;
+    onPrevious: () => void;
+    onNext: () => void;
+    canNavigatePrevious: boolean;
+    canNavigateNext: boolean;
     dayDetails?: DayLipDetails | null;
+    hasReachedShuffleLimit?: boolean;
 }
 
 function useScrollDirection(isLoading: boolean, revealKey: unknown, thresholdPixels = 24) {
@@ -71,7 +76,16 @@ function useScrollDirection(isLoading: boolean, revealKey: unknown, thresholdPix
     return visible;
 }
 
-export default function DetailsLip({ isLoading, onShuffle, dayDetails }: Props) {
+export default function DetailsLip({
+    isLoading,
+    onShuffle,
+    onPrevious,
+    onNext,
+    canNavigatePrevious,
+    canNavigateNext,
+    dayDetails,
+    hasReachedShuffleLimit,
+}: Props) {
     const visible = useScrollDirection(isLoading, dayDetails);
     const isShowingDayDetails = Boolean(dayDetails);
 
@@ -91,34 +105,30 @@ export default function DetailsLip({ isLoading, onShuffle, dayDetails }: Props) 
                                 {dayDetails.detail ? ` · ${dayDetails.detail}` : ""}
                             </p>
                         </div>
-                        <Button
-                            id="shuffle-optimization"
-                            type="button"
-                            variant="secondary"
-                            disabled={isLoading}
-                            onClick={onShuffle}
-                            aria-label="Shuffle optimization"
-                        >
-                            <Shuffle className="w-4 h-4" />
-                            Shuffle
-                        </Button>
+                        <ResultControls
+                            isLoading={isLoading}
+                            onShuffle={onShuffle}
+                            onPrevious={onPrevious}
+                            onNext={onNext}
+                            canNavigatePrevious={canNavigatePrevious}
+                            canNavigateNext={canNavigateNext}
+                            hasReachedShuffleLimit={hasReachedShuffleLimit}
+                        />
                     </div>
                 ) : (
                     <div className="flex items-center justify-between gap-3">
                         <p className="text-sm text-text-muted">
                             Not happy with the result?
                         </p>
-                        <Button
-                            id="shuffle-optimization"
-                            type="button"
-                            variant="secondary"
-                            disabled={isLoading}
-                            onClick={onShuffle}
-                            aria-label="Shuffle optimization"
-                        >
-                            <Shuffle className="w-4 h-4" />
-                            Shuffle
-                        </Button>
+                        <ResultControls
+                            isLoading={isLoading}
+                            onShuffle={onShuffle}
+                            onPrevious={onPrevious}
+                            onNext={onNext}
+                            canNavigatePrevious={canNavigatePrevious}
+                            canNavigateNext={canNavigateNext}
+                            hasReachedShuffleLimit={hasReachedShuffleLimit}
+                        />
                     </div>
                 )}
             </div>
@@ -130,4 +140,58 @@ export default function DetailsLip({ isLoading, onShuffle, dayDetails }: Props) 
     }
 
     return createPortal(content, document.body);
+}
+
+function ResultControls({
+    isLoading,
+    onShuffle,
+    onPrevious,
+    onNext,
+    canNavigatePrevious,
+    canNavigateNext,
+    hasReachedShuffleLimit,
+}: {
+    isLoading: boolean;
+    onShuffle: () => void;
+    onPrevious: () => void;
+    onNext: () => void;
+    canNavigatePrevious: boolean;
+    canNavigateNext: boolean;
+    hasReachedShuffleLimit?: boolean;
+}) {
+    return (
+        <div className="inline-flex items-center gap-2">
+            <Button
+                id="previous-optimization"
+                type="button"
+                variant="secondary"
+                disabled={!canNavigatePrevious || isLoading}
+                onClick={onPrevious}
+                aria-label="Previous result"
+            >
+                <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+                id="next-optimization"
+                type="button"
+                variant="secondary"
+                disabled={!canNavigateNext || isLoading}
+                onClick={onNext}
+                aria-label="Next result"
+            >
+                <ChevronRight className="w-4 h-4" />
+            </Button>
+            <Button
+                id="shuffle-optimization"
+                type="button"
+                variant="secondary"
+                disabled={isLoading || hasReachedShuffleLimit}
+                onClick={onShuffle}
+                aria-label="Shuffle optimization"
+            >
+                <Shuffle className="w-4 h-4" />
+                Shuffle
+            </Button>
+        </div>
+    );
 }

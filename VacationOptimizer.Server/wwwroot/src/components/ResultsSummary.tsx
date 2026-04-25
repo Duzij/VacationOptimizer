@@ -5,6 +5,7 @@ import { Calendar, ChevronDown, ChevronRight, Palmtree, PointerIcon, Sun } from 
 interface Props {
     result: OptimizeResult;
     shouldScroll?: boolean;
+    children?: React.ReactNode;
 }
 
 function formatDate(dateStr: string): string {
@@ -34,7 +35,7 @@ function scrollToMonth(dateStr: string) {
     }
 }
 
-export default function ResultsSummary({ result, shouldScroll = false }: Props) {
+export default function ResultsSummary({ result, shouldScroll = false, children }: Props) {
     const timeOffRangesRef = useRef<HTMLButtonElement>(null);
     const [isRangesOpen, setIsRangesOpen] = useState(() => {
         if (typeof window !== "undefined") {
@@ -81,6 +82,8 @@ export default function ResultsSummary({ result, shouldScroll = false }: Props) 
                     inverted={true}
                 />
             </div>
+
+            {children}
 
             {/* Vacation ranges */}
             {result.ranges.length > 0 && (

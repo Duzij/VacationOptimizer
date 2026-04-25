@@ -10,6 +10,7 @@ public class VacationOptimizerServiceTests
 {
     private readonly IPublicHolidayService _holidayService;
     private readonly CalendarService _calendarService;
+    private readonly IResultTokenService _resultTokenService;
     private readonly VacationOptimizerService _optimizer;
 
     private const string DefaultCountry = "ES";
@@ -27,7 +28,8 @@ public class VacationOptimizerServiceTests
 
         _holidayService = new PublicHolidayService(dbContext);
         _calendarService = new CalendarService(_holidayService);
-        _optimizer = new VacationOptimizerService(_calendarService);
+        _resultTokenService = new ResultTokenService("test-result-token-signing-key");
+        _optimizer = new VacationOptimizerService(_calendarService, _resultTokenService);
     }
 
     [Fact]
@@ -253,18 +255,105 @@ public class VacationOptimizerServiceTests
     }
 
     [Fact]
-    public void Optimize_ResultSeed_IsCompactAndStableForReuse()
+    public void Optimize_ResultToken_IsSignedAndStableForReuse()
     {
         var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
 
         var firstResult = _optimizer.Optimize(request);
         var nextResult = _optimizer.Optimize(request with
         {
-            UsedResultSeeds = new List<string> { firstResult.ResultSeed }
+            UsedResultTokens = new List<string> { firstResult.ResultToken }
         });
+        var firstPayload = _resultTokenService.ParseToken(firstResult.ResultToken);
+        var nextPayload = _resultTokenService.ParseToken(nextResult.ResultToken);
 
-        Assert.Matches("^[0-9a-f]{16}$", firstResult.ResultSeed);
-        Assert.NotEqual(firstResult.ResultSeed, nextResult.ResultSeed);
+        Assert.Equal(0, firstPayload.Attempt);
+        Assert.Equal(1, nextPayload.Attempt);
+        Assert.Matches("^[0-9a-f]{16}$", firstPayload.OutputSeed);
+        Assert.NotEqual(firstPayload.OutputSeed, nextPayload.OutputSeed);
+    }
+
+    [Fact]
+    public void Optimize_ResultToken_TamperIsRejected()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+        var firstResult = _optimizer.Optimize(request);
+        var tamperedToken = TamperToken(firstResult.ResultToken);
+
+        Assert.Throws<ResultTokenException>(() => _optimizer.Optimize(request with
+        {
+            UsedResultTokens = new List<string> { tamperedToken }
+        }));
+    }
+
+    [Fact]
+    public void Optimize_ResultToken_ForDifferentRequestIsIgnored()
+    {
+        var firstRequest = CreateOptimizeRequest(vacationDays: DefaultBudget);
+        var differentRequest = CreateOptimizeRequest(vacationDays: DefaultBudget - 1);
+        var firstResult = _optimizer.Optimize(firstRequest);
+
+        var differentResult = _optimizer.Optimize(differentRequest with
+        {
+            UsedResultTokens = new List<string> { firstResult.ResultToken }
+        });
+        var payload = _resultTokenService.ParseToken(differentResult.ResultToken);
+
+        Assert.Equal(0, payload.Attempt);
+    }
+
+    [Fact]
+    public void Optimize_ResultToken_ResumesAfterMaxMatchingAttempt()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+        var firstPayload = _resultTokenService.ParseToken(_optimizer.Optimize(request).ResultToken);
+        var futureToken = _resultTokenService.CreateToken(50, "ffffffffffffffff", firstPayload.RequestFingerprint);
+
+        var result = _optimizer.Optimize(request with
+        {
+            UsedResultTokens = new List<string> { futureToken }
+        });
+        var payload = _resultTokenService.ParseToken(result.ResultToken);
+
+        Assert.Equal(51, payload.Attempt);
+    }
+
+    [Fact]
+    public void Optimize_UsedResultTokens_RejectsTooManyTokens()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+        var token = _optimizer.Optimize(request).ResultToken;
+
+        Assert.Throws<ArgumentException>(() => _optimizer.Optimize(request with
+        {
+            UsedResultTokens = Enumerable.Repeat(token, 101).ToList()
+        }));
+    }
+
+    [Fact]
+    public void Optimize_ResultToken_RejectsOutOfRangeAttempt()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+        var payload = _resultTokenService.ParseToken(_optimizer.Optimize(request).ResultToken);
+        var outOfRangeToken = _resultTokenService.CreateToken(10_001, "ffffffffffffffff", payload.RequestFingerprint);
+
+        Assert.Throws<ArgumentException>(() => _optimizer.Optimize(request with
+        {
+            UsedResultTokens = new List<string> { outOfRangeToken }
+        }));
+    }
+
+    [Fact]
+    public void Optimize_ReturnsUnavailableWhenAttemptWindowIsExhausted()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+        var payload = _resultTokenService.ParseToken(_optimizer.Optimize(request).ResultToken);
+        var terminalToken = _resultTokenService.CreateToken(10_000, "ffffffffffffffff", payload.RequestFingerprint);
+
+        Assert.Throws<OptimizationResultUnavailableException>(() => _optimizer.Optimize(request with
+        {
+            UsedResultTokens = new List<string> { terminalToken }
+        }));
     }
 
     // Helper methods
@@ -284,4 +373,10 @@ public class VacationOptimizerServiceTests
 
     private static CalendarDay CreateCalendarDay(DateOnly date, DayType type, string? holidayName = null) =>
         new() { Date = date, Type = type, HolidayName = holidayName };
+
+    private static string TamperToken(string token)
+    {
+        var replacement = token[^1] == 'A' ? 'B' : 'A';
+        return token[..^1] + replacement;
+    }
 }
