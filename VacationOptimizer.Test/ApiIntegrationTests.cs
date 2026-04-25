@@ -288,7 +288,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             vacationDays = 5,
             minimumDaysPerRange = 1,
             maximumDaysPerRange = 14,
-            seed = 42,
         });
 
         var response = await client.PostAsync("/api/vacations/countries/IN/optimize", payload);
@@ -313,7 +312,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             vacationDays = 5,
             minimumDaysPerRange = 1,
             maximumDaysPerRange = 14,
-            seed = 42,
         });
 
         var response = await client.PostAsync("/api/vacations/countries/ES/optimize", payload);

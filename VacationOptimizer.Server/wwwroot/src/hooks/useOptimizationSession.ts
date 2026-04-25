@@ -2,7 +2,7 @@ import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react"
 import { useOptimize } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/models";
 import { getInitialOptimizationState, persistOptimization, updateUrlFromRequest } from "../utils/optimizationPersistence";
-import { hasSameHolidayScope, normalizeOptimizeRequest, withIgnoredHolidayDates } from "../utils/optimizationRequest";
+import { hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
 
 export interface OptimizationRunOptions {
   showLoading?: boolean;
@@ -30,7 +30,22 @@ export function useOptimizationSession() {
   const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>(
     initialStateRef.current.initialRequest?.customFreeDays ?? [],
   );
-  const usedResultHashesRef = useRef<string[]>([]);
+  const usedResultSeedsRef = useRef<string[]>([]);
+
+  const addUsedResultSeeds = useCallback((request: OptimizeRequest): OptimizeRequest => ({
+    ...request,
+    usedResultSeeds: usedResultSeedsRef.current.length > 0
+      ? usedResultSeedsRef.current
+      : undefined,
+  }), []);
+
+  const rememberResultSeed = useCallback((resultSeed: string | undefined) => {
+    if (!resultSeed) {
+      return;
+    }
+
+    usedResultSeedsRef.current = [...new Set([...usedResultSeedsRef.current, resultSeed])];
+  }, []);
 
   const executeOptimization = useEffectEvent(async (
     req: OptimizeRequest,
@@ -47,8 +62,12 @@ export function useOptimizationSession() {
     }
 
     const requestWithIgnoredDates = withIgnoredHolidayDates(normalizedRequest, effectiveIgnoredHolidayDates);
+    const keepResultHistory = requestsMatch(activeRequest, requestWithIgnoredDates);
+    if (!keepResultHistory) {
+      usedResultSeedsRef.current = [];
+    }
+    const requestForApi = addUsedResultSeeds(requestWithIgnoredDates);
 
-    usedResultHashesRef.current = [];
     setActiveRequest(requestWithIgnoredDates);
     updateUrlFromRequest(requestWithIgnoredDates);
 
@@ -57,13 +76,11 @@ export function useOptimizationSession() {
     }
 
     try {
-      const data = await optimize.mutateAsync(requestWithIgnoredDates);
+      const data = await optimize.mutateAsync(requestForApi);
       setResult(data);
       persistOptimization(requestWithIgnoredDates, data);
 
-      if (data.resultHash) {
-        usedResultHashesRef.current = [...usedResultHashesRef.current, data.resultHash];
-      }
+      rememberResultSeed(data.resultSeed);
 
       return { data, request: requestWithIgnoredDates };
     } finally {
@@ -101,24 +118,18 @@ export function useOptimizationSession() {
     setIsUserOptimizing(true);
     try {
       const shuffleRequest: OptimizeRequest = {
-        ...activeRequest,
-        seed: Math.floor(Math.random() * 1_000_000),
-        usedResultHashes: usedResultHashesRef.current.length > 0
-          ? usedResultHashesRef.current
-          : undefined,
+        ...addUsedResultSeeds(activeRequest),
       };
 
       const data = await optimize.mutateAsync(shuffleRequest);
       setResult(data);
       persistOptimization(activeRequest, data);
 
-      if (data.resultHash) {
-        usedResultHashesRef.current = [...usedResultHashesRef.current, data.resultHash];
-      }
+      rememberResultSeed(data.resultSeed);
     } finally {
       setIsUserOptimizing(false);
     }
-  }, [activeRequest, optimize]);
+  }, [activeRequest, addUsedResultSeeds, optimize, rememberResultSeed]);
 
   return {
     initialRequest: initialStateRef.current.initialRequest,

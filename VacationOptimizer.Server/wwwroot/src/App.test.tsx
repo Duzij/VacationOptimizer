@@ -80,13 +80,13 @@ describe("App loading state", () => {
       maximumDaysPerRange: 14,
     }));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify({
-      calendar: { days: [], hash: "" },
+      calendar: { days: [] },
       selectedVacationDays: [],
       ranges: [],
       totalDaysOff: 0,
       vacationDaysUsed: 0,
       publicHolidaysCount: 0,
-      resultHash: "",
+      resultSeed: "",
     }));
     window.history.replaceState({}, "", "/app?country=DE");
 

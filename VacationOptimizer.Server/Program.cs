@@ -246,8 +246,7 @@ api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHoli
             CustomFreeDays: request.CustomFreeDays,
             State: state.Code,
             IgnoredHolidayDates: request.IgnoredHolidayDates,
-            Seed: request.Seed,
-            UsedResultHashes: request.UsedResultHashes);
+            UsedResultSeeds: request.UsedResultSeeds);
 
         var result = optimizer.Optimize(internalRequest);
 
@@ -263,7 +262,7 @@ api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHoli
             TotalDaysOff: result.TotalDaysOff,
             VacationDaysUsed: result.VacationDaysUsed,
             PublicHolidaysCount: result.PublicHolidaysCount,
-            ResultHash: result.ResultHash));
+            ResultSeed: result.ResultSeed));
     }
     catch (ArgumentException ex)
     {
@@ -335,8 +334,7 @@ api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHoli
             CustomFreeDays: request.CustomFreeDays,
             State: effectiveStateCode,
             IgnoredHolidayDates: request.IgnoredHolidayDates,
-            Seed: request.Seed,
-            UsedResultHashes: request.UsedResultHashes);
+            UsedResultSeeds: request.UsedResultSeeds);
 
         var result = optimizer.Optimize(internalRequest);
         stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);
@@ -356,7 +354,7 @@ api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHoli
             TotalDaysOff: result.TotalDaysOff,
             VacationDaysUsed: result.VacationDaysUsed,
             PublicHolidaysCount: result.PublicHolidaysCount,
-            ResultHash: result.ResultHash));
+            ResultSeed: result.ResultSeed));
     }
     catch (ArgumentException ex)
     {

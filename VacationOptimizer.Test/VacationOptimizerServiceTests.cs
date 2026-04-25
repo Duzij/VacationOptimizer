@@ -252,6 +252,21 @@ public class VacationOptimizerServiceTests
         Assert.Null(ignoredHoliday.HolidayName);
     }
 
+    [Fact]
+    public void Optimize_ResultSeed_IsCompactAndStableForReuse()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+
+        var firstResult = _optimizer.Optimize(request);
+        var nextResult = _optimizer.Optimize(request with
+        {
+            UsedResultSeeds = new List<string> { firstResult.ResultSeed }
+        });
+
+        Assert.Matches("^[0-9a-f]{16}$", firstResult.ResultSeed);
+        Assert.NotEqual(firstResult.ResultSeed, nextResult.ResultSeed);
+    }
+
     // Helper methods
     private List<CalendarDay> BuildDefaultCalendar() =>
         _calendarService.BuildCalendar(DefaultCountry, DefaultYear).Days;

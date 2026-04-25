@@ -47,7 +47,21 @@ function normalizeCustomFreeDays(customFreeDays: CustomFreeDay[] | undefined) {
     return undefined;
   }
 
-  return uniqueDates(customFreeDays.map((day) => day.date)).map((date) => ({ date }));
+  const daysByDate = new Map<string, CustomFreeDay>();
+  customFreeDays.forEach((day) => {
+    if (!day.date) {
+      return;
+    }
+
+    daysByDate.set(day.date, day);
+  });
+
+  return [...daysByDate.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([date, day]) => ({
+      date,
+      ...(day.title !== undefined ? { title: day.title } : {}),
+    }));
 }
 
 function normalizeIgnoredHolidayDates(ignoredHolidayDates: string[] | undefined) {
@@ -67,8 +81,7 @@ function normalizeBaseFields(request: OptimizeRequest) {
     maximumDaysPerRange: clamp(request.maximumDaysPerRange ?? defaultMaximumDaysPerRange, 1, 31),
     customFreeDays: normalizeCustomFreeDays(request.customFreeDays),
     ignoredHolidayDates: normalizeIgnoredHolidayDates(request.ignoredHolidayDates),
-    seed: request.seed,
-    usedResultHashes: request.usedResultHashes,
+    usedResultSeeds: request.usedResultSeeds,
   };
 }
 
@@ -239,8 +252,8 @@ export function requestsMatch(left: OptimizeRequest | null, right: OptimizeReque
     && normalizedLeft.vacationDays === normalizedRight.vacationDays
     && normalizedLeft.minimumDaysPerRange === normalizedRight.minimumDaysPerRange
     && normalizedLeft.maximumDaysPerRange === normalizedRight.maximumDaysPerRange
-    && uniqueDates((normalizedLeft.customFreeDays ?? []).map((day) => day.date)).join(",")
-      === uniqueDates((normalizedRight.customFreeDays ?? []).map((day) => day.date)).join(",")
+    && JSON.stringify(normalizedLeft.customFreeDays ?? [])
+      === JSON.stringify(normalizedRight.customFreeDays ?? [])
     && uniqueDates(normalizedLeft.ignoredHolidayDates ?? []).join(",")
       === uniqueDates(normalizedRight.ignoredHolidayDates ?? []).join(",");
 }

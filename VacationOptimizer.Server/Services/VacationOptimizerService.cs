@@ -23,8 +23,7 @@ public class VacationOptimizerService
             request.CustomFreeDays,
             request.IgnoredHolidayDates);
 
-        var usedResultHashes = request.UsedResultHashes?.ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>();
-        var seedBase = request.Seed ?? 0;
+        var usedResultSeeds = request.UsedResultSeeds?.ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>();
         const int maxAttempts = 16;
 
         OptimizeResult? lastResult = null;
@@ -32,10 +31,10 @@ public class VacationOptimizerService
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             var calendar = CloneCalendar(initialCalendar);
-            var rng = new Random(seedBase + attempt);
+            var rng = new Random(attempt);
             var result = OptimizeCalendar(calendar, request, rng);
 
-            if (!usedResultHashes.Contains(result.ResultHash))
+            if (!usedResultSeeds.Contains(result.ResultSeed))
             {
                 return result;
             }
@@ -80,7 +79,7 @@ public class VacationOptimizerService
     private static CalendarData CloneCalendar(CalendarData calendar)
     {
         var clonedDays = calendar.Days.Select(day => day with { }).ToList();
-        return new CalendarData(clonedDays, calendar.Hash);
+        return new CalendarData(clonedDays);
     }
 
     /// <summary>
@@ -145,25 +144,36 @@ public class VacationOptimizerService
             TotalDaysOff: totalDaysOff,
             VacationDaysUsed: selectedVacationDays.Count,
             PublicHolidaysCount: publicHolidaysCount,
-            ResultHash: string.Empty
+            ResultSeed: string.Empty
         );
 
-        return result with { ResultHash = ComputeResultHash(result) };
+        return result with { ResultSeed = ComputeResultSeed(result) };
     }
 
-    private static string ComputeResultHash(OptimizeResult result)
+    private static string ComputeResultSeed(OptimizeResult result)
     {
         var payload = new
         {
-            calendarHash = result.Calendar.Hash,
             selectedVacationDays = result.SelectedVacationDays
                 .OrderBy(date => date)
                 .Select(date => date.ToString("yyyy-MM-dd"))
                 .ToArray(),
+            ranges = result.Ranges
+                .OrderBy(range => range.Start)
+                .ThenBy(range => range.End)
+                .Select(range => new
+                {
+                    start = range.Start.ToString("yyyy-MM-dd"),
+                    end = range.End.ToString("yyyy-MM-dd"),
+                    totalDaysOff = range.TotalDaysOff,
+                    vacationDaysUsed = range.VacationDaysUsed
+                })
+                .ToArray(),
         };
 
         var json = JsonSerializer.Serialize(payload);
-        return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
+        return Convert.ToHexString(hash.AsSpan(0, 8)).ToLowerInvariant();
     }
 
     /// <summary>

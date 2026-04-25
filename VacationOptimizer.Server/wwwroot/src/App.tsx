@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { Shuffle } from "lucide-react";
-import ShuffleLip from "./components/ShuffleLip";
+import DetailsLip from "./components/DetailsLip";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
@@ -25,7 +25,9 @@ import { useTheme } from "./hooks/useTheme";
 import { useOptimizationSession } from "./hooks/useOptimizationSession";
 import { useCalendarInteractions } from "./hooks/useCalendarInteractions";
 import { useDetectedCountry } from "./api/vacationApi";
-import type { OptimizeRequest } from "./types/models";
+import { DayType } from "./types/models";
+import type { CalendarDay, OptimizeRequest } from "./types/models";
+import type { DayLipDetails } from "./components/DetailsLip";
 
 const queryClient = new QueryClient();
 
@@ -151,6 +153,7 @@ function PlannerPage() {
   const currentYear = getDefaultYear();
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
+  const [selectedDayDetails, setSelectedDayDetails] = useState<DayLipDetails | null>(null);
 
   const {
     initialRequest,
@@ -185,8 +188,19 @@ function PlannerPage() {
 
   const handleRunOptimization = useCallback((req: OptimizeRequest) => {
     setShouldScrollResults(true);
+    setSelectedDayDetails(null);
     runOptimization(req);
   }, [runOptimization]);
+
+  const handleShuffleOptimization = useCallback(() => {
+    setShouldScrollResults(false);
+    setSelectedDayDetails(null);
+    void shuffleOptimization();
+  }, [shuffleOptimization]);
+
+  const handleDaySelect = useCallback((day: CalendarDay) => {
+    setSelectedDayDetails(getDayLipDetails(day));
+  }, []);
 
   return (
     <>
@@ -216,7 +230,38 @@ function PlannerPage() {
               initialRequest={initialRequest}
             />
 
-            <aside className="content-panel space-y-5">
+            <details className="content-panel group xl:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-base font-semibold text-text">
+                <span>How to use the planner well</span>
+                <span className="text-sm font-medium text-text-muted group-open:hidden">Show</span>
+                <span className="hidden text-sm font-medium text-text-muted group-open:inline">Hide</span>
+              </summary>
+              <div className="mt-4 space-y-4">
+                <div className="space-y-3 text-sm leading-6 text-text-muted">
+                  <p>Start with holiday clusters, decide whether you want one long break or several smaller ones, then add local context such as office closures or school schedules.</p>
+                  <p>Use the planner to compare real date combinations instead of guessing, then verify the best option against approvals, cost, team coverage, and travel constraints.</p>
+                </div>
+
+                <div className="space-y-3 border-t border-border pt-4">
+                  <h3 className="text-base font-semibold text-text">Need help or spotted something off?</h3>
+                  <p className="text-sm leading-6 text-text-muted">
+                    Share feedback if you notice incorrect holiday data, confusing behavior, or a missing planning detail we should support.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFeedbackDraft({
+                      title: "Share feedback",
+                      message: "",
+                    })}
+                    className="inline-flex items-center justify-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover cursor-pointer"
+                  >
+                    Share feedback
+                  </button>
+                </div>
+              </div>
+            </details>
+
+            <aside className="content-panel hidden space-y-5 xl:block">
               <div className="space-y-3">
                 <h2 className="text-xl font-semibold text-text">How to use the planner well</h2>
                 <div className="space-y-3 text-sm leading-6 text-text-muted">
@@ -261,7 +306,7 @@ function PlannerPage() {
               id="shuffle-optimization-desktop"
               type="button"
               disabled={isUserOptimizing}
-              onClick={() => void shuffleOptimization()}
+              onClick={handleShuffleOptimization}
               className="action-btn action-btn-secondary hidden sm:inline-flex"
               title="Shuffle — generate a different optimization with the same settings"
             >
@@ -275,15 +320,17 @@ function PlannerPage() {
             year={activeRequest?.year ?? currentYear}
             country={activeRequest?.country}
             onDayLongPress={handleDayLongPress}
+            onDaySelect={handleDaySelect}
             locale={detectedCountry?.countryCode}
           />
         </div>
       )}
 
       {result && (
-        <ShuffleLip
+        <DetailsLip
           isLoading={isUserOptimizing}
-          onShuffle={() => void shuffleOptimization()}
+          onShuffle={handleShuffleOptimization}
+          dayDetails={selectedDayDetails}
         />
       )}
 
@@ -300,4 +347,58 @@ function PlannerPage() {
       )}
     </>
   );
+}
+
+function getDayLipDetails(day: CalendarDay): DayLipDetails {
+  return {
+    formattedDate: parseCalendarDate(day.date).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    }),
+    label: getDayLabel(day),
+    detail: getDayDetail(day),
+  };
+}
+
+function parseCalendarDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function getDayLabel(day: CalendarDay): string {
+  switch (day.type) {
+    case DayType.Vacation:
+      return "Vacation day";
+    case DayType.CustomFreeDay:
+      return "Custom free day";
+    case DayType.PublicHoliday:
+      return "Public holiday";
+    case DayType.Weekend:
+      return "Weekend";
+    case DayType.PassedDay:
+      return "Past day";
+    case DayType.Today:
+      return "Today";
+    case DayType.WorkDay:
+    default:
+      return "Work day";
+  }
+}
+
+function getDayDetail(day: CalendarDay): string | null {
+  if (day.type === DayType.CustomFreeDay && (!day.holidayName || day.holidayName.startsWith("Custom free day"))) {
+    return null;
+  }
+
+  if (day.holidayName) {
+    return day.holidayName;
+  }
+
+  if (day.type === DayType.Today) {
+    return "Current day";
+  }
+
+  return null;
 }

@@ -1,6 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using VacationOptimizer.Server.Models;
 
 namespace VacationOptimizer.Server.Services;
@@ -73,9 +70,6 @@ public class CalendarService
             });
         }
 
-        var json = JsonSerializer.Serialize(days);
-        var hash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
-
-        return new CalendarData(days, hash);
+        return new CalendarData(days);
     }
 }
