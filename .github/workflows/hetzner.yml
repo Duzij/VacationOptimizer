@@ -92,12 +92,12 @@ jobs:
             # After docker compose up -d
 
             log_info "Checking SSL certificate..."
-            if [ ! -f "/root/vacation-app/certbot/conf/live/optimize-vacation-for.me/fullchain.pem" ]; then
+            if [ ! -f "/root/vacation-app/certbot/conf/live/longvacation.eu/fullchain.pem" ]; then
               log_info "No certificate found, obtaining one..."
 
               docker compose -f /root/vacation-app/docker-compose.yaml run --rm certbot certonly --webroot \
                 --webroot-path /var/www/certbot \
-                -d optimize-vacation-for.me \
+                -d longvacation.eu \
                 --email your@email.com \
                 --agree-tos --no-eff-email --non-interactive
 
@@ -110,8 +110,8 @@ jobs:
             log_info "Running health check..."
             for i in {1..5}; do
             if curl -fsS --max-time 10 \
-              --resolve optimize-vacation-for.me:443:127.0.0.1 \
-              https://optimize-vacation-for.me/app >/dev/null 2>&1; then
+              --resolve longvacation.eu:443:127.0.0.1 \
+              https://longvacation.eu/app >/dev/null 2>&1; then
                 log_success "API is healthy"
                 break
               elif [ $i -eq 5 ]; then

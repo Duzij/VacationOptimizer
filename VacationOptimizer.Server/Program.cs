@@ -112,7 +112,7 @@ Allow: /privacy
 Allow: /terms
 Allow: /sitemap.xml
 
-Sitemap: https://optimize-vacation-for.me/sitemap.xml
+Sitemap: https://longvacation.eu/sitemap.xml
 """;
 const string adsTxt = """
 google.com, pub-9485445500768000, DIRECT, f08c47fec0942fa0
@@ -478,12 +478,12 @@ static string BuildSitemapXml(IEnumerable<SitemapPage> pages)
 {
     var entries = string.Join(Environment.NewLine, pages.Select(page => $"""
   <url>
-    <loc>https://optimize-vacation-for.me{page.Path}/</loc>
+    <loc>https://longvacation.eu{page.Path}/</loc>
     <lastmod>{page.LastModified:yyyy-MM-dd}</lastmod>
     <changefreq>{page.ChangeFrequency}</changefreq>
     <priority>{page.Priority:0.0}</priority>
   </url>
-""".Replace($"{page.Path}//", $"{page.Path}/").Replace("https://optimize-vacation-for.me//", "https://optimize-vacation-for.me/")));
+""".Replace($"{page.Path}//", $"{page.Path}/").Replace("https://longvacation.eu//", "https://longvacation.eu/")));
 
     return $$"""
 <?xml version="1.0" encoding="UTF-8"?>

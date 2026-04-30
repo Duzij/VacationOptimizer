@@ -186,10 +186,10 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         response.EnsureSuccessStatusCode();
         Assert.Equal("application/xml", response.Content.Headers.ContentType?.MediaType);
         var xml = await response.Content.ReadAsStringAsync();
-        Assert.Contains("https://optimize-vacation-for.me/", xml);
-        Assert.Contains("https://optimize-vacation-for.me/about/", xml);
-        Assert.Contains("https://optimize-vacation-for.me/contact/", xml);
-        Assert.Contains("https://optimize-vacation-for.me/app/", xml);
+        Assert.Contains("https://longvacation.eu/", xml);
+        Assert.Contains("https://longvacation.eu/about/", xml);
+        Assert.Contains("https://longvacation.eu/contact/", xml);
+        Assert.Contains("https://longvacation.eu/app/", xml);
     }
 
     [Fact]

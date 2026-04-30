@@ -238,7 +238,7 @@ export function RouteMeta({
     const canonicalTag = document.querySelector('link[rel="canonical"]');
     canonicalTag?.setAttribute(
       "href",
-      `https://optimize-vacation-for.me${canonicalPath}`,
+      `https://longvacation.eu${canonicalPath}`,
     );
   }, [canonicalPath, description, title]);
 

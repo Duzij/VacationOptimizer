@@ -9,4 +9,4 @@ Allow: /privacy
 Allow: /terms
 Allow: /sitemap.xml
 
-Sitemap: https://optimize-vacation-for.me/sitemap.xml
+Sitemap: https://longvacation.eu/sitemap.xml

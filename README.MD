@@ -45,7 +45,7 @@ docker compose -f docker-compose.dev.yaml down
 ## 1. Prerequisites
 
 - Docker and Docker Compose plugin installed
-- DNS for `optimize-vacation-for.me` pointing to the server IP
+- DNS for `longvacation.eu` pointing to the server IP
 - Ports `22` and `443` open on the server, the rest are closed by custom firewall
 - A valid `.env` file in the project root
 
@@ -76,7 +76,7 @@ Run certbot manually (the `certbot` service uses a profile and does not auto-sta
 ```bash
 docker compose run --rm --profile certbot certbot certonly --webroot \
   --webroot-path /var/www/certbot \
-  -d optimize-vacation-for.me \
+  -d longvacation.eu \
   --email pavelpavelpetrpetr@gmail.com \
   --agree-tos \
   --no-eff-email
