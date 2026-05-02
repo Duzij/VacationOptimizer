@@ -1,5 +1,6 @@
 using PublicHoliday;
 using System.Reflection;
+using VacationOptimizer.Server.CountrySpecific.Switzerland;
 using VacationOptimizer.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -110,6 +111,8 @@ public class PublicHolidayService : IPublicHolidayService
                 _countryFactories[code] = () => (IPublicHolidays)Activator.CreateInstance(capturedType)!;
             }
         }
+
+        _countryFactories["CH"] = () => new SwitzerlandPublicHoliday(false, false, false);
     }
 
     public IList<HolidayInfo> GetHolidays(string countryCode, int year, string? stateCode = null)
@@ -152,6 +155,7 @@ public class PublicHolidayService : IPublicHolidayService
             throw new ArgumentException($"Unsupported country code: {countryCode}");
 
         var provider = factory();
+        ConfigureFallbackProvider(provider, countryCode, stateCode);
         var holidays = provider.PublicHolidayNames(year);
 
         return holidays
@@ -187,6 +191,11 @@ public class PublicHolidayService : IPublicHolidayService
 
     public IList<StateInfo> GetStates(string countryCode)
     {
+        if (string.Equals(countryCode, "CH", StringComparison.OrdinalIgnoreCase))
+        {
+            return SwitzerlandCantons.All.ToArray();
+        }
+
         return _dbContext.States
             .Where(s => s.Country!.IsoCode == countryCode)
             .OrderBy(s => s.Name)
@@ -213,5 +222,29 @@ public class PublicHolidayService : IPublicHolidayService
         }
 
         return codes;
+    }
+
+    private static void ConfigureFallbackProvider(IPublicHolidays provider, string countryCode, string? stateCode)
+    {
+        if (!string.Equals(countryCode, "CH", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(stateCode))
+        {
+            return;
+        }
+
+        var cantonCode = stateCode.Trim().ToUpperInvariant();
+        if (cantonCode.StartsWith("CH-", StringComparison.OrdinalIgnoreCase))
+        {
+            cantonCode = cantonCode[3..];
+        }
+
+        if (provider is not SwitzerlandPublicHoliday swissProvider
+            || !Enum.TryParse<SwitzerlandPublicHoliday.Cantons>(cantonCode, ignoreCase: true, out var canton)
+            || canton is SwitzerlandPublicHoliday.Cantons.ALL or SwitzerlandPublicHoliday.Cantons.OnlyOfficial)
+        {
+            throw new ArgumentException($"Unsupported state code '{stateCode}' for country 'CH'.");
+        }
+
+        swissProvider.Canton = canton;
     }
 }

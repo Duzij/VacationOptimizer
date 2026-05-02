@@ -227,6 +227,23 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task GetSwitzerlandSchema_ReturnsCantonContract()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/countries/CH/schema");
+
+        response.EnsureSuccessStatusCode();
+        var schema = await response.Content.ReadFromJsonAsync<SwitzerlandSchemaResponse>();
+
+        Assert.NotNull(schema);
+        Assert.Equal("CH", schema.CountryCode);
+        Assert.Equal("switzerland", schema.Component);
+        Assert.True(schema.CantonSelectionRequired);
+        Assert.Contains(schema.Cantons, canton => canton.Code == "CH-ZH");
+    }
+
+    [Fact]
     public async Task GetSpainSchema_ReturnsEmptyStateAndCityOptionsWhenSpainExistsOnlyViaFallbackProvider()
     {
         using (var scope = _factory.Services.CreateScope())
@@ -327,6 +344,29 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task OptimizeSwitzerland_WithCanton_ReturnsSwitzerlandSpecificScope()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            cantonCode = "CH-ZH",
+            year = 2026,
+            vacationDays = 5,
+            minimumDaysPerRange = 1,
+            maximumDaysPerRange = 14,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/CH/optimize", payload);
+
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"countryCode\":\"CH\"", json);
+        Assert.Contains("\"type\":\"canton\"", json);
+        Assert.Contains("\"cantonCode\":\"CH-ZH\"", json);
+        Assert.Contains("\"publicHolidaysCount\":", json);
+    }
+
+    [Fact]
     public async Task OptimizeLegacyEndpoint_StillWorksForNonIndiaCountries()
     {
         var client = _factory.CreateClient();
@@ -357,4 +397,10 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         string Component,
         List<StateResponse> States,
         List<CityResponse> Cities);
+
+    private sealed record SwitzerlandSchemaResponse(
+        string CountryCode,
+        string Component,
+        bool CantonSelectionRequired,
+        List<StateResponse> Cantons);
 }

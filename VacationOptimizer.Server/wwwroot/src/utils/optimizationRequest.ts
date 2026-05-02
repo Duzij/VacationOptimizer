@@ -1,11 +1,15 @@
 import {
+  type CustomFreeDay,
+  type OptimizeRequest,
+} from "../types/models";
+import {
   isIndiaOptimizeRequest,
   isSpainOptimizeRequest,
-  type CustomFreeDay,
+  isSwitzerlandOptimizeRequest,
   type IndiaOptimizeRequest,
-  type OptimizeRequest,
   type SpainOptimizeRequest,
-} from "../types/models";
+  type SwitzerlandOptimizeRequest,
+} from "../features/countrySpecific/models";
 import {
   defaultMaximumDaysPerRange,
   defaultMinimumDaysPerRange,
@@ -106,6 +110,16 @@ function normalizeSpainRequest(request: SpainOptimizeRequest): SpainOptimizeRequ
   };
 }
 
+function normalizeSwitzerlandRequest(request: SwitzerlandOptimizeRequest): SwitzerlandOptimizeRequest {
+  const normalized = normalizeBaseFields(request);
+
+  return {
+    ...normalized,
+    country: "CH",
+    cantonCode: request.cantonCode.trim().toUpperCase(),
+  };
+}
+
 export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequest {
   if (isIndiaOptimizeRequest(request)) {
     return normalizeIndiaRequest(request);
@@ -113,6 +127,10 @@ export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequ
 
   if (isSpainOptimizeRequest(request)) {
     return normalizeSpainRequest(request);
+  }
+
+  if (isSwitzerlandOptimizeRequest(request)) {
+    return normalizeSwitzerlandRequest(request);
   }
 
   const normalized = normalizeBaseFields(request);
@@ -162,6 +180,24 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     });
   }
 
+  if (country === "CH") {
+    const cantonCode = params.get("cantonCode")?.trim().toUpperCase();
+    if (!cantonCode) {
+      return null;
+    }
+
+    return normalizeSwitzerlandRequest({
+      country: "CH",
+      cantonCode,
+      year: parseNumber(params.get("year"), currentYear),
+      vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
+      minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
+      maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+      customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
+      ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+    });
+  }
+
   return normalizeOptimizeRequest({
     country,
     state: params.get("state")?.trim().toUpperCase() || undefined,
@@ -201,6 +237,8 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
     if (normalizedRequest.cityCode) {
       params.set("cityCode", normalizedRequest.cityCode);
     }
+  } else if (isSwitzerlandOptimizeRequest(normalizedRequest)) {
+    params.set("cantonCode", normalizedRequest.cantonCode);
   } else if (normalizedRequest.state) {
     params.set("state", normalizedRequest.state);
   }
@@ -233,6 +271,10 @@ function getScopeCode(request: OptimizeRequest) {
 
   if (isSpainOptimizeRequest(request)) {
     return request.cityCode ?? request.stateCode ?? "";
+  }
+
+  if (isSwitzerlandOptimizeRequest(request)) {
+    return request.cantonCode;
   }
 
   return request.state ?? "";

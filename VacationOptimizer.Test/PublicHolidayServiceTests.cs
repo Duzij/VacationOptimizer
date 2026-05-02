@@ -60,6 +60,24 @@ public class PublicHolidayServiceTests
     }
 
     [Fact]
+    public void GetStates_Switzerland_ReturnsPackageBackedCantons()
+    {
+        var states = _holidayService.GetStates("CH");
+
+        Assert.Contains(states, s => s.Code == "CH-ZH" && s.Name == "Zurich");
+        Assert.Contains(states, s => s.Code == "CH-GE" && s.Name == "Geneva");
+    }
+
+    [Fact]
+    public void GetHolidays_SwitzerlandWithCanton_ReturnsCantonHolidays()
+    {
+        var holidays = _holidayService.GetHolidays("CH", 2026, "CH-ZH");
+
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 1));
+        Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 4, 6));
+    }
+
+    [Fact]
     public void GetHolidays_IndiaWithoutState_ReturnsNormalizedNationalHolidays()
     {
         var holidays = _holidayService.GetHolidays("IN", 2026);

@@ -40,6 +40,9 @@ vi.mock("../api/vacationApi", () => ({
     data: [],
     isLoading: false,
   }),
+}));
+
+vi.mock("../features/countrySpecific/countrySpecificApi", () => ({
   useIndiaSchema: () => ({
     data: indiaSchema,
     isLoading: false,
@@ -56,6 +59,64 @@ vi.mock("../api/vacationApi", () => ({
       },
       states: [],
       cities: [],
+    },
+    isLoading: false,
+  }),
+  useSwitzerlandSchema: () => ({
+    data: {
+      countryCode: "CH" as const,
+      component: "switzerland" as const,
+      yearRange: { min: 2026, max: 2031 },
+      defaults: {
+        vacationDays: 25,
+        minimumDaysPerRange: 4,
+        maximumDaysPerRange: 14,
+      },
+      cantonSelectionRequired: true,
+      cantons: [],
+    },
+    isLoading: false,
+  }),
+}));
+
+vi.mock("../features/countrySpecific/india/api", () => ({
+  useIndiaSchema: () => ({
+    data: indiaSchema,
+    isLoading: false,
+  }),
+}));
+
+vi.mock("../features/countrySpecific/spain/api", () => ({
+  useSpainSchema: () => ({
+    data: {
+      countryCode: "ES" as const,
+      component: "spain" as const,
+      yearRange: { min: 2026, max: 2031 },
+      defaults: {
+        vacationDays: 25,
+        minimumDaysPerRange: 4,
+        maximumDaysPerRange: 14,
+      },
+      states: [],
+      cities: [],
+    },
+    isLoading: false,
+  }),
+}));
+
+vi.mock("../features/countrySpecific/switzerland/api", () => ({
+  useSwitzerlandSchema: () => ({
+    data: {
+      countryCode: "CH" as const,
+      component: "switzerland" as const,
+      yearRange: { min: 2026, max: 2031 },
+      defaults: {
+        vacationDays: 25,
+        minimumDaysPerRange: 4,
+        maximumDaysPerRange: 14,
+      },
+      cantonSelectionRequired: true,
+      cantons: [],
     },
     isLoading: false,
   }),

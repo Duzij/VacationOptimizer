@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   DayType,
-  getOptimizeRequestScopeCode,
-  isIndiaOptimizeRequest,
   type CalendarDay,
   type CustomFreeDay,
   type OptimizeRequest,
   type OptimizeResult,
 } from "../types/models";
+import {
+  getOptimizeRequestScopeCode,
+  isIndiaOptimizeRequest,
+} from "../features/countrySpecific/models";
 
 export interface FeedbackDraft {
   title: string;
