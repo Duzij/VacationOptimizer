@@ -118,47 +118,92 @@ public class VacationOptimizerService
     }
 
     /// <summary>
-    /// Finds contiguous sequences of working days that act as "bridges" between
-    /// non-working clusters (weekends, holidays, already-selected vacation days).
+    /// Finds working-day bridge candidates between days off.
+    /// Never-vacation days are blockers for final ranges, but they also join adjacent
+    /// working-day bridge candidates so the optimizer can choose both sides together.
     /// </summary>
     public static List<BridgeCandidate> FindBridgeCandidates(List<CalendarDay> calendar)
     {
         var candidates = new List<BridgeCandidate>();
         var segments = FindContiguousSegments(calendar, IsWorkDay);
+        var candidateKeys = new HashSet<(int Start, int End)>();
 
         foreach (var segment in segments)
         {
-            int workDaysCount = segment.End - segment.Start + 1;
+            AddBridgeCandidate(calendar, candidates, candidateKeys, segment.Start, segment.End);
+        }
 
-            // Calculate total continuous days off if this bridge were filled
-            int clusterStart = segment.Start;
-            int clusterEnd = segment.End;
+        for (int i = 0; i < segments.Count - 1; i++)
+        {
+            var left = segments[i];
+            var right = segments[i + 1];
+            var gapContainsNeverVacationDay = calendar
+                .Skip(left.End + 1)
+                .Take(right.Start - left.End - 1)
+                .Any(IsNeverVacationDay);
 
-            // Extend backwards to include preceding days off, stopping at never-vacation blockers.
-            while (clusterStart > 0 && IsRangeDay(calendar[clusterStart - 1]))
+            if (gapContainsNeverVacationDay)
             {
-                clusterStart--;
+                AddBridgeCandidate(calendar, candidates, candidateKeys, left.Start, right.End);
             }
-
-            // Extend forwards to include following days off, stopping at never-vacation blockers.
-            while (clusterEnd < calendar.Count - 1 && IsRangeDay(calendar[clusterEnd + 1]))
-            {
-                clusterEnd++;
-            }
-
-            int totalDaysOff = clusterEnd - clusterStart + 1;
-            double score = (double)totalDaysOff / workDaysCount;
-
-            candidates.Add(new BridgeCandidate(
-                StartIndex: segment.Start,
-                EndIndex: segment.End,
-                WorkDaysCount: workDaysCount,
-                TotalDaysOff: totalDaysOff,
-                Score: score
-            ));
         }
 
         return candidates;
+    }
+
+    /// <summary>
+    /// Adds a candidate covering the supplied calendar indexes.
+    /// Only workdays count against the vacation budget; never-vacation days inside the
+    /// candidate are not selected and are excluded from the candidate's total days off.
+    /// </summary>
+    private static void AddBridgeCandidate(
+        List<CalendarDay> calendar,
+        List<BridgeCandidate> candidates,
+        HashSet<(int Start, int End)> candidateKeys,
+        int startIndex,
+        int endIndex)
+    {
+        if (!candidateKeys.Add((startIndex, endIndex)))
+        {
+            return;
+        }
+
+        int workDaysCount = calendar
+            .Skip(startIndex)
+            .Take(endIndex - startIndex + 1)
+            .Count(IsWorkDay);
+
+        if (workDaysCount == 0)
+        {
+            return;
+        }
+
+        int clusterStart = startIndex;
+        int clusterEnd = endIndex;
+
+        while (clusterStart > 0 && IsRangeDay(calendar[clusterStart - 1]))
+        {
+            clusterStart--;
+        }
+
+        while (clusterEnd < calendar.Count - 1 && IsRangeDay(calendar[clusterEnd + 1]))
+        {
+            clusterEnd++;
+        }
+
+        int totalDaysOff = calendar
+            .Skip(clusterStart)
+            .Take(clusterEnd - clusterStart + 1)
+            .Count(day => !IsNeverVacationDay(day));
+        double score = (double)totalDaysOff / workDaysCount;
+
+        candidates.Add(new BridgeCandidate(
+            StartIndex: startIndex,
+            EndIndex: endIndex,
+            WorkDaysCount: workDaysCount,
+            TotalDaysOff: totalDaysOff,
+            Score: score
+        ));
     }
 
     private static OptimizeResult BuildResult(CalendarData calendar, int minimumDaysPerRange = 1, int maximumDaysPerRange = 365)
@@ -275,8 +320,9 @@ public class VacationOptimizerService
     }
 
     /// <summary>
-    /// Groups consecutive non-working days (weekends + holidays + vacation) into ranges,
-    /// filtered by minimum and maximum days per range.
+    /// Groups consecutive visible days off into result ranges.
+    /// Never-vacation days split ranges and are not included in range totals, even when
+    /// a bridge candidate selected vacation days on both sides of the blocker.
     /// </summary>
     private static List<VacationRange> BuildRanges(List<CalendarDay> calendar, int minimumDaysPerRange = 1, int maximumDaysPerRange = 365)
     {

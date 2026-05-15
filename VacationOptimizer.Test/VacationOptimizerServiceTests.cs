@@ -132,6 +132,39 @@ public class VacationOptimizerServiceTests
     }
 
     [Fact]
+    public void BridgeCandidates_AddsCombinedBridgeAroundNeverHoliday()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var calendar = new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 4), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 5), DayType.NeverHoliday),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 6), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 7), DayType.Weekend),
+        };
+
+        var candidates = VacationOptimizerService.FindBridgeCandidates(calendar);
+
+        Assert.Equal(3, candidates.Count);
+        Assert.Contains(candidates, candidate =>
+            candidate.StartIndex == 1 &&
+            candidate.EndIndex == 1 &&
+            candidate.WorkDaysCount == 1 &&
+            candidate.TotalDaysOff == 2);
+        Assert.Contains(candidates, candidate =>
+            candidate.StartIndex == 3 &&
+            candidate.EndIndex == 3 &&
+            candidate.WorkDaysCount == 1 &&
+            candidate.TotalDaysOff == 2);
+        Assert.Contains(candidates, candidate =>
+            candidate.StartIndex == 1 &&
+            candidate.EndIndex == 3 &&
+            candidate.WorkDaysCount == 2 &&
+            candidate.TotalDaysOff == 4);
+    }
+
+    [Fact]
     public void OptimizeCalendar_NeverHolidayIsNotIncludedInRanges()
     {
         var nextYear = DateTime.Now.Year + 1;
