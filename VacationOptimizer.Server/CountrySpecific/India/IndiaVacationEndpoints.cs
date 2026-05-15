@@ -51,6 +51,7 @@ public static class IndiaVacationEndpoints
                     CustomFreeDays: request.CustomFreeDays,
                     State: state.Code,
                     IgnoredHolidayDates: request.IgnoredHolidayDates,
+                    NeverHolidayDates: request.NeverHolidayDates,
                     UsedResultTokens: request.UsedResultTokens));
 
                 return Results.Ok(new IndiaOptimizeResult(

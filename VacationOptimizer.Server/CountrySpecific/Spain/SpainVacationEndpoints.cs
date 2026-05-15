@@ -63,6 +63,7 @@ public static class SpainVacationEndpoints
                     CustomFreeDays: request.CustomFreeDays,
                     State: normalizedCityCode ?? normalizedStateCode,
                     IgnoredHolidayDates: request.IgnoredHolidayDates,
+                    NeverHolidayDates: request.NeverHolidayDates,
                     UsedResultTokens: request.UsedResultTokens));
 
                 stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);

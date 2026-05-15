@@ -20,7 +20,7 @@ export interface FeedbackDraft {
 
 export interface ConfirmDayState {
   date: string;
-  mode: "add" | "remove" | "reportHoliday";
+  mode: "add" | "remove" | "removeNeverHoliday" | "reportHoliday";
   holidayName?: string | null;
 }
 
@@ -54,6 +54,8 @@ export function useCalendarInteractions({
   result,
   ignoredHolidayDates,
   setIgnoredHolidayDates,
+  neverHolidayDates,
+  setNeverHolidayDates,
   customFreeDays,
   setCustomFreeDays,
   runOptimization,
@@ -62,6 +64,8 @@ export function useCalendarInteractions({
   result: OptimizeResult | null;
   ignoredHolidayDates: string[];
   setIgnoredHolidayDates: React.Dispatch<React.SetStateAction<string[]>>;
+  neverHolidayDates: string[];
+  setNeverHolidayDates: React.Dispatch<React.SetStateAction<string[]>>;
   customFreeDays: CustomFreeDay[];
   setCustomFreeDays: React.Dispatch<React.SetStateAction<CustomFreeDay[]>>;
   runOptimization: (
@@ -116,6 +120,11 @@ export function useCalendarInteractions({
       return;
     }
 
+    if (day.type === DayType.NeverHoliday) {
+      setConfirmDay({ date: day.date, mode: "removeNeverHoliday" });
+      return;
+    }
+
     const isExisting = customFreeDays.some((item) => item.date === day.date);
     setConfirmDay({ date: day.date, mode: isExisting ? "remove" : "add" });
   };
@@ -133,13 +142,39 @@ export function useCalendarInteractions({
     const updatedDays = confirmDay.mode === "remove"
       ? customFreeDays.filter((day) => day.date !== confirmDay.date)
       : [...customFreeDays, { date: confirmDay.date, title: "" }];
+    const updatedNeverHolidayDates = neverHolidayDates.filter((date) => date !== confirmDay.date);
 
     setCustomFreeDays(updatedDays);
+    setNeverHolidayDates(updatedNeverHolidayDates);
     setConfirmDay(null);
 
     const updatedRequest: OptimizeRequest = {
       ...activeRequest,
       customFreeDays: updatedDays.length > 0 ? updatedDays : undefined,
+      neverHolidayDates: updatedNeverHolidayDates.length > 0 ? updatedNeverHolidayDates : undefined,
+    };
+
+    void runOptimization(updatedRequest);
+  };
+
+  const handleConfirmNeverHoliday = () => {
+    if (!confirmDay || !activeRequest) {
+      return;
+    }
+
+    const updatedNeverHolidayDates = confirmDay.mode === "removeNeverHoliday"
+      ? neverHolidayDates.filter((date) => date !== confirmDay.date)
+      : [...new Set([...neverHolidayDates, confirmDay.date])].sort();
+    const updatedCustomFreeDays = customFreeDays.filter((day) => day.date !== confirmDay.date);
+
+    setNeverHolidayDates(updatedNeverHolidayDates);
+    setCustomFreeDays(updatedCustomFreeDays);
+    setConfirmDay(null);
+
+    const updatedRequest: OptimizeRequest = {
+      ...activeRequest,
+      customFreeDays: updatedCustomFreeDays.length > 0 ? updatedCustomFreeDays : undefined,
+      neverHolidayDates: updatedNeverHolidayDates.length > 0 ? updatedNeverHolidayDates : undefined,
     };
 
     void runOptimization(updatedRequest);
@@ -180,6 +215,7 @@ export function useCalendarInteractions({
     setConfirmDay,
     handleDayLongPress,
     handleConfirmCustomDay,
+    handleConfirmNeverHoliday,
     handleIgnoreHoliday,
   };
 }

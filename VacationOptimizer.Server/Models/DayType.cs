@@ -12,6 +12,7 @@ public enum DayType
     CustomFreeDay,
     Vacation,
     Today,
-    PassedDay
+    PassedDay,
+    NeverHoliday
 }
 

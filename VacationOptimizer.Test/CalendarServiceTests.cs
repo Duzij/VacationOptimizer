@@ -82,6 +82,21 @@ public class CalendarServiceTests
         Assert.Null(newYear.HolidayName);
     }
 
+    [Fact]
+    public void BuildCalendar_NeverHolidayDates_AreMarkedAsNeverHoliday()
+    {
+        var neverHolidayDate = new DateOnly(DefaultYear, 1, 1);
+
+        var calendar = _calendarService.BuildCalendar(
+            DefaultCountry,
+            DefaultYear,
+            neverHolidayDates: new List<DateOnly> { neverHolidayDate });
+
+        var day = GetDayFromCalendar(calendar.Days, neverHolidayDate);
+        Assert.Equal(DayType.NeverHoliday, day.Type);
+        Assert.Null(day.HolidayName);
+    }
+
     private static void AssertDayType(List<CalendarDay> calendar, DateOnly date, DayType expectedType) =>
         Assert.Equal(expectedType, GetDayFromCalendar(calendar, date).Type);
 

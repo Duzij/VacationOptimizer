@@ -36,6 +36,9 @@ export function useOptimizationSession() {
   const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>(
     initialStateRef.current.initialRequest?.customFreeDays ?? [],
   );
+  const [neverHolidayDates, setNeverHolidayDates] = useState<string[]>(
+    initialStateRef.current.initialRequest?.neverHolidayDates ?? [],
+  );
   const resultHistoryRef = useRef<OptimizeResult[]>(initialResultHistory);
   const activeResultIndexRef = useRef(initialResultHistory.length > 0 ? 0 : -1);
 
@@ -136,6 +139,8 @@ export function useOptimizationSession() {
   ) => {
     const normalizedRequest = normalizeOptimizeRequest(req);
     const nextIgnoredHolidayDates = hasSameHolidayScope(activeRequest, normalizedRequest) ? ignoredHolidayDates : [];
+    const nextNeverHolidayDates = normalizedRequest.neverHolidayDates
+      ?? (hasSameHolidayScope(activeRequest, normalizedRequest) ? neverHolidayDates : []);
     const effectiveIgnoredHolidayDates = overrideIgnoredHolidayDates ?? nextIgnoredHolidayDates;
     const showLoading = options?.showLoading ?? true;
 
@@ -143,7 +148,14 @@ export function useOptimizationSession() {
       setIgnoredHolidayDates([]);
     }
 
-    const requestWithIgnoredDates = withIgnoredHolidayDates(normalizedRequest, effectiveIgnoredHolidayDates);
+    if (!hasSameHolidayScope(activeRequest, normalizedRequest) && neverHolidayDates.length > 0) {
+      setNeverHolidayDates([]);
+    }
+
+    const requestWithIgnoredDates = normalizeOptimizeRequest({
+      ...withIgnoredHolidayDates(normalizedRequest, effectiveIgnoredHolidayDates),
+      neverHolidayDates: nextNeverHolidayDates.length > 0 ? nextNeverHolidayDates : undefined,
+    });
     const keepResultHistory = requestsMatch(activeRequest, requestWithIgnoredDates);
     const shouldIncludeResultTokens = options?.includeResultTokens ?? keepResultHistory;
     const requestForApi = shouldIncludeResultTokens
@@ -223,6 +235,8 @@ export function useOptimizationSession() {
     activeRequest,
     ignoredHolidayDates,
     setIgnoredHolidayDates,
+    neverHolidayDates,
+    setNeverHolidayDates,
     customFreeDays,
     setCustomFreeDays,
     isUserOptimizing,

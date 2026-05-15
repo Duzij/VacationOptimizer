@@ -59,6 +59,9 @@
   --calendar-today-bg: #222222;
   --calendar-today-text: #fff;
   --calendar-today-border: #222222;
+  --calendar-never-holiday-bg: #f7f7f7;
+  --calendar-never-holiday-text: #525252;
+  --calendar-never-holiday-border: #d4d4d4;
   --calendar-past-bg: #f0f0f0;
   --calendar-past-text: #bbbbbb;
   --calendar-past-line: #cccccc;
@@ -86,11 +89,14 @@
   --calendar-holiday-text: #fee2e2;
   --calendar-vacation-bg: #006064;
   --calendar-vacation-text: #e0f7fa;
-  --calendar-custom-bg: #444444;
+  --calendar-custom-bg: #7f5d1d;
   --calendar-custom-text: #f9fafb;
   --calendar-today-bg: #f9fafb;
   --calendar-today-text: #222222;
   --calendar-today-border: #f9fafb;
+  --calendar-never-holiday-bg: #303030;
+  --calendar-never-holiday-text: #d4d4d4;
+  --calendar-never-holiday-border: #737373;
   --calendar-past-bg: #1a1a1a;
   --calendar-past-text: #555555;
   --calendar-past-line: #333333;

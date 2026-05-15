@@ -76,6 +76,14 @@ function normalizeIgnoredHolidayDates(ignoredHolidayDates: string[] | undefined)
   return uniqueDates(ignoredHolidayDates);
 }
 
+function normalizeNeverHolidayDates(neverHolidayDates: string[] | undefined) {
+  if (!neverHolidayDates || neverHolidayDates.length === 0) {
+    return undefined;
+  }
+
+  return uniqueDates(neverHolidayDates);
+}
+
 function normalizeBaseFields(request: OptimizeRequest) {
   return {
     country: request.country.trim().toUpperCase(),
@@ -85,6 +93,7 @@ function normalizeBaseFields(request: OptimizeRequest) {
     maximumDaysPerRange: clamp(request.maximumDaysPerRange ?? defaultMaximumDaysPerRange, 1, 31),
     customFreeDays: normalizeCustomFreeDays(request.customFreeDays),
     ignoredHolidayDates: normalizeIgnoredHolidayDates(request.ignoredHolidayDates),
+    neverHolidayDates: normalizeNeverHolidayDates(request.neverHolidayDates),
     usedResultTokens: request.usedResultTokens,
   };
 }
@@ -163,6 +172,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+      neverHolidayDates: parseDateList(params.get("neverHolidays")),
     });
   }
 
@@ -177,6 +187,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+      neverHolidayDates: parseDateList(params.get("neverHolidays")),
     });
   }
 
@@ -195,6 +206,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+      neverHolidayDates: parseDateList(params.get("neverHolidays")),
     });
   }
 
@@ -207,6 +219,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
     customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
     ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+    neverHolidayDates: parseDateList(params.get("neverHolidays")),
   });
 }
 
@@ -261,6 +274,11 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
     params.set("ignoredHolidays", ignoredHolidayDates.join(","));
   }
 
+  const neverHolidayDates = uniqueDates(normalizedRequest.neverHolidayDates ?? []);
+  if (neverHolidayDates.length > 0) {
+    params.set("neverHolidays", neverHolidayDates.join(","));
+  }
+
   return params;
 }
 
@@ -297,7 +315,9 @@ export function requestsMatch(left: OptimizeRequest | null, right: OptimizeReque
     && JSON.stringify(normalizedLeft.customFreeDays ?? [])
       === JSON.stringify(normalizedRight.customFreeDays ?? [])
     && uniqueDates(normalizedLeft.ignoredHolidayDates ?? []).join(",")
-      === uniqueDates(normalizedRight.ignoredHolidayDates ?? []).join(",");
+      === uniqueDates(normalizedRight.ignoredHolidayDates ?? []).join(",")
+    && uniqueDates(normalizedLeft.neverHolidayDates ?? []).join(",")
+      === uniqueDates(normalizedRight.neverHolidayDates ?? []).join(",");
 }
 
 export function hasSameHolidayScope(left: OptimizeRequest | null, right: OptimizeRequest) {

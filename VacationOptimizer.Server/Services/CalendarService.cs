@@ -16,9 +16,11 @@ public class CalendarService
         int year,
         string? stateCode = null,
         List<CustomFreeDay>? customFreeDays = null,
-        List<DateOnly>? ignoredHolidayDates = null)
+        List<DateOnly>? ignoredHolidayDates = null,
+        List<DateOnly>? neverHolidayDates = null)
     {
         var ignoredHolidayDateSet = ignoredHolidayDates?.ToHashSet() ?? new HashSet<DateOnly>();
+        var neverHolidayDateSet = neverHolidayDates?.ToHashSet() ?? new HashSet<DateOnly>();
         var holidays = _holidayService.GetHolidays(country, year, stateCode)
             .Where(h => !ignoredHolidayDateSet.Contains(h.Date))
             .ToList();
@@ -38,6 +40,10 @@ public class CalendarService
             if(date < today)
             {
                 type = DayType.PassedDay;
+            }
+            else if (neverHolidayDateSet.Contains(date))
+            {
+                type = DayType.NeverHoliday;
             }
             else if (date == DateOnly.FromDateTime(DateTime.Today))
             {

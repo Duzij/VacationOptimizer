@@ -52,7 +52,8 @@ public class VacationOptimizerService
             request.Year,
             request.State,
             request.CustomFreeDays,
-            request.IgnoredHolidayDates);
+            request.IgnoredHolidayDates,
+            request.NeverHolidayDates);
 
         // Parallel.For(0, OptimizationDefaults.MaxUsedResultTokens, attempt =>
         // {
@@ -133,14 +134,14 @@ public class VacationOptimizerService
             int clusterStart = segment.Start;
             int clusterEnd = segment.End;
 
-            // Extend backwards to include preceding non-working cluster
-            while (clusterStart > 0 && !IsWorkDay(calendar[clusterStart - 1]))
+            // Extend backwards to include preceding days off, stopping at never-vacation blockers.
+            while (clusterStart > 0 && IsRangeDay(calendar[clusterStart - 1]))
             {
                 clusterStart--;
             }
 
-            // Extend forwards to include following non-working cluster
-            while (clusterEnd < calendar.Count - 1 && !IsWorkDay(calendar[clusterEnd + 1]))
+            // Extend forwards to include following days off, stopping at never-vacation blockers.
+            while (clusterEnd < calendar.Count - 1 && IsRangeDay(calendar[clusterEnd + 1]))
             {
                 clusterEnd++;
             }
@@ -234,6 +235,11 @@ public class VacationOptimizerService
                 .Distinct()
                 .OrderBy(date => date)
                 .Select(date => date.ToString("yyyy-MM-dd"))
+                .ToArray(),
+            neverHolidayDates = request.NeverHolidayDates?
+                .Distinct()
+                .OrderBy(date => date)
+                .Select(date => date.ToString("yyyy-MM-dd"))
                 .ToArray()
         };
 
@@ -275,7 +281,7 @@ public class VacationOptimizerService
     private static List<VacationRange> BuildRanges(List<CalendarDay> calendar, int minimumDaysPerRange = 1, int maximumDaysPerRange = 365)
     {
         var ranges = new List<VacationRange>();
-        var segments = FindContiguousSegments(calendar, d => !IsWorkDay(d));
+        var segments = FindContiguousSegments(calendar, IsRangeDay);
 
         foreach (var segment in segments)
         {
@@ -348,6 +354,10 @@ public class VacationOptimizerService
     }
 
     private static bool IsWorkDay(CalendarDay day) => day.Type == DayType.WorkDay;
+
+    private static bool IsNeverVacationDay(CalendarDay day) => day.Type == DayType.NeverHoliday;
+
+    private static bool IsRangeDay(CalendarDay day) => !IsWorkDay(day) && !IsNeverVacationDay(day);
 }
 
 public record BridgeCandidate(

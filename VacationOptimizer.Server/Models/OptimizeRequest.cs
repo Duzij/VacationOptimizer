@@ -10,6 +10,7 @@ public record OptimizeRequest(
     List<CustomFreeDay>? CustomFreeDays = null,
     string? State = null,
     List<DateOnly>? IgnoredHolidayDates = null,
+    List<DateOnly>? NeverHolidayDates = null,
     List<string>? UsedResultTokens = null
 );
 

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VacationOptimizer.Server.Data;
@@ -107,6 +108,51 @@ public class VacationOptimizerServiceTests
         Assert.Equal(2, candidates[0].WorkDaysCount);
         Assert.Equal(6, candidates[0].TotalDaysOff);
         Assert.Equal(3.0, candidates[0].Score);
+    }
+
+    [Fact]
+    public void BridgeCandidates_NeverHolidayStopsBridgeExpansion()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var calendar = new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 4), DayType.NeverHoliday),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 5), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 6), DayType.Weekend),
+        };
+
+        var candidates = VacationOptimizerService.FindBridgeCandidates(calendar);
+
+        Assert.Single(candidates);
+        Assert.Equal(2, candidates[0].StartIndex);
+        Assert.Equal(2, candidates[0].EndIndex);
+        Assert.Equal(1, candidates[0].WorkDaysCount);
+        Assert.Equal(2, candidates[0].TotalDaysOff);
+    }
+
+    [Fact]
+    public void OptimizeCalendar_NeverHolidayIsNotIncludedInRanges()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var neverHoliday = new DateOnly(nextYear, 1, 5);
+        var calendar = new CalendarData(new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 4), DayType.WorkDay),
+            CreateCalendarDay(neverHoliday, DayType.NeverHoliday),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 6), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 7), DayType.Weekend),
+        });
+
+        var result = InvokeOptimizeCalendar(
+            calendar,
+            CreateOptimizeRequest(year: nextYear, vacationDays: 2),
+            new Random(0));
+
+        Assert.DoesNotContain(neverHoliday, result.SelectedVacationDays);
+        Assert.Equal(DayType.NeverHoliday, GetDayFromCalendar(result.Calendar.Days, neverHoliday).Type);
+        Assert.DoesNotContain(result.Ranges, range => range.Start <= neverHoliday && range.End >= neverHoliday);
     }
 
     [Fact]
@@ -364,13 +410,24 @@ public class VacationOptimizerServiceTests
         int vacationDays = DefaultBudget,
         int minimumDaysPerRange = 1,
         int maximumDaysPerRange = 365) =>
-        new OptimizeRequest(country ?? DefaultCountry, year ?? DefaultYear, vacationDays, minimumDaysPerRange, maximumDaysPerRange, null, null, null, null, []);
+        new OptimizeRequest(country ?? DefaultCountry, year ?? DefaultYear, vacationDays, minimumDaysPerRange, maximumDaysPerRange, null, null, null, null, null, []);
 
     private static CalendarDay GetDayFromCalendar(List<CalendarDay> calendar, DateOnly date) =>
         calendar.First(d => d.Date == date);
 
     private static CalendarDay CreateCalendarDay(DateOnly date, DayType type, string? holidayName = null) =>
         new() { Date = date, Type = type, HolidayName = holidayName };
+
+    private static OptimizeResult InvokeOptimizeCalendar(CalendarData calendar, OptimizeRequest request, Random rng)
+    {
+        var method = typeof(VacationOptimizerService).GetMethod(
+            "OptimizeCalendar",
+            BindingFlags.NonPublic | BindingFlags.Static);
+
+        Assert.NotNull(method);
+
+        return Assert.IsType<OptimizeResult>(method.Invoke(null, [calendar, request, rng]));
+    }
 
     private static string TamperToken(string token)
     {

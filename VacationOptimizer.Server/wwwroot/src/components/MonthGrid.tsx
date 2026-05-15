@@ -22,6 +22,7 @@ function getDayClass(type: DayType | string): string {
         case "Weekend": return "bg-weekend";
         case "PassedDay": return "bg-past";
         case "Today": return "bg-today";
+        case "NeverHoliday": return "bg-never-holiday";
         case "WorkDay": return "bg-workday opacity-70";
         default:
             console.warn("Unknown day type:", type);
@@ -78,6 +79,7 @@ function DayCell({
             title={
                 day.holidayName ? day.holidayName
                     : day.type === "Vacation" ? "Vacation day"
+                        : day.type === "NeverHoliday" ? "Never a holiday"
                         : undefined
             }
             onClick={() => onDaySelect?.(day)}

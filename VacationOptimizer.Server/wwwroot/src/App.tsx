@@ -174,6 +174,8 @@ function PlannerPage() {
     setCustomFreeDays,
     ignoredHolidayDates,
     setIgnoredHolidayDates,
+    neverHolidayDates,
+    setNeverHolidayDates,
     isUserOptimizing,
     canNavigatePrevious,
     canNavigateNext,
@@ -199,12 +201,15 @@ function PlannerPage() {
     setConfirmDay,
     handleDayLongPress,
     handleConfirmCustomDay,
+    handleConfirmNeverHoliday,
     handleIgnoreHoliday,
   } = useCalendarInteractions({
     activeRequest,
     result,
     ignoredHolidayDates,
     setIgnoredHolidayDates,
+    neverHolidayDates,
+    setNeverHolidayDates,
     customFreeDays,
     setCustomFreeDays,
     runOptimization: handleCalendarRunOptimization,
@@ -416,7 +421,8 @@ function PlannerPage() {
           date={confirmDay.date}
           mode={confirmDay.mode}
           holidayName={confirmDay.holidayName}
-          onConfirm={handleConfirmCustomDay}
+          onConfirmCustomDay={handleConfirmCustomDay}
+          onConfirmNeverHoliday={handleConfirmNeverHoliday}
           onIgnoreHoliday={confirmDay.mode === "reportHoliday" ? handleIgnoreHoliday : undefined}
           onCancel={() => setConfirmDay(null)}
         />
@@ -458,6 +464,8 @@ function getDayLabel(day: CalendarDay): string {
       return "Past day";
     case DayType.Today:
       return "Today";
+    case DayType.NeverHoliday:
+      return "Never a holiday";
     case DayType.WorkDay:
     default:
       return "Work day";

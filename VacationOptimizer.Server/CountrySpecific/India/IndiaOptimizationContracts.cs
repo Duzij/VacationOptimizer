@@ -20,6 +20,7 @@ public record IndiaOptimizeRequest(
     int MaximumDaysPerRange = OptimizationDefaults.MaximumDaysPerRange,
     List<CustomFreeDay>? CustomFreeDays = null,
     List<DateOnly>? IgnoredHolidayDates = null,
+    List<DateOnly>? NeverHolidayDates = null,
     List<string>? UsedResultTokens = null
 );
 

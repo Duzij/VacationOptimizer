@@ -5,6 +5,7 @@ export default function Legend() {
             <LegendItem color="bg-custom" label="Custom Free Day" />
             <LegendItem color="bg-holiday" label="Public Holiday" />
             <LegendItem color="bg-weekend" label="Weekend" />
+            <LegendItem color="bg-never-holiday" label="Never Vacation" />
             <LegendItem color="bg-surface" label="Work Day" />
         </div>
     );

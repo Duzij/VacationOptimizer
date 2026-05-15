@@ -51,6 +51,7 @@ public static class SwitzerlandVacationEndpoints
                     CustomFreeDays: request.CustomFreeDays,
                     State: canton.Code,
                     IgnoredHolidayDates: request.IgnoredHolidayDates,
+                    NeverHolidayDates: request.NeverHolidayDates,
                     UsedResultTokens: request.UsedResultTokens));
 
                 return Results.Ok(new SwitzerlandOptimizeResult(

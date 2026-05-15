@@ -30,6 +30,7 @@ export const DayType = {
     Vacation: "Vacation",
     Today: "Today",
     PassedDay: "PassedDay",
+    NeverHoliday: "NeverHoliday",
 } as const;
 
 export type DayType = (typeof DayType)[keyof typeof DayType];
@@ -95,6 +96,7 @@ export interface SharedOptimizeRequestFields {
     maximumDaysPerRange?: number;
     customFreeDays?: CustomFreeDay[];
     ignoredHolidayDates?: string[];
+    neverHolidayDates?: string[];
     usedResultTokens?: string[];
 }
 
