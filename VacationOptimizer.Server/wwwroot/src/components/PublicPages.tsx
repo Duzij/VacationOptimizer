@@ -47,7 +47,7 @@ export function AboutPage() {
   return (
     <PageSection
       title="About Vacation Optimizer"
-      description="Vacation Optimizer is a vacation planning site built to help people use PTO more deliberately by comparing breaks around public holidays, weekends, and local calendar rules."
+      description="Vacation Optimizer is a vacation planning site built to help people use vacation days more deliberately by comparing breaks around public holidays, weekends, and local calendar rules."
     >
       <HtmlFragment
         html={aboutPageHtml}
@@ -120,7 +120,7 @@ export function PrivacyPage() {
             </p>
             <p>
               The saved request can include the values you enter into the
-              planner, such as country, year, PTO settings, region or state
+              planner, such as country, year, vacation-day settings, region or state
               selection, ignored holidays, and custom free-day dates. The saved
               result can include the vacation ranges generated from that form
               state.

@@ -15,7 +15,7 @@ export default function LandingContent() {
                   There is a better way
                   <br />
                   <span className="text-[var(--landing-accent)] italic">
-                    to use PTOs.
+                    to use vacation days.
                   </span>
                 </h1>
                 <h2 className="max-w-xl text-base leading-7 text-text-muted md:text-lg">
