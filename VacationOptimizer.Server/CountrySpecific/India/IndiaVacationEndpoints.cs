@@ -52,7 +52,8 @@ public static class IndiaVacationEndpoints
                     State: state.Code,
                     IgnoredHolidayDates: request.IgnoredHolidayDates,
                     NeverHolidayDates: request.NeverHolidayDates,
-                    UsedResultTokens: request.UsedResultTokens));
+                    UsedResultTokens: request.UsedResultTokens,
+                    LockedVacationDates: request.LockedVacationDates));
 
                 return Results.Ok(new IndiaOptimizeResult(
                     CountryCode: "IN",

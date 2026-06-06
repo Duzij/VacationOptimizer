@@ -84,6 +84,14 @@ function normalizeNeverHolidayDates(neverHolidayDates: string[] | undefined) {
   return uniqueDates(neverHolidayDates);
 }
 
+function normalizeLockedVacationDates(lockedVacationDates: string[] | undefined) {
+  if (!lockedVacationDates || lockedVacationDates.length === 0) {
+    return undefined;
+  }
+
+  return uniqueDates(lockedVacationDates);
+}
+
 function normalizeBaseFields(request: OptimizeRequest) {
   return {
     country: request.country.trim().toUpperCase(),
@@ -94,6 +102,7 @@ function normalizeBaseFields(request: OptimizeRequest) {
     customFreeDays: normalizeCustomFreeDays(request.customFreeDays),
     ignoredHolidayDates: normalizeIgnoredHolidayDates(request.ignoredHolidayDates),
     neverHolidayDates: normalizeNeverHolidayDates(request.neverHolidayDates),
+    lockedVacationDates: normalizeLockedVacationDates(request.lockedVacationDates),
     usedResultTokens: request.usedResultTokens,
   };
 }
@@ -173,6 +182,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
+      lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
     });
   }
 
@@ -188,6 +198,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
+      lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
     });
   }
 
@@ -207,6 +218,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
+      lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
     });
   }
 
@@ -220,6 +232,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
     ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
     neverHolidayDates: parseDateList(params.get("neverHolidays")),
+    lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
   });
 }
 
@@ -279,6 +292,11 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
     params.set("neverHolidays", neverHolidayDates.join(","));
   }
 
+  const lockedVacationDates = uniqueDates(normalizedRequest.lockedVacationDates ?? []);
+  if (lockedVacationDates.length > 0) {
+    params.set("lockedVacationDays", lockedVacationDates.join(","));
+  }
+
   return params;
 }
 
@@ -317,7 +335,9 @@ export function requestsMatch(left: OptimizeRequest | null, right: OptimizeReque
     && uniqueDates(normalizedLeft.ignoredHolidayDates ?? []).join(",")
       === uniqueDates(normalizedRight.ignoredHolidayDates ?? []).join(",")
     && uniqueDates(normalizedLeft.neverHolidayDates ?? []).join(",")
-      === uniqueDates(normalizedRight.neverHolidayDates ?? []).join(",");
+      === uniqueDates(normalizedRight.neverHolidayDates ?? []).join(",")
+    && uniqueDates(normalizedLeft.lockedVacationDates ?? []).join(",")
+      === uniqueDates(normalizedRight.lockedVacationDates ?? []).join(",");
 }
 
 export function hasSameHolidayScope(left: OptimizeRequest | null, right: OptimizeRequest) {

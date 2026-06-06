@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LockKeyhole } from "lucide-react";
 import { DayType } from "../types/models";
 import type { CalendarDay, MonthModel } from "../types/models";
 import { useLongPress } from "../hooks/useLongPress";
@@ -75,9 +76,10 @@ function DayCell({
 
     return (
         <div
-            className={`aspect-square flex items-center justify-center rounded-md text-[11px] leading-none select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""} ${isFlashing ? "animate-cell-flash z-10" : "transition-colors"}`}
+            className={`relative aspect-square flex items-center justify-center rounded-md text-[11px] leading-none select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""} ${isFlashing ? "animate-cell-flash z-10" : "transition-colors"}`}
             title={
-                day.holidayName ? day.holidayName
+                day.isLockedVacationDay ? "Locked vacation day"
+                    : day.holidayName ? day.holidayName
                     : day.type === "Vacation" ? "Vacation day"
                         : day.type === "NeverHoliday" ? "Never a holiday"
                         : undefined
@@ -86,6 +88,9 @@ function DayCell({
             {...(isLongPressEnabled ? longPressHandlers : {})}
         >
             {dayNum}
+            {day.isLockedVacationDay && (
+                <LockKeyhole className="locked-vacation-icon" aria-hidden="true" />
+            )}
         </div>
     );
 }

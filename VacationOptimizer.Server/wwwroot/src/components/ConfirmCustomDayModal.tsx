@@ -10,10 +10,12 @@ const MONTH_NAMES_FULL = [
 
 interface Props {
     date: string;
-    mode: "add" | "remove" | "removeNeverHoliday" | "reportHoliday";
+    mode: "generalActions" | "holidayActions" | "vacationActions" | "remove" | "removeNeverHoliday";
+    isLockedVacationDay?: boolean;
     holidayName?: string | null;
     onConfirmCustomDay: () => void;
     onConfirmNeverHoliday: () => void;
+    onConfirmLockedVacationDay: () => void;
     onIgnoreHoliday?: (reportAsIncorrect: boolean) => Promise<void> | void;
     onCancel: () => void;
 }
@@ -21,9 +23,11 @@ interface Props {
 export default function ConfirmCustomDayModal({
     date,
     mode,
+    isLockedVacationDay = false,
     holidayName,
     onConfirmCustomDay,
     onConfirmNeverHoliday,
+    onConfirmLockedVacationDay,
     onIgnoreHoliday,
     onCancel,
 }: Props) {
@@ -31,7 +35,9 @@ export default function ConfirmCustomDayModal({
     const monthName = MONTH_NAMES_FULL[month - 1];
     const isRemove = mode === "remove";
     const isRemoveNeverHoliday = mode === "removeNeverHoliday";
-    const isHolidayReport = mode === "reportHoliday";
+    const isHolidayActions = mode === "holidayActions";
+    const isVacationActions = mode === "vacationActions";
+    const isGeneralActions = mode === "generalActions";
     const [reportAsIncorrect, setReportAsIncorrect] = useState(false);
     const [isSubmittingIgnore, setIsSubmittingIgnore] = useState(false);
 
@@ -44,13 +50,13 @@ export default function ConfirmCustomDayModal({
     }, [onCancel]);
 
     useEffect(() => {
-        if (!isHolidayReport) {
+        if (!isHolidayActions) {
             return;
         }
 
         setReportAsIncorrect(false);
         setIsSubmittingIgnore(false);
-    }, [date, isHolidayReport]);
+    }, [date, isHolidayActions]);
 
     const handleIgnoreHoliday = async () => {
         if (!onIgnoreHoliday || isSubmittingIgnore) {
@@ -76,12 +82,14 @@ export default function ConfirmCustomDayModal({
             >
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-semibold text-text">
-                        {isHolidayReport
-                            ? "Report public holiday"
+                        {isHolidayActions
+                            ? "Public holiday actions"
+                            : isVacationActions ? "Vacation day actions"
+                            : isGeneralActions ? "Day actions"
                             : isRemoveNeverHoliday ? "Remove never a holiday"
                             : isRemove ? "Remove custom vacation day" : "Add custom vacation day"}
                     </h2>
-                    {!isHolidayReport && (
+                    {!isHolidayActions && (
                         <button
                             type="button"
                             onClick={onCancel}
@@ -94,17 +102,21 @@ export default function ConfirmCustomDayModal({
                 </div>
 
                 <p className="text-sm text-text">
-                    {isHolidayReport
-                        ? <>Ignore <span className="font-semibold text-text">{holidayName ?? "this public holiday"}</span> on <span className="font-semibold text-text">{monthName} {day}</span> so it no longer affects your plan.</>
+                    {isHolidayActions
+                        ? <>Choose how <span className="font-semibold text-text">{holidayName ?? "this public holiday"}</span> on <span className="font-semibold text-text">{monthName} {day}</span> should affect your plan.</>
+                        : isVacationActions
+                        ? <>Choose how vacation day <span className="font-semibold text-text">{monthName} {day}</span> should behave in the next optimization.</>
+                        : isGeneralActions
+                        ? <>How do you want to mark day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span>?</>
                         : isRemoveNeverHoliday
                         ? <>Do you want to let day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span> be considered for vacation ranges again?</>
                         : isRemove
                         ? <>Do you want to remove day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span> from custom vacation days?</>
-                        : <>How do you want to mark day <span className="font-semibold text-text">{day}</span> of <span className="font-semibold text-text">{monthName}</span>?</>
+                        : null
                     }
                 </p>
 
-                {isHolidayReport ? (
+                {isHolidayActions ? (
                     <>
                         <CheckboxField
                             checked={reportAsIncorrect}
@@ -122,7 +134,7 @@ export default function ConfirmCustomDayModal({
                                 variant="secondary"
                                 className="flex-1"
                             >
-                                Never a holiday
+                                Never vacation
                             </Button>
                             <Button
                                 type="button"
@@ -139,7 +151,7 @@ export default function ConfirmCustomDayModal({
                         <Button type="button" onClick={onCancel} variant="secondary" className="flex-1">
                             Cancel
                         </Button>
-                        {mode === "add" ? (
+                        {isGeneralActions ? (
                             <>
                                 <Button
                                     type="button"
@@ -147,7 +159,7 @@ export default function ConfirmCustomDayModal({
                                     variant="secondary"
                                     className="flex-1"
                                 >
-                                    Never a holiday
+                                    Never vacation
                                 </Button>
                                 <Button
                                     type="button"
@@ -155,6 +167,32 @@ export default function ConfirmCustomDayModal({
                                     className="flex-1"
                                 >
                                     Custom vacation
+                                </Button>
+                                <Button
+                                    type="button"
+                                    onClick={onConfirmLockedVacationDay}
+                                    className="flex-1"
+                                >
+                                    Lock vacation
+                                </Button>
+                            </>
+                        ) : isVacationActions ? (
+                            <>
+                                <Button
+                                    type="button"
+                                    onClick={onConfirmLockedVacationDay}
+                                    variant={isLockedVacationDay ? "danger" : "primary"}
+                                    className="flex-1"
+                                >
+                                    {isLockedVacationDay ? "Unlock vacation" : "Lock vacation"}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    onClick={onConfirmNeverHoliday}
+                                    variant="secondary"
+                                    className="flex-1"
+                                >
+                                    Never vacation
                                 </Button>
                             </>
                         ) : (

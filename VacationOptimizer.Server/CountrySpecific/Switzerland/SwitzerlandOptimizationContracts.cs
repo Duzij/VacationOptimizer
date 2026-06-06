@@ -21,7 +21,8 @@ public record SwitzerlandOptimizeRequest(
     List<CustomFreeDay>? CustomFreeDays = null,
     List<DateOnly>? IgnoredHolidayDates = null,
     List<DateOnly>? NeverHolidayDates = null,
-    List<string>? UsedResultTokens = null
+    List<string>? UsedResultTokens = null,
+    List<DateOnly>? LockedVacationDates = null
 );
 
 public record SwitzerlandOptimizationScope(

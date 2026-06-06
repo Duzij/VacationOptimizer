@@ -176,6 +176,8 @@ function PlannerPage() {
     setIgnoredHolidayDates,
     neverHolidayDates,
     setNeverHolidayDates,
+    lockedVacationDates,
+    setLockedVacationDates,
     isUserOptimizing,
     canNavigatePrevious,
     canNavigateNext,
@@ -203,6 +205,7 @@ function PlannerPage() {
     handleConfirmCustomDay,
     handleConfirmNeverHoliday,
     handleIgnoreHoliday,
+    handleConfirmLockedVacationDay,
   } = useCalendarInteractions({
     activeRequest,
     result,
@@ -210,6 +213,8 @@ function PlannerPage() {
     setIgnoredHolidayDates,
     neverHolidayDates,
     setNeverHolidayDates,
+    lockedVacationDates,
+    setLockedVacationDates,
     customFreeDays,
     setCustomFreeDays,
     runOptimization: handleCalendarRunOptimization,
@@ -420,10 +425,12 @@ function PlannerPage() {
         <ConfirmCustomDayModal
           date={confirmDay.date}
           mode={confirmDay.mode}
+          isLockedVacationDay={confirmDay.isLockedVacationDay}
           holidayName={confirmDay.holidayName}
           onConfirmCustomDay={handleConfirmCustomDay}
           onConfirmNeverHoliday={handleConfirmNeverHoliday}
-          onIgnoreHoliday={confirmDay.mode === "reportHoliday" ? handleIgnoreHoliday : undefined}
+          onConfirmLockedVacationDay={handleConfirmLockedVacationDay}
+          onIgnoreHoliday={confirmDay.mode === "holidayActions" ? handleIgnoreHoliday : undefined}
           onCancel={() => setConfirmDay(null)}
         />
       )}

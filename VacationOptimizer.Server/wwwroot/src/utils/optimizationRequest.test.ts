@@ -57,4 +57,23 @@ describe("optimizationRequest", () => {
     expect(params.get("neverHolidays")).toBe(date);
     expect(parseRequestFromSearchParams(params)?.neverHolidayDates).toEqual([date]);
   });
+
+  it("normalizes, compares, and round-trips locked vacation dates", () => {
+    const date = `${getDefaultYear()}-05-12`;
+    const request = normalizeOptimizeRequest({
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      lockedVacationDates: [date, date],
+    });
+    const params = buildSearchParamsFromRequest(request);
+
+    expect(request.lockedVacationDates).toEqual([date]);
+    expect(params.get("lockedVacationDays")).toBe(date);
+    expect(parseRequestFromSearchParams(params)?.lockedVacationDates).toEqual([date]);
+    expect(requestsMatch(
+      { country: "DE", year: getDefaultYear(), vacationDays: 25 },
+      request,
+    )).toBe(false);
+  });
 });

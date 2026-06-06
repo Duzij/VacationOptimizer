@@ -3,6 +3,16 @@
   color: var(--calendar-vacation-text);
 }
 
+.locked-vacation-icon {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 8px;
+  height: 8px;
+  stroke-width: 3;
+  pointer-events: none;
+}
+
 .bg-custom {
   background-color: var(--calendar-custom-bg);
   color: var(--calendar-custom-text);

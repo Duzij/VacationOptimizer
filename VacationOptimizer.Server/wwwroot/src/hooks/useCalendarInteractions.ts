@@ -20,7 +20,8 @@ export interface FeedbackDraft {
 
 export interface ConfirmDayState {
   date: string;
-  mode: "add" | "remove" | "removeNeverHoliday" | "reportHoliday";
+  mode: "generalActions" | "holidayActions" | "vacationActions" | "remove" | "removeNeverHoliday";
+  isLockedVacationDay?: boolean;
   holidayName?: string | null;
 }
 
@@ -56,6 +57,8 @@ export function useCalendarInteractions({
   setIgnoredHolidayDates,
   neverHolidayDates,
   setNeverHolidayDates,
+  lockedVacationDates,
+  setLockedVacationDates,
   customFreeDays,
   setCustomFreeDays,
   runOptimization,
@@ -66,6 +69,8 @@ export function useCalendarInteractions({
   setIgnoredHolidayDates: React.Dispatch<React.SetStateAction<string[]>>;
   neverHolidayDates: string[];
   setNeverHolidayDates: React.Dispatch<React.SetStateAction<string[]>>;
+  lockedVacationDates: string[];
+  setLockedVacationDates: React.Dispatch<React.SetStateAction<string[]>>;
   customFreeDays: CustomFreeDay[];
   setCustomFreeDays: React.Dispatch<React.SetStateAction<CustomFreeDay[]>>;
   runOptimization: (
@@ -116,7 +121,7 @@ export function useCalendarInteractions({
     }
 
     if (day.type === DayType.PublicHoliday) {
-      setConfirmDay({ date: day.date, mode: "reportHoliday", holidayName: day.holidayName });
+      setConfirmDay({ date: day.date, mode: "holidayActions", holidayName: day.holidayName });
       return;
     }
 
@@ -125,8 +130,17 @@ export function useCalendarInteractions({
       return;
     }
 
+    if (day.type === DayType.Vacation) {
+      setConfirmDay({
+        date: day.date,
+        mode: "vacationActions",
+        isLockedVacationDay: day.isLockedVacationDay,
+      });
+      return;
+    }
+
     const isExisting = customFreeDays.some((item) => item.date === day.date);
-    setConfirmDay({ date: day.date, mode: isExisting ? "remove" : "add" });
+    setConfirmDay({ date: day.date, mode: isExisting ? "remove" : "generalActions" });
   };
 
   const handleConfirmCustomDay = () => {
@@ -134,7 +148,7 @@ export function useCalendarInteractions({
       return;
     }
 
-    if (confirmDay.mode === "reportHoliday") {
+    if (confirmDay.mode === "holidayActions" || confirmDay.mode === "vacationActions") {
       setConfirmDay(null);
       return;
     }
@@ -143,15 +157,18 @@ export function useCalendarInteractions({
       ? customFreeDays.filter((day) => day.date !== confirmDay.date)
       : [...customFreeDays, { date: confirmDay.date, title: "" }];
     const updatedNeverHolidayDates = neverHolidayDates.filter((date) => date !== confirmDay.date);
+    const updatedLockedVacationDates = lockedVacationDates.filter((date) => date !== confirmDay.date);
 
     setCustomFreeDays(updatedDays);
     setNeverHolidayDates(updatedNeverHolidayDates);
+    setLockedVacationDates(updatedLockedVacationDates);
     setConfirmDay(null);
 
     const updatedRequest: OptimizeRequest = {
       ...activeRequest,
       customFreeDays: updatedDays.length > 0 ? updatedDays : undefined,
       neverHolidayDates: updatedNeverHolidayDates.length > 0 ? updatedNeverHolidayDates : undefined,
+      lockedVacationDates: updatedLockedVacationDates.length > 0 ? updatedLockedVacationDates : undefined,
     };
 
     void runOptimization(updatedRequest);
@@ -166,22 +183,49 @@ export function useCalendarInteractions({
       ? neverHolidayDates.filter((date) => date !== confirmDay.date)
       : [...new Set([...neverHolidayDates, confirmDay.date])].sort();
     const updatedCustomFreeDays = customFreeDays.filter((day) => day.date !== confirmDay.date);
+    const updatedLockedVacationDates = lockedVacationDates.filter((date) => date !== confirmDay.date);
 
     setNeverHolidayDates(updatedNeverHolidayDates);
     setCustomFreeDays(updatedCustomFreeDays);
+    setLockedVacationDates(updatedLockedVacationDates);
     setConfirmDay(null);
 
     const updatedRequest: OptimizeRequest = {
       ...activeRequest,
       customFreeDays: updatedCustomFreeDays.length > 0 ? updatedCustomFreeDays : undefined,
       neverHolidayDates: updatedNeverHolidayDates.length > 0 ? updatedNeverHolidayDates : undefined,
+      lockedVacationDates: updatedLockedVacationDates.length > 0 ? updatedLockedVacationDates : undefined,
+    };
+
+    void runOptimization(updatedRequest);
+  };
+
+  const handleConfirmLockedVacationDay = () => {
+    if (!confirmDay || !activeRequest) {
+      return;
+    }
+
+    if (confirmDay.mode !== "generalActions" && confirmDay.mode !== "vacationActions") {
+      return;
+    }
+
+    const updatedLockedVacationDates = confirmDay.isLockedVacationDay
+      ? lockedVacationDates.filter((date) => date !== confirmDay.date)
+      : [...new Set([...lockedVacationDates, confirmDay.date])].sort();
+
+    setLockedVacationDates(updatedLockedVacationDates);
+    setConfirmDay(null);
+
+    const updatedRequest: OptimizeRequest = {
+      ...activeRequest,
+      lockedVacationDates: updatedLockedVacationDates.length > 0 ? updatedLockedVacationDates : undefined,
     };
 
     void runOptimization(updatedRequest);
   };
 
   const handleIgnoreHoliday = async (reportAsIncorrect: boolean) => {
-    if (!confirmDay || !activeRequest || confirmDay.mode !== "reportHoliday") {
+    if (!confirmDay || !activeRequest || confirmDay.mode !== "holidayActions") {
       return;
     }
 
@@ -217,5 +261,6 @@ export function useCalendarInteractions({
     handleConfirmCustomDay,
     handleConfirmNeverHoliday,
     handleIgnoreHoliday,
+    handleConfirmLockedVacationDay,
   };
 }

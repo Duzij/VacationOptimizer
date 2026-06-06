@@ -335,6 +335,41 @@ public class VacationOptimizerServiceTests
     }
 
     [Fact]
+    public void Optimize_WithLockedVacationDates_PreservesLockedDays()
+    {
+        var lockedDate = BuildDefaultCalendar().First(day => day.Type == DayType.WorkDay).Date;
+
+        var result = _optimizer.Optimize(CreateOptimizeRequest(
+            vacationDays: 1,
+            lockedVacationDates: new List<DateOnly> { lockedDate }));
+
+        var lockedDay = GetDayFromCalendar(result.Calendar.Days, lockedDate);
+        Assert.Contains(lockedDate, result.SelectedVacationDays);
+        Assert.Equal(DayType.Vacation, lockedDay.Type);
+        Assert.True(lockedDay.IsLockedVacationDay);
+        Assert.Equal(1, result.VacationDaysUsed);
+    }
+
+    [Fact]
+    public void Optimize_WithLockedVacationDates_KeepsLockedDaysAcrossShuffle()
+    {
+        var lockedDate = BuildDefaultCalendar().First(day => day.Type == DayType.WorkDay).Date;
+        var request = CreateOptimizeRequest(
+            vacationDays: 5,
+            lockedVacationDates: new List<DateOnly> { lockedDate });
+
+        var firstResult = _optimizer.Optimize(request);
+        var nextResult = _optimizer.Optimize(request with
+        {
+            UsedResultTokens = new List<string> { firstResult.ResultToken }
+        });
+
+        Assert.Contains(lockedDate, firstResult.SelectedVacationDays);
+        Assert.Contains(lockedDate, nextResult.SelectedVacationDays);
+        Assert.True(GetDayFromCalendar(nextResult.Calendar.Days, lockedDate).IsLockedVacationDay);
+    }
+
+    [Fact]
     public void Optimize_ResultToken_IsSignedAndStableForReuse()
     {
         var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
@@ -442,8 +477,21 @@ public class VacationOptimizerServiceTests
         int? year = null,
         int vacationDays = DefaultBudget,
         int minimumDaysPerRange = 1,
-        int maximumDaysPerRange = 365) =>
-        new OptimizeRequest(country ?? DefaultCountry, year ?? DefaultYear, vacationDays, minimumDaysPerRange, maximumDaysPerRange, null, null, null, null, null, []);
+        int maximumDaysPerRange = 365,
+        List<DateOnly>? lockedVacationDates = null) =>
+        new OptimizeRequest(
+            country ?? DefaultCountry,
+            year ?? DefaultYear,
+            vacationDays,
+            minimumDaysPerRange,
+            maximumDaysPerRange,
+            null,
+            null,
+            null,
+            null,
+            null,
+            [],
+            lockedVacationDates);
 
     private static CalendarDay GetDayFromCalendar(List<CalendarDay> calendar, DateOnly date) =>
         calendar.First(d => d.Date == date);

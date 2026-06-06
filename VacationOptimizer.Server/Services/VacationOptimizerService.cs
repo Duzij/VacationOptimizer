@@ -82,7 +82,8 @@ public class VacationOptimizerService
 
     private static OptimizeResult OptimizeCalendar(CalendarData calendar, OptimizeRequest request, Random rng)
     {
-        int remainingBudget = request.VacationDays;
+        int lockedVacationDays = MarkLockedVacationDays(calendar.Days, request.LockedVacationDates);
+        int remainingBudget = Math.Max(0, request.VacationDays - lockedVacationDays);
 
         if (remainingBudget <= 0)
         {
@@ -285,6 +286,11 @@ public class VacationOptimizerService
                 .Distinct()
                 .OrderBy(date => date)
                 .Select(date => date.ToString("yyyy-MM-dd"))
+                .ToArray(),
+            lockedVacationDates = request.LockedVacationDates?
+                .Distinct()
+                .OrderBy(date => date)
+                .Select(date => date.ToString("yyyy-MM-dd"))
                 .ToArray()
         };
 
@@ -397,6 +403,28 @@ public class VacationOptimizerService
                 calendar[i] = calendar[i] with { Type = DayType.Vacation };
             }
         }
+    }
+
+    private static int MarkLockedVacationDays(List<CalendarDay> calendar, List<DateOnly>? lockedVacationDates)
+    {
+        if (lockedVacationDates is null || lockedVacationDates.Count == 0)
+        {
+            return 0;
+        }
+
+        var dates = lockedVacationDates.ToHashSet();
+        var lockedVacationDays = 0;
+
+        for (int i = 0; i < calendar.Count; i++)
+        {
+            if (calendar[i].Type == DayType.WorkDay && dates.Contains(calendar[i].Date))
+            {
+                calendar[i] = calendar[i] with { Type = DayType.Vacation, IsLockedVacationDay = true };
+                lockedVacationDays++;
+            }
+        }
+
+        return lockedVacationDays;
     }
 
     private static bool IsWorkDay(CalendarDay day) => day.Type == DayType.WorkDay;

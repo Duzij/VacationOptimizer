@@ -64,7 +64,8 @@ public static class SpainVacationEndpoints
                     State: normalizedCityCode ?? normalizedStateCode,
                     IgnoredHolidayDates: request.IgnoredHolidayDates,
                     NeverHolidayDates: request.NeverHolidayDates,
-                    UsedResultTokens: request.UsedResultTokens));
+                    UsedResultTokens: request.UsedResultTokens,
+                    LockedVacationDates: request.LockedVacationDates));
 
                 stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);
                 stateMap.TryGetValue(normalizedCityCode ?? string.Empty, out var selectedCityResult);

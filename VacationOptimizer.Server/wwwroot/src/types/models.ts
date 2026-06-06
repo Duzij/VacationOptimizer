@@ -55,6 +55,7 @@ export interface CalendarDay {
     date: string; // "YYYY-MM-DD"
     type: DayType;
     holidayName: string | null;
+    isLockedVacationDay?: boolean;
 }
 
 export interface VacationRange {
@@ -97,6 +98,7 @@ export interface SharedOptimizeRequestFields {
     customFreeDays?: CustomFreeDay[];
     ignoredHolidayDates?: string[];
     neverHolidayDates?: string[];
+    lockedVacationDates?: string[];
     usedResultTokens?: string[];
 }
 
