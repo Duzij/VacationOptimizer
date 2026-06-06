@@ -13,6 +13,8 @@ export default function SpainCountryOptimizerForm({
     initialRequest,
     sharedDraft,
     onSharedDraftChange,
+    lockedVacationDaysCount,
+    onResetLockedDays,
 }: CountryOptimizerFormProps<"ES">) {
     const [stateCode, setStateCode] = useState(
         initialRequest && isSpainOptimizeRequest(initialRequest) && initialRequest.country === country
@@ -104,6 +106,8 @@ export default function SpainCountryOptimizerForm({
                 onShowAdvancedChange={setShowAdvanced}
                 yearMin={schema?.yearRange.min}
                 yearMax={schema?.yearRange.max}
+                lockedVacationDaysCount={lockedVacationDaysCount}
+                onResetLockedDays={onResetLockedDays}
             />
         </form>
     );

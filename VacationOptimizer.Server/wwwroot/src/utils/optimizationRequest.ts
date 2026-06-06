@@ -77,7 +77,7 @@ function normalizeIgnoredHolidayDates(ignoredHolidayDates: string[] | undefined)
 }
 
 function normalizeNeverHolidayDates(neverHolidayDates: string[] | undefined) {
-  if (!neverHolidayDates || neverHolidayDates.length === 0) {
+  if (neverHolidayDates === undefined) {
     return undefined;
   }
 
@@ -85,7 +85,7 @@ function normalizeNeverHolidayDates(neverHolidayDates: string[] | undefined) {
 }
 
 function normalizeLockedVacationDates(lockedVacationDates: string[] | undefined) {
-  if (!lockedVacationDates || lockedVacationDates.length === 0) {
+  if (lockedVacationDates === undefined) {
     return undefined;
   }
 

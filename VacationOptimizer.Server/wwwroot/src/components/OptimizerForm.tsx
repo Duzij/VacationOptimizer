@@ -20,6 +20,8 @@ interface Props {
     onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
     initialRequest?: OptimizeRequest | null;
     detectedCountry?: DetectedCountry | null;
+    lockedVacationDaysCount?: number;
+    onResetLockedDays?: () => void;
 }
 
 function getInitialSharedDraft(initialRequest: OptimizeRequest | null | undefined, currentYear: number): SharedDraft {
@@ -63,6 +65,8 @@ export default function OptimizerForm({
     onCustomFreeDaysChange,
     initialRequest,
     detectedCountry,
+    lockedVacationDaysCount,
+    onResetLockedDays,
 }: Props) {
     const currentYear = getDefaultYear();
     const [country, setCountry] = useState(initialRequest?.country ?? "");
@@ -138,6 +142,8 @@ export default function OptimizerForm({
                     initialRequest={initialRequest}
                     sharedDraft={sharedDraft}
                     onSharedDraftChange={setSharedDraft}
+                    lockedVacationDaysCount={lockedVacationDaysCount}
+                    onResetLockedDays={onResetLockedDays}
                 />
             )}
             {country === "ES" && (
@@ -151,6 +157,8 @@ export default function OptimizerForm({
                     initialRequest={initialRequest}
                     sharedDraft={sharedDraft}
                     onSharedDraftChange={setSharedDraft}
+                    lockedVacationDaysCount={lockedVacationDaysCount}
+                    onResetLockedDays={onResetLockedDays}
                 />
             )}
             {country === "CH" && (
@@ -164,6 +172,8 @@ export default function OptimizerForm({
                     initialRequest={initialRequest}
                     sharedDraft={sharedDraft}
                     onSharedDraftChange={setSharedDraft}
+                    lockedVacationDaysCount={lockedVacationDaysCount}
+                    onResetLockedDays={onResetLockedDays}
                 />
             )}
             {country && !["IN", "ES", "CH"].includes(country) && (
@@ -177,6 +187,8 @@ export default function OptimizerForm({
                     initialRequest={initialRequest}
                     sharedDraft={sharedDraft}
                     onSharedDraftChange={setSharedDraft}
+                    lockedVacationDaysCount={lockedVacationDaysCount}
+                    onResetLockedDays={onResetLockedDays}
                 />
             )}
         </div>
@@ -192,6 +204,8 @@ function LegacyCountryOptimizerForm({
     initialRequest,
     sharedDraft,
     onSharedDraftChange,
+    lockedVacationDaysCount,
+    onResetLockedDays,
 }: {
     country: string;
     onResult: (req: OptimizeRequest) => void;
@@ -201,6 +215,8 @@ function LegacyCountryOptimizerForm({
     initialRequest?: OptimizeRequest | null;
     sharedDraft: SharedDraft;
     onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
+    lockedVacationDaysCount?: number;
+    onResetLockedDays?: () => void;
 }) {
     const [state, setState] = useState(
         initialRequest && !isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
@@ -248,7 +264,10 @@ function LegacyCountryOptimizerForm({
                 isSubmitDisabled={isLoading}
                 showAdvanced={showAdvanced}
                 onShowAdvancedChange={setShowAdvanced}
+                lockedVacationDaysCount={lockedVacationDaysCount}
+                onResetLockedDays={onResetLockedDays}
             />
         </form>
     );
+
 }

@@ -18,6 +18,7 @@ interface Props {
     canNavigateNext: boolean;
     dayDetails?: DayLipDetails | null;
     hasReachedShuffleLimit?: boolean;
+    hasLockedBudgetLimit?: boolean;
 }
 
 function useScrollDirection(isLoading: boolean, revealKey: unknown, thresholdPixels = 24) {
@@ -85,6 +86,7 @@ export default function DetailsLipMobile({
     canNavigateNext,
     dayDetails,
     hasReachedShuffleLimit,
+    hasLockedBudgetLimit,
 }: Props) {
     const visible = useScrollDirection(isLoading, dayDetails);
 
@@ -112,6 +114,7 @@ export default function DetailsLipMobile({
                             canNavigatePrevious={canNavigatePrevious}
                             canNavigateNext={canNavigateNext}
                             hasReachedShuffleLimit={hasReachedShuffleLimit}
+                            hasLockedBudgetLimit={hasLockedBudgetLimit}
                         />
                     </div>
                 ) : (
@@ -127,6 +130,7 @@ export default function DetailsLipMobile({
                             canNavigatePrevious={canNavigatePrevious}
                             canNavigateNext={canNavigateNext}
                             hasReachedShuffleLimit={hasReachedShuffleLimit}
+                            hasLockedBudgetLimit={hasLockedBudgetLimit}
                         />
                     </div>
                 )}
@@ -149,6 +153,7 @@ function ResultControls({
     canNavigatePrevious,
     canNavigateNext,
     hasReachedShuffleLimit,
+    hasLockedBudgetLimit,
 }: {
     isLoading: boolean;
     onShuffle: () => void;
@@ -157,6 +162,7 @@ function ResultControls({
     canNavigatePrevious: boolean;
     canNavigateNext: boolean;
     hasReachedShuffleLimit?: boolean;
+    hasLockedBudgetLimit?: boolean;
 }) {
     return (
         <div className="inline-flex items-center gap-2">
@@ -184,7 +190,7 @@ function ResultControls({
                 id="shuffle-optimization"
                 type="button"
                 variant="secondary"
-                disabled={isLoading || hasReachedShuffleLimit}
+                disabled={isLoading || hasReachedShuffleLimit || hasLockedBudgetLimit}
                 onClick={onShuffle}
                 aria-label="Shuffle optimization"
             >

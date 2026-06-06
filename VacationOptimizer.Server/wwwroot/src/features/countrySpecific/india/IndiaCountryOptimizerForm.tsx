@@ -12,6 +12,8 @@ export default function IndiaCountryOptimizerForm({
     initialRequest,
     sharedDraft,
     onSharedDraftChange,
+    lockedVacationDaysCount,
+    onResetLockedDays,
 }: CountryOptimizerFormProps<"IN">) {
     const [stateCode, setStateCode] = useState(
         initialRequest && isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
@@ -64,6 +66,8 @@ export default function IndiaCountryOptimizerForm({
                 onShowAdvancedChange={setShowAdvanced}
                 yearMin={schema?.yearRange.min}
                 yearMax={schema?.yearRange.max}
+                lockedVacationDaysCount={lockedVacationDaysCount}
+                onResetLockedDays={onResetLockedDays}
             />
         </form>
     );

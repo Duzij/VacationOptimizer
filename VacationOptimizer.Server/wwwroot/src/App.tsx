@@ -186,6 +186,7 @@ function PlannerPage() {
     navigatePreviousResult,
     navigateNextResult,
     hasReachedShuffleLimit,
+    hasLockedBudgetLimit,
   } = useOptimizationSession();
   const handleCalendarRunOptimization = useCallback((
     req: OptimizeRequest,
@@ -245,6 +246,16 @@ function PlannerPage() {
     void shuffleOptimization();
   }, [shuffleOptimization]);
 
+  const handleResetLockedDays = useCallback(() => {
+    setLockedVacationDates([]);
+    if (activeRequest) {
+      void runOptimization({
+        ...activeRequest,
+        lockedVacationDates: [],
+      });
+    }
+  }, [activeRequest, runOptimization, setLockedVacationDates]);
+
   const handleDaySelect = useCallback((day: CalendarDay) => {
     setSelectedDayDetails(getDayLipDetails(day));
   }, []);
@@ -275,6 +286,8 @@ function PlannerPage() {
               customFreeDays={customFreeDays}
               onCustomFreeDaysChange={setCustomFreeDays}
               initialRequest={initialRequest}
+              lockedVacationDaysCount={lockedVacationDates.length}
+              onResetLockedDays={handleResetLockedDays}
             />
 
             <details className="content-panel group xl:hidden">
@@ -375,7 +388,7 @@ function PlannerPage() {
                 <button
                   id="shuffle-optimization-desktop"
                   type="button"
-                  disabled={isUserOptimizing || hasReachedShuffleLimit}
+                  disabled={isUserOptimizing || hasReachedShuffleLimit || hasLockedBudgetLimit}
                   onClick={handleShuffleOptimization}
                   className="action-btn action-btn-secondary"
                   title="Shuffle — generate a different optimization with the same settings"
@@ -408,6 +421,7 @@ function PlannerPage() {
           canNavigateNext={canNavigateNext}
           dayDetails={selectedDayDetails}
           hasReachedShuffleLimit={hasReachedShuffleLimit}
+          hasLockedBudgetLimit={hasLockedBudgetLimit}
         />
       )}
 
@@ -426,6 +440,7 @@ function PlannerPage() {
           date={confirmDay.date}
           mode={confirmDay.mode}
           isLockedVacationDay={confirmDay.isLockedVacationDay}
+          isLockDisabled={hasLockedBudgetLimit}
           holidayName={confirmDay.holidayName}
           onConfirmCustomDay={handleConfirmCustomDay}
           onConfirmNeverHoliday={handleConfirmNeverHoliday}

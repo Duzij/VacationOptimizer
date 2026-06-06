@@ -12,6 +12,8 @@ export default function SwitzerlandCountryOptimizerForm({
     initialRequest,
     sharedDraft,
     onSharedDraftChange,
+    lockedVacationDaysCount,
+    onResetLockedDays,
 }: CountryOptimizerFormProps<"CH">) {
     const [cantonCode, setCantonCode] = useState(
         initialRequest && isSwitzerlandOptimizeRequest(initialRequest) && initialRequest.country === country
@@ -64,6 +66,8 @@ export default function SwitzerlandCountryOptimizerForm({
                 onShowAdvancedChange={setShowAdvanced}
                 yearMin={schema?.yearRange.min}
                 yearMax={schema?.yearRange.max}
+                lockedVacationDaysCount={lockedVacationDaysCount}
+                onResetLockedDays={onResetLockedDays}
             />
         </form>
     );

@@ -167,8 +167,8 @@ export function useCalendarInteractions({
     const updatedRequest: OptimizeRequest = {
       ...activeRequest,
       customFreeDays: updatedDays.length > 0 ? updatedDays : undefined,
-      neverHolidayDates: updatedNeverHolidayDates.length > 0 ? updatedNeverHolidayDates : undefined,
-      lockedVacationDates: updatedLockedVacationDates.length > 0 ? updatedLockedVacationDates : undefined,
+      neverHolidayDates: updatedNeverHolidayDates,
+      lockedVacationDates: updatedLockedVacationDates,
     };
 
     void runOptimization(updatedRequest);
@@ -193,8 +193,8 @@ export function useCalendarInteractions({
     const updatedRequest: OptimizeRequest = {
       ...activeRequest,
       customFreeDays: updatedCustomFreeDays.length > 0 ? updatedCustomFreeDays : undefined,
-      neverHolidayDates: updatedNeverHolidayDates.length > 0 ? updatedNeverHolidayDates : undefined,
-      lockedVacationDates: updatedLockedVacationDates.length > 0 ? updatedLockedVacationDates : undefined,
+      neverHolidayDates: updatedNeverHolidayDates,
+      lockedVacationDates: updatedLockedVacationDates,
     };
 
     void runOptimization(updatedRequest);
@@ -218,7 +218,7 @@ export function useCalendarInteractions({
 
     const updatedRequest: OptimizeRequest = {
       ...activeRequest,
-      lockedVacationDates: updatedLockedVacationDates.length > 0 ? updatedLockedVacationDates : undefined,
+      lockedVacationDates: updatedLockedVacationDates,
     };
 
     void runOptimization(updatedRequest);

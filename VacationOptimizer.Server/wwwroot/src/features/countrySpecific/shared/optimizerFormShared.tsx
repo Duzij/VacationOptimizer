@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Loader2, Plane } from "lucide-react";
+import { ChevronDown, ChevronUp, LockOpen, Loader2, Plane } from "lucide-react";
 import { getDefaultYear } from "../../../optimizerDefaults";
 import type { CustomFreeDay, StateOption } from "../../../types/models";
 import Button from "../../../components/Button";
@@ -31,6 +31,8 @@ export interface CountryOptimizerFormProps<TCountry extends string> {
     initialRequest?: import("../../../types/models").OptimizeRequest | null;
     sharedDraft: SharedDraft;
     onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
+    lockedVacationDaysCount?: number;
+    onResetLockedDays?: () => void;
 }
 
 export function StateSelectField({
@@ -88,6 +90,8 @@ export function SharedOptimizerControls({
     onShowAdvancedChange,
     yearMin,
     yearMax,
+    lockedVacationDaysCount,
+    onResetLockedDays,
 }: {
     sharedDraft: SharedDraft;
     onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
@@ -99,6 +103,8 @@ export function SharedOptimizerControls({
     onShowAdvancedChange: React.Dispatch<React.SetStateAction<boolean>>;
     yearMin?: number;
     yearMax?: number;
+    lockedVacationDaysCount?: number;
+    onResetLockedDays?: () => void;
 }) {
     const currentYear = getDefaultYear();
     const minimumYear = yearMin ?? currentYear;
@@ -153,12 +159,23 @@ export function SharedOptimizerControls({
                         min={1}
                         max={40}
                         value={sharedDraft.vacationDays}
-                        onChange={(e) => onSharedDraftChange((draft) => ({ ...draft, vacationDays: Number(e.target.value) }))}
+                        onChange={(e) => onSharedDraftChange((draft) => ({ ...draft, vacationDays: Math.max(Number(e.target.value), lockedVacationDaysCount ?? 0) }))}
                         className="flex-1 themed-range"
                     />
                     <span className="text-lg font-semibold text-primary min-w-[2ch] text-right tabular-nums">
                         {sharedDraft.vacationDays}
                     </span>
+                    {(lockedVacationDaysCount ?? 0) > 0 && onResetLockedDays && (
+                        <button
+                            type="button"
+                            onClick={onResetLockedDays}
+                            className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text cursor-pointer whitespace-nowrap"
+                            title="Reset all locked vacation days"
+                        >
+                            <LockOpen className="w-3 h-3" />
+                            Reset locks
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -221,7 +238,7 @@ export function SharedOptimizerControls({
                 )}
             </div>
 
-            <Button type="submit" disabled={isSubmitDisabled} fullWidth>
+            <Button type="submit" disabled={isSubmitDisabled || (lockedVacationDaysCount ?? 0) >= sharedDraft.vacationDays} fullWidth>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plane className="w-4 h-4" />}
                 {isLoading ? "Optimizing..." : "Optimize"}
             </Button>

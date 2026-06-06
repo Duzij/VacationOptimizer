@@ -102,6 +102,8 @@ export function useOptimizationSession() {
   const canNavigatePrevious = activeResultIndex > 0;
   const canNavigateNext = activeResultIndex >= 0 && activeResultIndex < resultHistory.length - 1;
   const hasReachedShuffleLimit = resultHistory.length >= MAX_SHUFFLE_HISTORY;
+  const hasLockedBudgetLimit = lockedVacationDates.length > 0
+    && lockedVacationDates.length >= (activeRequest?.vacationDays ?? Infinity);
 
   const navigatePreviousResult = useCallback(() => {
     if (!activeRequest || activeResultIndexRef.current <= 0) {
@@ -261,5 +263,6 @@ export function useOptimizationSession() {
     navigatePreviousResult,
     navigateNextResult,
     hasReachedShuffleLimit,
+    hasLockedBudgetLimit,
   };
 }

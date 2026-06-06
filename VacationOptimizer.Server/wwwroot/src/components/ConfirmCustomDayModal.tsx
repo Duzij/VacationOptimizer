@@ -12,6 +12,7 @@ interface Props {
     date: string;
     mode: "generalActions" | "holidayActions" | "vacationActions" | "remove" | "removeNeverHoliday";
     isLockedVacationDay?: boolean;
+    isLockDisabled?: boolean;
     holidayName?: string | null;
     onConfirmCustomDay: () => void;
     onConfirmNeverHoliday: () => void;
@@ -24,6 +25,7 @@ export default function ConfirmCustomDayModal({
     date,
     mode,
     isLockedVacationDay = false,
+    isLockDisabled = false,
     holidayName,
     onConfirmCustomDay,
     onConfirmNeverHoliday,
@@ -171,6 +173,7 @@ export default function ConfirmCustomDayModal({
                                 <Button
                                     type="button"
                                     onClick={onConfirmLockedVacationDay}
+                                    disabled={isLockDisabled}
                                     className="flex-1"
                                 >
                                     Lock vacation
@@ -182,6 +185,7 @@ export default function ConfirmCustomDayModal({
                                     type="button"
                                     onClick={onConfirmLockedVacationDay}
                                     variant={isLockedVacationDay ? "danger" : "primary"}
+                                    disabled={!isLockedVacationDay && isLockDisabled}
                                     className="flex-1"
                                 >
                                     {isLockedVacationDay ? "Unlock vacation" : "Lock vacation"}
