@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
 import Button from "./Button";
-import { MAX_SHUFFLE_HISTORY } from "../hooks/useOptimizationSession";
 
 interface Props {
     onClose: () => void;

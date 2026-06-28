@@ -458,7 +458,6 @@ function PlannerPage() {
 
 function PlannerSeed({ isVisible, seed }: { isVisible: boolean; seed: string }) {
   const [hasCopied, setHasCopied] = useState(false);
-  const [isVisibleState, setIsVisibleState] = useState(isVisible);
 
   const handleCopy = useCallback(async () => {
     if (!seed) {
@@ -483,7 +482,7 @@ function PlannerSeed({ isVisible, seed }: { isVisible: boolean; seed: string }) 
     window.setTimeout(() => setHasCopied(false), 1600);
   }, [seed]);
 
-  if (!seed || !isVisibleState) {
+  if (!seed || !isVisible) {
     return null;
   }
 
