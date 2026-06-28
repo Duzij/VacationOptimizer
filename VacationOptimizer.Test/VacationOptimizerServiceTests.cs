@@ -370,6 +370,17 @@ public class VacationOptimizerServiceTests
     }
 
     [Fact]
+    public void Optimize_WithLockedVacationDates_KeepsLockedRangeVisibleEvenBelowMinimum()
+    {
+        var lockedDate = BuildDefaultCalendar().First(day => day.Type == DayType.WorkDay).Date;
+
+        var result = CreateOptimizerRequestForLockedRangeMinimumScenario(lockedDate);
+
+        Assert.Contains(result.SelectedVacationDays, date => date == lockedDate);
+        Assert.Contains(result.Ranges, range => range.Start <= lockedDate && range.End >= lockedDate);
+    }
+
+    [Fact]
     public void Optimize_ResultToken_IsSignedAndStableForReuse()
     {
         var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
@@ -386,6 +397,93 @@ public class VacationOptimizerServiceTests
         Assert.Equal(1, nextPayload.Attempt);
         Assert.Matches("^[0-9a-f]{16}$", firstPayload.OutputSeed);
         Assert.NotEqual(firstPayload.OutputSeed, nextPayload.OutputSeed);
+    }
+
+    [Fact]
+    public void Optimize_DoesNotReturnDuplicateOutputForDifferentAttempts()
+    {
+        var request = CreateOptimizeRequest(vacationDays: 0);
+        var firstResult = _optimizer.Optimize(request);
+
+        Assert.Throws<OptimizationResultUnavailableException>(() => _optimizer.Optimize(request with
+        {
+            UsedResultTokens = new List<string> { firstResult.ResultToken }
+        }));
+    }
+
+    [Fact]
+    public void Optimize_RepeatedShuffleForLockedSpainCityRequest_ReturnsUniqueOutputSeeds()
+    {
+        var lockedDates = new List<DateOnly>
+        {
+            new(DefaultYear, 9, 21),
+            new(DefaultYear, 9, 22),
+            new(DefaultYear, 9, 23),
+            new(DefaultYear, 9, 25),
+            new(DefaultYear, 9, 28),
+            new(DefaultYear, 9, 29),
+            new(DefaultYear, 9, 30),
+            new(DefaultYear, 10, 1),
+            new(DefaultYear, 10, 2),
+        };
+
+        var request = new OptimizeRequest(
+            Country: DefaultCountry,
+            Year: DefaultYear,
+            VacationDays: 16,
+            MinimumDaysPerRange: 4,
+            MaximumDaysPerRange: 14,
+            State: "ES-CT-BCN",
+            LockedVacationDates: lockedDates);
+
+        var seenOutputSeeds = new HashSet<string>(StringComparer.Ordinal);
+        var usedResultTokens = new List<string>();
+
+        while (usedResultTokens.Count < OptimizationDefaults.MaxUsedResultTokens)
+        {
+            OptimizeResult result;
+            try
+            {
+                result = _optimizer.Optimize(request with
+                {
+                    UsedResultTokens = usedResultTokens.Count > 0 ? new List<string>(usedResultTokens) : null
+                });
+            }
+            catch (OptimizationResultUnavailableException)
+            {
+                break;
+            }
+
+            var payload = _resultTokenService.ParseToken(result.ResultToken);
+            Assert.True(
+                seenOutputSeeds.Add(payload.OutputSeed),
+                $"Received duplicate output seed '{payload.OutputSeed}' after {usedResultTokens.Count} prior results.");
+
+            usedResultTokens.Add(result.ResultToken);
+        }
+
+        Assert.NotEmpty(usedResultTokens);
+        Assert.Equal(seenOutputSeeds.Count, usedResultTokens.Count);
+    }
+
+    [Fact]
+    public void Optimize_SeedToken_ReplaysSameAttemptForMatchingRequest()
+    {
+        var request = CreateOptimizeRequest(vacationDays: DefaultBudget);
+
+        var firstResult = _optimizer.Optimize(request);
+        var shuffledResult = _optimizer.Optimize(request with
+        {
+            UsedResultTokens = new List<string> { firstResult.ResultToken }
+        });
+        var replayedResult = _optimizer.Optimize(request with
+        {
+            SeedToken = firstResult.ResultToken,
+            UsedResultTokens = new List<string> { firstResult.ResultToken, shuffledResult.ResultToken }
+        });
+
+        Assert.Equal(firstResult.ResultToken, replayedResult.ResultToken);
+        Assert.Equal(firstResult.SelectedVacationDays, replayedResult.SelectedVacationDays);
     }
 
     [Fact]
@@ -492,6 +590,13 @@ public class VacationOptimizerServiceTests
             null,
             [],
             lockedVacationDates);
+
+    private OptimizeResult CreateOptimizerRequestForLockedRangeMinimumScenario(DateOnly lockedDate) =>
+        _optimizer.Optimize(CreateOptimizeRequest(
+            vacationDays: 1,
+            minimumDaysPerRange: 4,
+            maximumDaysPerRange: 14,
+            lockedVacationDates: new List<DateOnly> { lockedDate }));
 
     private static CalendarDay GetDayFromCalendar(List<CalendarDay> calendar, DateOnly date) =>
         calendar.First(d => d.Date == date);

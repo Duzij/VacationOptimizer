@@ -76,4 +76,22 @@ describe("optimizationRequest", () => {
       request,
     )).toBe(false);
   });
+
+  it("round-trips the planner seed through search params without affecting request matching", () => {
+    const request = normalizeOptimizeRequest({
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      seedToken: "  seed-token-value  ",
+    });
+    const params = buildSearchParamsFromRequest(request);
+
+    expect(request.seedToken).toBe("seed-token-value");
+    expect(params.get("seed")).toBe("seed-token-value");
+    expect(parseRequestFromSearchParams(params)?.seedToken).toBe("seed-token-value");
+    expect(requestsMatch(
+      { country: "DE", year: getDefaultYear(), vacationDays: 25 },
+      request,
+    )).toBe(true);
+  });
 });

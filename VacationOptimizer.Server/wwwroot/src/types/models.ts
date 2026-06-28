@@ -100,6 +100,7 @@ export interface SharedOptimizeRequestFields {
     neverHolidayDates?: string[];
     lockedVacationDates?: string[];
     usedResultTokens?: string[];
+    seedToken?: string;
 }
 
 export interface LegacyOptimizeRequest extends SharedOptimizeRequestFields {

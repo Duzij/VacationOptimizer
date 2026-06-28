@@ -40,7 +40,7 @@ export default function ShuffleLimitModal({ onClose }: Props) {
                 </div>
 
                 <p className="text-sm text-text-muted leading-6">
-                    You've explored {MAX_SHUFFLE_HISTORY} different variations for these settings. Try changing your vacation days, date range, or adding custom free days to find different options.
+                    You've explored all available variations for these settings. Shuffle cannot generate a new result anymore, so change your vacation days, range limits, locked days, or custom free days to find different options.
                 </p>
 
                 <div className="flex justify-end pt-2">

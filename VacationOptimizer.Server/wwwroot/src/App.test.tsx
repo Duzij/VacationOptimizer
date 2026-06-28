@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 import { getDefaultYear } from "./optimizerDefaults";
@@ -35,7 +35,11 @@ vi.mock("./components/CalendarView", () => ({
 }));
 
 vi.mock("./components/ResultsSummary", () => ({
-  default: () => <div data-testid="results-summary" />,
+  default: ({ children }: { children?: React.ReactNode }) => (
+    <div data-testid="results-summary">
+      {children}
+    </div>
+  ),
 }));
 
 vi.mock("./components/Legend", () => ({
@@ -61,6 +65,10 @@ describe("App loading state", () => {
   });
 
   it("does not keep the form loading when a cached restore result is already visible", () => {
+    Object.defineProperty(window, "scrollTo", {
+      writable: true,
+      value: vi.fn(),
+    });
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: vi.fn().mockReturnValue({
@@ -94,5 +102,45 @@ describe("App loading state", () => {
 
     expect(screen.getByTestId("results-summary")).toBeTruthy();
     expect(screen.getByTestId("optimizer-form-loading").textContent).toBe("false");
+  });
+
+  it("shows the shuffle limit modal and disables shuffle when restore gets a 409", async () => {
+    Object.defineProperty(window, "scrollTo", {
+      writable: true,
+      value: vi.fn(),
+    });
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: vi.fn().mockReturnValue({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }),
+    });
+    mutateAsync.mockRejectedValue(Object.assign(new Error("No new optimization result is available."), { status: 409 }));
+
+    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify({
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      minimumDaysPerRange: 4,
+      maximumDaysPerRange: 14,
+    }));
+    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify({
+      calendar: { days: [] },
+      selectedVacationDays: [],
+      ranges: [],
+      totalDaysOff: 0,
+      vacationDaysUsed: 0,
+      publicHolidaysCount: 0,
+      resultToken: "token-1",
+    }));
+    window.history.replaceState({}, "", "/app?country=DE");
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Shuffle limit reached")).toBeTruthy();
+    });
   });
 });

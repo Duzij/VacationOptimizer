@@ -123,7 +123,8 @@ export function PrivacyPage() {
               planner, such as country, year, vacation-day settings, region or state
               selection, ignored holidays, and custom free-day dates. The saved
               result can include the vacation ranges generated from that form
-              state.
+              state, and the saved request may include a signed planner seed so
+              the same generated result can be restored.
             </p>
             <p>
               We use this local storage only to provide core planner

@@ -22,7 +22,7 @@ function HookHarness() {
   return null;
 }
 
-function createResult(resultToken: string, totalDaysOff = 0): OptimizeResult {
+function createResult(resultToken: string, totalDaysOff = Number(resultToken.match(/\d+/)?.[0] ?? 0)): OptimizeResult {
   return {
     calendar: {days: []},
     selectedVacationDays: [],
@@ -32,6 +32,10 @@ function createResult(resultToken: string, totalDaysOff = 0): OptimizeResult {
     publicHolidaysCount: 0,
     resultToken,
   };
+}
+
+function createApiError(status: number, message = "Optimization failed") {
+  return Object.assign(new Error(message), { status });
 }
 
 describe("useOptimizationSession", () => {
@@ -63,7 +67,6 @@ describe("useOptimizationSession", () => {
         vacationDays: 25,
         minimumDaysPerRange: 4,
         maximumDaysPerRange: 14,
-        ignoredHolidayDates: undefined,
       });
     });
   });
@@ -89,7 +92,6 @@ describe("useOptimizationSession", () => {
         vacationDays: 25,
         minimumDaysPerRange: 4,
         maximumDaysPerRange: 14,
-        ignoredHolidayDates: undefined,
       });
     });
   });
@@ -120,7 +122,6 @@ describe("useOptimizationSession", () => {
 
     expect(mutateAsync).toHaveBeenNthCalledWith(2, {
       ...request,
-      ignoredHolidayDates: undefined,
       usedResultTokens: ["token-1"],
     });
 
@@ -130,9 +131,10 @@ describe("useOptimizationSession", () => {
 
     expect(mutateAsync).toHaveBeenNthCalledWith(3, expect.objectContaining({
       ...request,
-      ignoredHolidayDates: undefined,
       usedResultTokens: ["token-1", "token-2"],
     }));
+    expect(latestSession?.activeRequest?.seedToken).toBe("token-3");
+    expect(window.location.search).toContain("seed=token-3");
   });
 
   it("navigates between remembered results without calling the api", async () => {
@@ -167,6 +169,7 @@ describe("useOptimizationSession", () => {
     });
 
     expect(latestSession?.result?.resultToken).toBe("token-1");
+    expect(latestSession?.activeRequest?.seedToken).toBe("token-1");
     expect(latestSession?.canNavigatePrevious).toBe(false);
     expect(latestSession?.canNavigateNext).toBe(true);
     expect(mutateAsync).toHaveBeenCalledTimes(2);
@@ -176,6 +179,7 @@ describe("useOptimizationSession", () => {
     });
 
     expect(latestSession?.result?.resultToken).toBe("token-2");
+    expect(latestSession?.activeRequest?.seedToken).toBe("token-2");
     expect(mutateAsync).toHaveBeenCalledTimes(2);
   });
 
@@ -213,8 +217,10 @@ describe("useOptimizationSession", () => {
 
     expect(mutateAsync).toHaveBeenNthCalledWith(3, expect.objectContaining({
       ...request,
-      ignoredHolidayDates: undefined,
       usedResultTokens: ["token-1", "token-2"],
+    }));
+    expect(mutateAsync).toHaveBeenNthCalledWith(3, expect.not.objectContaining({
+      seedToken: "token-1",
     }));
     expect(latestSession?.result?.resultToken).toBe("token-3");
     expect(latestSession?.canNavigatePrevious).toBe(true);
@@ -250,9 +256,77 @@ describe("useOptimizationSession", () => {
 
     expect(mutateAsync).toHaveBeenNthCalledWith(2, {
       ...secondRequest,
-      ignoredHolidayDates: undefined,
     });
     expect(latestSession?.canNavigatePrevious).toBe(false);
     expect(latestSession?.canNavigateNext).toBe(false);
+  });
+
+  it("does not append duplicate calendar outputs when a new token has identical content", async () => {
+    const request: OptimizeRequest = {
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      minimumDaysPerRange: 4,
+      maximumDaysPerRange: 14,
+    };
+
+    mutateAsync
+      .mockResolvedValueOnce(createResult("token-1", 10))
+      .mockResolvedValueOnce(createResult("token-2", 10))
+      .mockResolvedValueOnce(createResult("token-3", 20));
+
+    render(<HookHarness />);
+
+    await act(async () => {
+      await latestSession?.runOptimization(request);
+    });
+
+    await act(async () => {
+      await latestSession?.runOptimization(request);
+    });
+
+    expect(latestSession?.result?.resultToken).toBe("token-2");
+    expect(latestSession?.canNavigatePrevious).toBe(false);
+    expect(latestSession?.canNavigateNext).toBe(false);
+
+    await act(async () => {
+      await latestSession?.shuffleOptimization();
+    });
+
+    expect(mutateAsync).toHaveBeenNthCalledWith(3, expect.objectContaining({
+      ...request,
+      usedResultTokens: ["token-2"],
+    }));
+    expect(latestSession?.result?.resultToken).toBe("token-3");
+    expect(latestSession?.canNavigatePrevious).toBe(true);
+  });
+
+  it("marks shuffle as exhausted when optimize returns 409", async () => {
+    const request: OptimizeRequest = {
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      minimumDaysPerRange: 4,
+      maximumDaysPerRange: 14,
+    };
+
+    mutateAsync
+      .mockResolvedValueOnce(createResult("token-1"))
+      .mockRejectedValueOnce(createApiError(409, "No new optimization result is available."));
+
+    render(<HookHarness />);
+
+    await act(async () => {
+      await latestSession?.runOptimization(request);
+    });
+
+    await act(async () => {
+      await expect(latestSession?.shuffleOptimization())
+        .rejects.toThrow("No new optimization result is available.");
+    });
+
+    await waitFor(() => {
+      expect(latestSession?.hasReachedShuffleLimit).toBe(true);
+    });
   });
 });

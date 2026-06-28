@@ -77,7 +77,7 @@ function normalizeIgnoredHolidayDates(ignoredHolidayDates: string[] | undefined)
 }
 
 function normalizeNeverHolidayDates(neverHolidayDates: string[] | undefined) {
-  if (neverHolidayDates === undefined) {
+  if (neverHolidayDates === undefined || neverHolidayDates.length === 0) {
     return undefined;
   }
 
@@ -85,25 +85,37 @@ function normalizeNeverHolidayDates(neverHolidayDates: string[] | undefined) {
 }
 
 function normalizeLockedVacationDates(lockedVacationDates: string[] | undefined) {
-  if (lockedVacationDates === undefined) {
+  if (lockedVacationDates === undefined || lockedVacationDates.length === 0) {
     return undefined;
   }
 
   return uniqueDates(lockedVacationDates);
 }
 
+function normalizeSeedToken(seedToken: string | undefined) {
+  const trimmed = seedToken?.trim();
+  return trimmed || undefined;
+}
+
 function normalizeBaseFields(request: OptimizeRequest) {
+  const customFreeDays = normalizeCustomFreeDays(request.customFreeDays);
+  const ignoredHolidayDates = normalizeIgnoredHolidayDates(request.ignoredHolidayDates);
+  const neverHolidayDates = normalizeNeverHolidayDates(request.neverHolidayDates);
+  const lockedVacationDates = normalizeLockedVacationDates(request.lockedVacationDates);
+  const seedToken = normalizeSeedToken(request.seedToken);
+
   return {
     country: request.country.trim().toUpperCase(),
     year: clamp(request.year, minimumYear, maximumYear),
     vacationDays: clamp(request.vacationDays, 1, 40),
     minimumDaysPerRange: clamp(request.minimumDaysPerRange ?? defaultMinimumDaysPerRange, 1, 14),
     maximumDaysPerRange: clamp(request.maximumDaysPerRange ?? defaultMaximumDaysPerRange, 1, 31),
-    customFreeDays: normalizeCustomFreeDays(request.customFreeDays),
-    ignoredHolidayDates: normalizeIgnoredHolidayDates(request.ignoredHolidayDates),
-    neverHolidayDates: normalizeNeverHolidayDates(request.neverHolidayDates),
-    lockedVacationDates: normalizeLockedVacationDates(request.lockedVacationDates),
-    usedResultTokens: request.usedResultTokens,
+    ...(customFreeDays ? { customFreeDays } : {}),
+    ...(ignoredHolidayDates ? { ignoredHolidayDates } : {}),
+    ...(neverHolidayDates ? { neverHolidayDates } : {}),
+    ...(lockedVacationDates ? { lockedVacationDates } : {}),
+    ...(request.usedResultTokens ? { usedResultTokens: request.usedResultTokens } : {}),
+    ...(seedToken ? { seedToken } : {}),
   };
 }
 
@@ -123,8 +135,8 @@ function normalizeSpainRequest(request: SpainOptimizeRequest): SpainOptimizeRequ
   return {
     ...normalized,
     country: "ES",
-    stateCode: request.stateCode?.trim().toUpperCase() || undefined,
-    cityCode: request.cityCode?.trim().toUpperCase() || undefined,
+    ...(request.stateCode?.trim() ? { stateCode: request.stateCode.trim().toUpperCase() } : {}),
+    ...(request.cityCode?.trim() ? { cityCode: request.cityCode.trim().toUpperCase() } : {}),
   };
 }
 
@@ -155,7 +167,7 @@ export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequ
 
   return {
     ...normalized,
-    state: request.state?.trim().toUpperCase() || undefined,
+    ...(request.state?.trim() ? { state: request.state.trim().toUpperCase() } : {}),
   };
 }
 
@@ -183,6 +195,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
       lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
+      seedToken: params.get("seed") ?? undefined,
     });
   }
 
@@ -199,6 +212,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
       lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
+      seedToken: params.get("seed") ?? undefined,
     });
   }
 
@@ -219,6 +233,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
       lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
+      seedToken: params.get("seed") ?? undefined,
     });
   }
 
@@ -233,6 +248,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
     neverHolidayDates: parseDateList(params.get("neverHolidays")),
     lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
+    seedToken: params.get("seed") ?? undefined,
   });
 }
 
@@ -295,6 +311,10 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
   const lockedVacationDates = uniqueDates(normalizedRequest.lockedVacationDates ?? []);
   if (lockedVacationDates.length > 0) {
     params.set("lockedVacationDays", lockedVacationDates.join(","));
+  }
+
+  if (normalizedRequest.seedToken) {
+    params.set("seed", normalizedRequest.seedToken);
   }
 
   return params;

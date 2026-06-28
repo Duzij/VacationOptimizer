@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Clipboard, Shuffle } from "lucide-react";
 import DetailsLipMobile from "./components/DetailsLipMobile";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
@@ -408,6 +408,8 @@ function PlannerPage() {
             onDaySelect={handleDaySelect}
             locale={detectedCountry?.countryCode}
           />
+
+          <PlannerSeed isVisible={false} seed={result.resultToken} />
         </div>
       )}
 
@@ -451,6 +453,59 @@ function PlannerPage() {
       )}
       {showShuffleLimitModal && <ShuffleLimitModal onClose={() => setShowShuffleLimitModal(false)} />}
     </>
+  );
+}
+
+function PlannerSeed({ isVisible, seed }: { isVisible: boolean; seed: string }) {
+  const [hasCopied, setHasCopied] = useState(false);
+  const [isVisibleState, setIsVisibleState] = useState(isVisible);
+
+  const handleCopy = useCallback(async () => {
+    if (!seed) {
+      return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(seed);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = seed;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    setHasCopied(true);
+    window.setTimeout(() => setHasCopied(false), 1600);
+  }, [seed]);
+
+  if (!seed || !isVisibleState) {
+    return null;
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 border-t border-border pt-4 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <span className="font-medium text-text">Planner seed</span>
+        <code className="mt-1 block break-all rounded-md border border-border bg-surface/50 px-2 py-1 font-mono text-[11px] leading-5 text-text-muted">
+          {seed}
+        </code>
+      </div>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="action-btn action-btn-secondary shrink-0"
+        aria-label="Copy planner seed"
+        title="Copy planner seed"
+      >
+        {hasCopied ? <Check className="w-4 h-4" /> : <Clipboard className="w-4 h-4" />}
+        {hasCopied ? "Copied" : "Copy"}
+      </button>
+    </div>
   );
 }
 

@@ -19,6 +19,14 @@ import {
 
 const BASE = "/api/vacations";
 
+export interface ApiError extends Error {
+    status?: number;
+}
+
+export function createApiError(message: string, status: number): ApiError {
+    return Object.assign(new Error(message), { status });
+}
+
 export async function fetchCountries(): Promise<Country[]> {
     const res = await fetch(`${BASE}/countries`);
     if (!res.ok) throw new Error("Failed to fetch countries");
@@ -45,7 +53,7 @@ async function optimizeLegacyVacation(request: OptimizeRequest): Promise<Optimiz
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Optimization failed");
+        throw createApiError(err.error || "Optimization failed", res.status);
     }
     return res.json();
 }

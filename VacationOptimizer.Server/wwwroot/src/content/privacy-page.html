@@ -11,7 +11,7 @@
 <article class="content-panel">
   <h2 class="text-xl font-semibold text-text">What this means in practice</h2>
   <div class="space-y-3 text-sm leading-6 text-text-muted">
-    <p>The planner is designed to work with a small amount of browser-stored state so returning visitors can continue where they left off. The site should not be used to submit sensitive personal or employment information that is unnecessary for vacation planning.</p>
+    <p>The planner is designed to work with a small amount of browser-stored state and URL state so returning visitors can continue where they left off. Saved planner links may include a signed planner seed that reproduces the same generated calendar result for the same settings. The site should not be used to submit sensitive personal or employment information that is unnecessary for vacation planning.</p>
   </div>
 </article>
 <article class="content-panel">
@@ -25,6 +25,7 @@
   <h2 class="text-xl font-semibold text-text">Session Tokens and History</h2>
   <div class="space-y-3 text-sm leading-6 text-text-muted">
     <p>When you generate alternative vacation scenarios, the application uses cryptographic tokens to keep track of which results you have already seen in your current session. These tokens ensure the system provides fresh suggestions rather than repeating previous ones.</p>
-    <p>These tokens contain only an anonymized fingerprint of your request settings and a signature to prevent tampering. They do not contain personally identifiable information, are not used for tracking your identity across visits, and only serve to manage the state of your current planning session.</p>
+    <p>The same token may also be saved as a planner seed in local storage and the page URL so the planner can reproduce the same result when you return to or share that exact set of settings.</p>
+    <p>These tokens contain only an anonymized fingerprint of your request settings, an output seed, and a signature to prevent tampering. They do not contain personally identifiable information, are not used for tracking your identity across visits, and only serve to manage planner result state.</p>
   </div>
 </article>

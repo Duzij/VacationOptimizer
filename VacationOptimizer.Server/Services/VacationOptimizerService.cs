@@ -27,6 +27,7 @@ public class VacationOptimizerService
         }
 
         var requestFingerprint = ComputeRequestFingerprint(request);
+        var seedToken = ParseMatchingSeedToken(request.SeedToken, requestFingerprint);
         var matchingTokens = ParseMatchingTokens(request.UsedResultTokens, requestFingerprint);
         if(matchingTokens.Any(token => token.Attempt >= OptimizationDefaults.MaxUsedResultTokens))
         {
@@ -41,7 +42,17 @@ public class VacationOptimizerService
             return GenerateMaxAttemptResults(request, generatedResults, requestFingerprint);
         });
 
-        return results?.FirstOrDefault(r => !request.UsedResultTokens?.Contains(r.ResultToken) ?? true) ??
+        if (seedToken is not null && results is not null)
+        {
+            return results.ElementAtOrDefault(seedToken.Attempt) ??
+                throw new OptimizationResultUnavailableException("The requested optimization seed is no longer available. Try changing the planner settings.");
+        }
+
+        var usedOutputSeeds = matchingTokens
+            .Select(token => token.OutputSeed)
+            .ToHashSet(StringComparer.Ordinal);
+
+        return results?.FirstOrDefault(result => !usedOutputSeeds.Contains(ComputeOutputSeed(result))) ??
             throw new OptimizationResultUnavailableException("No new optimization result is available. Try changing the planner settings.");
     }
 
@@ -231,6 +242,24 @@ public class VacationOptimizerService
         return result;
     }
 
+    private ResultTokenPayload? ParseMatchingSeedToken(string? seedToken, string requestFingerprint)
+    {
+        if (string.IsNullOrWhiteSpace(seedToken))
+        {
+            return null;
+        }
+
+        var payload = _resultTokenService.ParseToken(seedToken);
+        if (payload.Attempt < 0 || payload.Attempt >= OptimizationDefaults.MaxUsedResultTokens)
+        {
+            throw new ArgumentException("Seed token attempt is out of range.");
+        }
+
+        return string.Equals(payload.RequestFingerprint, requestFingerprint, StringComparison.Ordinal)
+            ? payload
+            : null;
+    }
+
     private List<ResultTokenPayload> ParseMatchingTokens(List<string>? usedResultTokens, string requestFingerprint)
     {
         if (usedResultTokens is null || usedResultTokens.Count == 0)
@@ -337,10 +366,22 @@ public class VacationOptimizerService
 
         foreach (var segment in segments)
         {
-            int vacDaysUsed = calendar
-                .Skip(segment.Start)
-                .Take(segment.End - segment.Start + 1)
-                .Count(d => d.Type == DayType.Vacation);
+            int vacDaysUsed = 0;
+            bool containsLockedVacationDay = false;
+
+            for (int i = segment.Start; i <= segment.End; i++)
+            {
+                var day = calendar[i];
+                if (day.Type == DayType.Vacation)
+                {
+                    vacDaysUsed++;
+                }
+
+                if (day.IsLockedVacationDay)
+                {
+                    containsLockedVacationDay = true;
+                }
+            }
 
             int totalDaysOff = segment.End - segment.Start + 1;
 
@@ -348,9 +389,11 @@ public class VacationOptimizerService
             // 1. Have at least one vacation day OR are interesting (multi-day blocks with holidays)
             // 2. Meet the minimum days requirement
             // 3. Do not exceed the maximum days requirement
-            if ((vacDaysUsed > 0 || totalDaysOff >= 3) &&
-                totalDaysOff >= minimumDaysPerRange &&
-                totalDaysOff <= maximumDaysPerRange)
+            // Locked vacation days always stay visible in the resulting ranges, even if
+            // the user-configured min/max range filters would otherwise hide them.
+            if ((containsLockedVacationDay || vacDaysUsed > 0 || totalDaysOff >= 3) &&
+                (containsLockedVacationDay || totalDaysOff >= minimumDaysPerRange) &&
+                (containsLockedVacationDay || totalDaysOff <= maximumDaysPerRange))
             {
                 ranges.Add(new VacationRange(
                     Start: calendar[segment.Start].Date,

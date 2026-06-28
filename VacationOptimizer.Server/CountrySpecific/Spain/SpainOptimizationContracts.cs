@@ -29,7 +29,8 @@ public record SpainOptimizeRequest(
     List<DateOnly>? IgnoredHolidayDates = null,
     List<DateOnly>? NeverHolidayDates = null,
     List<string>? UsedResultTokens = null,
-    List<DateOnly>? LockedVacationDates = null
+    List<DateOnly>? LockedVacationDates = null,
+    string? SeedToken = null
 );
 
 public record SpainOptimizationScope(

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { createApiError } from "../../../api/vacationApi";
 import type { OptimizeResult } from "../../../types/models";
 import type { SpainCountrySchema, SpainOptimizeRequest } from "./models";
 
@@ -19,7 +20,7 @@ export async function optimizeSpainVacation(request: SpainOptimizeRequest): Prom
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Optimization failed");
+        throw createApiError(err.error || "Optimization failed", res.status);
     }
     return res.json();
 }

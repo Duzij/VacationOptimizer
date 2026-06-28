@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
-import { useOptimize } from "../api/vacationApi";
+import { type ApiError, useOptimize } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/models";
 import { getInitialOptimizationState, persistOptimization, updateUrlFromRequest } from "../utils/optimizationPersistence";
+import { getOptimizationResultFingerprint } from "../utils/optimizationResult";
 import { hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
 
 export const MAX_SHUFFLE_HISTORY = 50;
@@ -36,6 +37,7 @@ export function useOptimizationSession() {
   const [customFreeDays, setCustomFreeDays] = useState<CustomFreeDay[]>(
     initialStateRef.current.initialRequest?.customFreeDays ?? [],
   );
+  const [hasExhaustedShuffleResults, setHasExhaustedShuffleResults] = useState(false);
   const [neverHolidayDates, setNeverHolidayDates] = useState<string[]>(
     initialStateRef.current.initialRequest?.neverHolidayDates ?? [],
   );
@@ -59,6 +61,16 @@ export function useOptimizationSession() {
       .slice(-MAX_SHUFFLE_HISTORY)
   ), []);
 
+  const withSeedToken = useCallback((request: OptimizeRequest, result: OptimizeResult): OptimizeRequest => ({
+    ...request,
+    seedToken: result.resultToken || undefined,
+  }), []);
+
+  const withoutSeedToken = useCallback((request: OptimizeRequest): OptimizeRequest => {
+    const { seedToken: _seedToken, ...requestWithoutSeedToken } = request;
+    return requestWithoutSeedToken;
+  }, []);
+
   const addUsedResultTokens = useCallback((request: OptimizeRequest): OptimizeRequest => {
     const knownTokens = getKnownResultTokens();
 
@@ -81,13 +93,30 @@ export function useOptimizationSession() {
       return;
     }
 
+    const nextFingerprint = getOptimizationResultFingerprint(nextResult);
+    const duplicateContentIndex = resultHistoryRef.current.findIndex((entry) =>
+      getOptimizationResultFingerprint(entry) === nextFingerprint);
+    if (duplicateContentIndex >= 0) {
+      const nextHistory = [...resultHistoryRef.current];
+      nextHistory[duplicateContentIndex] = nextResult;
+      setResultHistoryState(nextHistory, duplicateContentIndex);
+      return;
+    }
+
     const nextHistory = [...resultHistoryRef.current, nextResult].slice(-MAX_SHUFFLE_HISTORY);
     setResultHistoryState(nextHistory, nextHistory.length - 1);
   }, [setResultHistoryState]);
 
   const clearResultHistory = useCallback(() => {
+    setHasExhaustedShuffleResults(false);
     setResultHistoryState([], -1);
   }, [setResultHistoryState]);
+
+  const markShuffleExhaustedIfNeeded = useCallback((error: unknown) => {
+    if ((error as ApiError | undefined)?.status === 409) {
+      setHasExhaustedShuffleResults(true);
+    }
+  }, []);
 
   useEffect(() => {
     const handleClearSession = () => {
@@ -101,7 +130,7 @@ export function useOptimizationSession() {
   const result = activeResultIndex >= 0 ? resultHistory[activeResultIndex] ?? null : null;
   const canNavigatePrevious = activeResultIndex > 0;
   const canNavigateNext = activeResultIndex >= 0 && activeResultIndex < resultHistory.length - 1;
-  const hasReachedShuffleLimit = resultHistory.length >= MAX_SHUFFLE_HISTORY;
+  const hasReachedShuffleLimit = hasExhaustedShuffleResults || resultHistory.length >= MAX_SHUFFLE_HISTORY;
   const hasLockedBudgetLimit = lockedVacationDates.length > 0
     && lockedVacationDates.length >= (activeRequest?.vacationDays ?? Infinity);
 
@@ -118,8 +147,11 @@ export function useOptimizationSession() {
 
     activeResultIndexRef.current = nextIndex;
     setActiveResultIndex(nextIndex);
-    persistOptimization(activeRequest, nextResult);
-  }, [activeRequest]);
+    const seededRequest = withSeedToken(activeRequest, nextResult);
+    setActiveRequest(seededRequest);
+    persistOptimization(seededRequest, nextResult);
+    updateUrlFromRequest(seededRequest);
+  }, [activeRequest, withSeedToken]);
 
   const navigateNextResult = useCallback(() => {
     if (!activeRequest || activeResultIndexRef.current >= resultHistoryRef.current.length - 1) {
@@ -134,8 +166,11 @@ export function useOptimizationSession() {
 
     activeResultIndexRef.current = nextIndex;
     setActiveResultIndex(nextIndex);
-    persistOptimization(activeRequest, nextResult);
-  }, [activeRequest]);
+    const seededRequest = withSeedToken(activeRequest, nextResult);
+    setActiveRequest(seededRequest);
+    persistOptimization(seededRequest, nextResult);
+    updateUrlFromRequest(seededRequest);
+  }, [activeRequest, withSeedToken]);
 
   const executeOptimization = useEffectEvent(async (
     req: OptimizeRequest,
@@ -169,6 +204,9 @@ export function useOptimizationSession() {
       lockedVacationDates: nextLockedVacationDates.length > 0 ? nextLockedVacationDates : undefined,
     });
     const keepResultHistory = requestsMatch(activeRequest, requestWithIgnoredDates);
+    if (!keepResultHistory) {
+      setHasExhaustedShuffleResults(false);
+    }
     const shouldIncludeResultTokens = options?.includeResultTokens ?? keepResultHistory;
     const requestForApi = shouldIncludeResultTokens
       ? addUsedResultTokens(requestWithIgnoredDates)
@@ -183,7 +221,11 @@ export function useOptimizationSession() {
 
     try {
       const data = await optimize.mutateAsync(requestForApi);
-      persistOptimization(requestWithIgnoredDates, data);
+      setHasExhaustedShuffleResults(false);
+      const seededRequest = withSeedToken(requestWithIgnoredDates, data);
+      setActiveRequest(seededRequest);
+      updateUrlFromRequest(seededRequest);
+      persistOptimization(seededRequest, data);
 
       if (options?.replaceHistory || !keepResultHistory) {
         replaceResultHistory(data);
@@ -191,7 +233,10 @@ export function useOptimizationSession() {
         appendResultHistory(data);
       }
 
-      return { data, request: requestWithIgnoredDates };
+      return { data, request: seededRequest };
+    } catch (error) {
+      markShuffleExhaustedIfNeeded(error);
+      throw error;
     } finally {
       if (showLoading) {
         setIsUserOptimizing(false);
@@ -230,16 +275,23 @@ export function useOptimizationSession() {
 
     setIsUserOptimizing(true);
     try {
-      const shuffleRequest = addUsedResultTokens(activeRequest);
+      const shuffleRequest = addUsedResultTokens(withoutSeedToken(activeRequest));
 
       const data = await optimize.mutateAsync(shuffleRequest);
-      persistOptimization(activeRequest, data);
+      setHasExhaustedShuffleResults(false);
+      const seededRequest = withSeedToken(withoutSeedToken(activeRequest), data);
+      setActiveRequest(seededRequest);
+      updateUrlFromRequest(seededRequest);
+      persistOptimization(seededRequest, data);
 
       appendResultHistory(data);
+    } catch (error) {
+      markShuffleExhaustedIfNeeded(error);
+      throw error;
     } finally {
       setIsUserOptimizing(false);
     }
-  }, [activeRequest, addUsedResultTokens, appendResultHistory, optimize]);
+  }, [activeRequest, addUsedResultTokens, appendResultHistory, markShuffleExhaustedIfNeeded, optimize, withSeedToken, withoutSeedToken]);
 
   return {
     initialRequest: initialStateRef.current.initialRequest,

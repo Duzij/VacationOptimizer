@@ -53,7 +53,8 @@ public static class SwitzerlandVacationEndpoints
                     IgnoredHolidayDates: request.IgnoredHolidayDates,
                     NeverHolidayDates: request.NeverHolidayDates,
                     UsedResultTokens: request.UsedResultTokens,
-                    LockedVacationDates: request.LockedVacationDates));
+                    LockedVacationDates: request.LockedVacationDates,
+                    SeedToken: request.SeedToken));
 
                 return Results.Ok(new SwitzerlandOptimizeResult(
                     CountryCode: "CH",
