@@ -196,6 +196,57 @@ describe("App loading state", () => {
     expect(screen.getByText(/connect\?token=planner-seed-1&connectedCalendarName=Friends/)).toBeTruthy();
   });
 
+  it("does not generate a share link from a stale cached result without planner seed", async () => {
+    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify({
+      country: "ES",
+      stateCode: "ES-CT",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      minimumDaysPerRange: 4,
+      maximumDaysPerRange: 14,
+    }));
+    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify({
+      countryCode: "ES",
+      scope: {
+        type: "state",
+        stateCode: "ES-CT",
+        stateName: "Catalonia",
+        cityCode: null,
+        cityName: null,
+      },
+      calendar: { days: [] },
+      selectedVacationDays: [],
+      ranges: [],
+      totalDaysOff: 0,
+      vacationDaysUsed: 0,
+      publicHolidaysCount: 0,
+      resultToken: "result-token-1",
+    }));
+    window.localStorage.setItem("vacationOptimizer.v2.calendarName", "Friends");
+    window.history.replaceState({}, "", "/app?country=ES&stateCode=ES-CT");
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
+    });
+  });
+
+  it("hides share when the cached result has no usable planner seed", async () => {
+    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
+    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify({
+      ...createSavedResult(),
+      plannerSeed: "undefined",
+    }));
+    window.history.replaceState({}, "", "/app?country=DE");
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
+    });
+  });
+
   it("disconnects a connected calendar and clears the URL params", async () => {
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("planner-seed-1")));

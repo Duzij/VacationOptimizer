@@ -169,7 +169,6 @@ function Main() {
 }
 
 function PlannerPage() {
-
   const currentYear = getDefaultYear();
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
@@ -209,6 +208,11 @@ function PlannerPage() {
   const [calendarName, setCalendarName] = useState(initialCalendarName);
   const [connectedToken, setConnectedToken] = useState(initialConnectedToken);
   const [connectedCalendarName, setConnectedCalendarName] = useState(initialConnectedCalendarName);
+  const normalizedPlannerSeed = typeof result?.plannerSeed === "string"
+    && result.plannerSeed.trim()
+    && result.plannerSeed.trim().toLowerCase() !== "undefined"
+    ? result.plannerSeed.trim()
+    : "";
   const handleCalendarRunOptimization = useCallback((
     req: OptimizeRequest,
     overrideIgnoredHolidayDates?: string[],
@@ -481,8 +485,15 @@ function PlannerPage() {
               isVisible={true}
               connectedCalendarName={connectedCalendarName}
               isConnected={Boolean(connectedToken)}
+              canShare={Boolean(normalizedPlannerSeed)}
               onDisconnect={handleDisconnectConnectedCalendar}
-              onOpenShareModal={() => setShowShareModal(true)}
+              onOpenShareModal={() => {
+                if (!normalizedPlannerSeed) {
+                  return;
+                }
+
+                setShowShareModal(true);
+              }}
             />
 
             <CalendarView
@@ -541,7 +552,7 @@ function PlannerPage() {
       {showShuffleLimitModal && <ShuffleLimitModal onClose={() => setShowShuffleLimitModal(false)} />}
       {showShareModal && result && (
         <ShareCalendarModal
-          plannerSeed={result.plannerSeed}
+          plannerSeed={normalizedPlannerSeed}
           initialCalendarName={calendarName}
           onCalendarNameSave={(name) => {
             setCalendarName(name);

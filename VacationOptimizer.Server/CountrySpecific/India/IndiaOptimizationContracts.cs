@@ -41,5 +41,6 @@ public record IndiaOptimizeResult(
     int TotalDaysOff,
     int VacationDaysUsed,
     int PublicHolidaysCount,
-    string ResultToken
+    string ResultToken,
+    string PlannerSeed
 );

@@ -3,7 +3,7 @@ import { Check, Clipboard, X } from "lucide-react";
 import Button from "./Button";
 
 interface Props {
-  plannerSeed: string;
+  plannerSeed?: string | null;
   initialCalendarName: string;
   onClose: () => void;
   onCalendarNameSave: (name: string) => void;
@@ -15,6 +15,19 @@ function getOrigin() {
   return typeof window === "undefined" ? "" : window.location.origin;
 }
 
+function normalizePlannerSeed(plannerSeed?: string | null) {
+  if (typeof plannerSeed !== "string") {
+    return "";
+  }
+
+  const trimmedPlannerSeed = plannerSeed.trim();
+  if (!trimmedPlannerSeed || trimmedPlannerSeed.toLowerCase() === "undefined") {
+    return "";
+  }
+
+  return trimmedPlannerSeed;
+}
+
 export default function ShareCalendarModal({
   plannerSeed,
   initialCalendarName,
@@ -24,6 +37,7 @@ export default function ShareCalendarModal({
   const [calendarName, setCalendarName] = useState(initialCalendarName);
   const [copiedField, setCopiedField] = useState<"connect" | null>(null);
   const trimmedCalendarName = calendarName.trim();
+  const normalizedPlannerSeed = normalizePlannerSeed(plannerSeed);
   const isValidCalendarName = calendarNamePattern.test(trimmedCalendarName);
 
   useEffect(() => {
@@ -44,17 +58,17 @@ export default function ShareCalendarModal({
   }, [isValidCalendarName, onCalendarNameSave, trimmedCalendarName]);
 
   const connectLink = useMemo(() => {
-    if (!isValidCalendarName) {
+    if (!isValidCalendarName || !normalizedPlannerSeed) {
       return "";
     }
 
     const params = new URLSearchParams({
-      token: plannerSeed,
+      token: normalizedPlannerSeed,
       connectedCalendarName: trimmedCalendarName,
     });
 
     return `${getOrigin()}/connect?${params.toString()}`;
-  }, [isValidCalendarName, plannerSeed, trimmedCalendarName]);
+  }, [isValidCalendarName, normalizedPlannerSeed, trimmedCalendarName]);
 
   const handleCopy = useCallback(async (value: string, field: "connect") => {
     if (!value) {
@@ -120,7 +134,9 @@ export default function ShareCalendarModal({
           <div className="space-y-2">
             <label className="block text-sm font-medium text-text">Share link</label>
             <code className="block break-all rounded-md border border-border bg-background px-3 py-2 font-mono text-[11px] leading-5 text-text-muted">
-              {connectLink || "Enter a valid calendar name to generate the link."}
+              {connectLink || (normalizedPlannerSeed
+                ? "Enter a valid calendar name to generate the link."
+                : "Share link unavailable until this calendar has a valid share token.")}
             </code>
             <Button
               type="button"

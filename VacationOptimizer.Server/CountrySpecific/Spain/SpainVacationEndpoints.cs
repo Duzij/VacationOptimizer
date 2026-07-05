@@ -85,7 +85,8 @@ public static class SpainVacationEndpoints
                     TotalDaysOff: result.TotalDaysOff,
                     VacationDaysUsed: result.VacationDaysUsed,
                     PublicHolidaysCount: result.PublicHolidaysCount,
-                    ResultToken: result.ResultToken));
+                    ResultToken: result.ResultToken,
+                    PlannerSeed: result.PlannerSeed));
             }
             catch (OptimizationResultUnavailableException ex)
             {

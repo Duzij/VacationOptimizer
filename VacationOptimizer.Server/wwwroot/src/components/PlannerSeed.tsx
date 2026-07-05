@@ -4,6 +4,7 @@ interface Props {
   isVisible: boolean;
   connectedCalendarName?: string;
   isConnected: boolean;
+  canShare?: boolean;
   onDisconnect: () => void;
   onOpenShareModal: () => void;
 }
@@ -12,6 +13,7 @@ export default function PlannerSeed({
   isVisible,
   connectedCalendarName = "",
   isConnected,
+  canShare = true,
   onDisconnect,
   onOpenShareModal,
 }: Props) {
@@ -33,6 +35,7 @@ export default function PlannerSeed({
         <button
           type="button"
           onClick={onOpenShareModal}
+          disabled={!canShare}
           className="action-btn action-btn-secondary"
         >
           <Share2 className="h-4 w-4" />

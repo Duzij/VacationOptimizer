@@ -7,6 +7,7 @@ import {
   getCanonicalAppPath,
   normalizeCanonicalAppPath,
   parseRequestFromUrl,
+  readSavedResult,
   savedRequestStorageKey,
   savedResultStorageKey,
   themeStorageKey,
@@ -103,6 +104,21 @@ describe("optimizationPersistence", () => {
       minimumDaysPerRange: defaultMinimumDaysPerRange,
       maximumDaysPerRange: defaultMaximumDaysPerRange,
     });
+  });
+
+  it("drops cached results that do not contain a usable planner seed", () => {
+    window.localStorage.setItem(savedResultStorageKey, JSON.stringify({
+      calendar: { days: [] },
+      selectedVacationDays: [],
+      ranges: [],
+      totalDaysOff: 0,
+      vacationDaysUsed: 0,
+      publicHolidaysCount: 0,
+      resultToken: "token-1",
+    }));
+
+    expect(readSavedResult()).toBeNull();
+    expect(window.localStorage.getItem(savedResultStorageKey)).toBeNull();
   });
 
   it("clears only the app-owned local storage entries", () => {

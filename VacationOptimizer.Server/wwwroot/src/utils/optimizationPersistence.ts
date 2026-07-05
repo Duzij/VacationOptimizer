@@ -27,6 +27,15 @@ function normalizeStoredString(value: string | null | undefined) {
   return value?.trim() ?? "";
 }
 
+function hasUsablePlannerSeed(result: Partial<OptimizeResult> | null | undefined): result is OptimizeResult {
+  return Boolean(
+    result
+    && typeof result.plannerSeed === "string"
+    && result.plannerSeed.trim()
+    && result.plannerSeed.trim().toLowerCase() !== "undefined",
+  );
+}
+
 export function getCanonicalAppPath(isDevelopment = import.meta.env.DEV) {
   return isDevelopment ? "/" : "/app";
 }
@@ -73,7 +82,13 @@ export function readSavedResult(): OptimizeResult | null {
       return null;
     }
 
-    return JSON.parse(raw) as OptimizeResult;
+    const parsed = JSON.parse(raw) as Partial<OptimizeResult>;
+    if (!hasUsablePlannerSeed(parsed)) {
+      window.localStorage.removeItem(savedResultStorageKey);
+      return null;
+    }
+
+    return parsed;
   } catch {
     return null;
   }

@@ -316,6 +316,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"stateCode\":\"IN-KA\"", json);
         Assert.Contains("\"stateName\":\"Karnataka\"", json);
         Assert.Contains("\"publicHolidaysCount\":", json);
+        Assert.Contains("\"plannerSeed\":\"", json);
     }
 
     [Fact]
@@ -341,6 +342,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"stateCode\":\"ES-CT\"", json);
         Assert.Contains("\"cityCode\":\"ES-CT-BCN\"", json);
         Assert.Contains("\"publicHolidaysCount\":", json);
+        Assert.Contains("\"plannerSeed\":\"", json);
     }
 
     [Fact]
@@ -364,6 +366,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"type\":\"canton\"", json);
         Assert.Contains("\"cantonCode\":\"CH-ZH\"", json);
         Assert.Contains("\"publicHolidaysCount\":", json);
+        Assert.Contains("\"plannerSeed\":\"", json);
     }
 
     [Fact]
