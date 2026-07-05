@@ -534,6 +534,7 @@ function PlannerPage() {
             />
 
             <CalendarView
+              key={result.resultToken || result.plannerSeed}
               calendar={result.calendar.days}
               ranges={result.ranges}
               year={activeRequest?.year ?? currentYear}

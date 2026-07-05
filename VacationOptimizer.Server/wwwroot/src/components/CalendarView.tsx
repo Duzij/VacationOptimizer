@@ -25,10 +25,6 @@ function toDateKey(date: Date) {
     return date.toISOString().slice(0, 10);
 }
 
-function buildRangeSignature(range: VacationRange) {
-    return `${range.start}:${range.end}`;
-}
-
 function buildDateSetForRanges(ranges: VacationRange[]) {
     const dates = new Set<string>();
 
@@ -98,7 +94,6 @@ function getStartMonthForYear(year: number, today = new Date()) {
 
 export default function CalendarView({ calendar, ranges = [], year, country, locale, onDayLongPress, onDaySelect, connectedToken }: Props) {
     const startMonth = getStartMonthForYear(year);
-    const months: MonthModel[] = Array.from({ length: 12 - startMonth }, (_, i) => new MonthModel(startMonth + i, locale || "en-US"));
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
 
     const { data: sharedDays } = useQuery({
@@ -122,31 +117,54 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
             isLockedVacationDay: false,
         }));
 
-        const connectedRangeSignatures = new Set(buildConnectedRanges(connectedCalendar).map(buildRangeSignature));
-        const matchingRanges = ranges.filter((range) => connectedRangeSignatures.has(buildRangeSignature(range)));
+        const plannerRangeDates = buildDateSetForRanges(ranges);
+        const connectedRangeDates = buildDateSetForRanges(buildConnectedRanges(connectedCalendar));
+        const nextMatchedRangeDates = new Set<string>();
 
-        return buildDateSetForRanges(matchingRanges);
-    }, [calendar, ranges, sharedDays]);
-
-    if (calendar) {
-        calendar.forEach((day, index) => {
-            const d = parseDate(day.date);
-            const currentMonth = months.find((m) => m.monthIndex === d.getUTCMonth());
-            if (currentMonth) {
-                const dayWithShared = sharedDays && sharedDays[index]
-                    ? {
-                        ...day,
-                        sharedType: sharedDays[index],
-                        // Mark the full continuous matched time-off span so the
-                        // shared range styling can extend through holidays,
-                        // weekends, and suggested vacation days.
-                        sharedMatchedRange: matchedRangeDates.has(day.date),
-                    }
-                    : day;
-                currentMonth.addDay(dayWithShared);
+        plannerRangeDates.forEach((date) => {
+            if (connectedRangeDates.has(date)) {
+                nextMatchedRangeDates.add(date);
             }
         });
-    }
+
+        return nextMatchedRangeDates;
+    }, [calendar, ranges, sharedDays]);
+
+    const decoratedCalendar = useMemo(() => {
+        if (!calendar) {
+            return [];
+        }
+
+        return calendar.map((day, index) => (
+            sharedDays && sharedDays[index]
+                ? {
+                    ...day,
+                    sharedType: sharedDays[index],
+                    // Mark the full continuous matched time-off span so the
+                    // shared range styling can extend through holidays,
+                    // weekends, and suggested vacation days.
+                    sharedMatchedRange: matchedRangeDates.has(day.date),
+                }
+                : day
+        ));
+    }, [calendar, sharedDays, matchedRangeDates]);
+
+    const months = useMemo(() => {
+        const nextMonths: MonthModel[] = Array.from(
+            { length: 12 - startMonth },
+            (_, i) => new MonthModel(startMonth + i, locale || "en-US"),
+        );
+
+        decoratedCalendar.forEach((day) => {
+            const d = parseDate(day.date);
+            const currentMonth = nextMonths.find((m) => m.monthIndex === d.getUTCMonth());
+            if (currentMonth) {
+                currentMonth.addDay(day);
+            }
+        });
+
+        return nextMonths;
+    }, [decoratedCalendar, locale, startMonth]);
 
     return (
         <div className="space-y-4 w-full max-w-6xl mx-auto">
