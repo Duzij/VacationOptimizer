@@ -31,12 +31,12 @@ export default function PlannerSeed({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center gap-2">
+      <div className={`grid shrink-0 items-center gap-2 ${isConnected ? "grid-cols-2" : "grid-cols-1"} sm:flex sm:flex-wrap`}>
         <button
           type="button"
           onClick={onOpenShareModal}
           disabled={!canShare}
-          className="action-btn action-btn-secondary"
+          className="action-btn action-btn-secondary w-full justify-center sm:ml-auto sm:w-auto"
         >
           <Share2 className="h-4 w-4" />
           Share
@@ -45,7 +45,7 @@ export default function PlannerSeed({
           <button
             type="button"
             onClick={onDisconnect}
-            className="action-btn action-btn-secondary"
+            className="action-btn action-btn-secondary w-full justify-center sm:ml-auto sm:w-auto"
           >
             <Unplug className="h-4 w-4" />
             Disconnect

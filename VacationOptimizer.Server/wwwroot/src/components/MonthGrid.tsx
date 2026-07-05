@@ -43,7 +43,9 @@ function getSharedClass(day: CalendarDay) {
         return "";
     }
 
-    const shouldShowSharedIndicator = day.sharedType !== day.type || day.sharedType === DayType.PublicHoliday;
+    const shouldShowSharedIndicator = day.sharedType !== day.type
+        || day.sharedType === DayType.PublicHoliday
+        || day.sharedType === DayType.Vacation;
     if (!shouldShowSharedIndicator) {
         return "";
     }
@@ -56,10 +58,8 @@ function getSharedClass(day: CalendarDay) {
     return "";
 }
 
-function isMatchingSharedHoliday(day: CalendarDay | undefined) {
-    return day?.type === DayType.PublicHoliday
-        && day.sharedType === DayType.PublicHoliday
-        && day.sharedMatchedRange === true;
+function isMatchingSharedRangeDay(day: CalendarDay | undefined) {
+    return day?.sharedMatchedRange === true;
 }
 
 function areConsecutiveDays(left: CalendarDay | undefined, right: CalendarDay | undefined) {
@@ -79,12 +79,12 @@ function getSharedHolidayRangePosition(
     previousDay: CalendarDay | undefined,
     nextDay: CalendarDay | undefined,
 ): SharedHolidayRangePosition {
-    if (!isMatchingSharedHoliday(day)) {
+    if (!isMatchingSharedRangeDay(day)) {
         return null;
     }
 
-    const hasPreviousMatch = isMatchingSharedHoliday(previousDay) && areConsecutiveDays(previousDay, day);
-    const hasNextMatch = isMatchingSharedHoliday(nextDay) && areConsecutiveDays(day, nextDay);
+    const hasPreviousMatch = isMatchingSharedRangeDay(previousDay) && areConsecutiveDays(previousDay, day);
+    const hasNextMatch = isMatchingSharedRangeDay(nextDay) && areConsecutiveDays(day, nextDay);
 
     if (hasPreviousMatch && hasNextMatch) {
         return "middle";

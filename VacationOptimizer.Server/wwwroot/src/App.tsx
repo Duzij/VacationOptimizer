@@ -216,6 +216,14 @@ function PlannerPage() {
   const [connectedCalendarYear, setConnectedCalendarYear] = useState(initialConnectedCalendarYear);
   const initialPlannerYearRef = useRef(initialRequest?.year ?? currentYear);
   const hasExitedInitialConnectStateRef = useRef(false);
+  const parsedConnectedCalendarYear = connectedCalendarYear ? Number(connectedCalendarYear) : null;
+  const hasConnectedYearMismatch = Boolean(
+    connectedToken
+    && activeRequest
+    && parsedConnectedCalendarYear !== null
+    && parsedConnectedCalendarYear !== Number(activeRequest.year),
+  );
+  const isConnectedCalendarApplied = Boolean(connectedToken) && !hasConnectedYearMismatch;
   const normalizedPlannerSeed = typeof result?.plannerSeed === "string"
     && result.plannerSeed.trim()
     && result.plannerSeed.trim().toLowerCase() !== "undefined"
@@ -336,13 +344,12 @@ function PlannerPage() {
     // show a year-mismatch warning. Otherwise allow the connection (including
     // when the token matches the existing planner seed).
     const currentYear = activeRequest.year ?? getDefaultYear();
-    const parsedConnectedYear = connectedCalendarYear ? Number(connectedCalendarYear) : null;
 
     if (activeRequest.year !== initialPlannerYearRef.current) {
       hasExitedInitialConnectStateRef.current = true;
     }
 
-    if (parsedConnectedYear !== null && parsedConnectedYear !== Number(currentYear)) {
+    if (parsedConnectedCalendarYear !== null && parsedConnectedCalendarYear !== Number(currentYear)) {
       if (arrivedFromConnect && !hasExitedInitialConnectStateRef.current) {
         clearConnectRedirectFlag();
         setConnectionWarning("This connect link is for a different year and was not applied. Change the planner year to match the shared calendar, or ask the sender for a new link.");
@@ -357,7 +364,7 @@ function PlannerPage() {
     hasExitedInitialConnectStateRef.current = true;
     clearConnectRedirectFlag();
     setConnectionWarning(null);
-  }, [connectedToken, handleDisconnectConnectedCalendar, connectedCalendarYear, activeRequest]);
+  }, [connectedToken, handleDisconnectConnectedCalendar, parsedConnectedCalendarYear, activeRequest, arrivedFromConnect]);
 
   return (
     <>
@@ -375,7 +382,7 @@ function PlannerPage() {
               Enter your country and vacation-day rules, then generate suggested vacation ranges. Results are meant to support planning,
               not replace checking your employer policy, local holiday changes, or team availability.
             </p>
-            {connectedToken && (
+            {isConnectedCalendarApplied && (
               <div className="max-w-3xl rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text">
                 Connected to <span className="font-semibold">{connectedCalendarName || "shared calendar"}</span>.
                 You can compare your planner with this shared calendar and disconnect at any time.
@@ -514,7 +521,7 @@ function PlannerPage() {
             <PlannerSeed
               isVisible={true}
               connectedCalendarName={connectedCalendarName}
-              isConnected={Boolean(connectedToken)}
+              isConnected={isConnectedCalendarApplied}
               canShare={Boolean(normalizedPlannerSeed)}
               onDisconnect={handleDisconnectConnectedCalendar}
               onOpenShareModal={() => {
@@ -534,7 +541,7 @@ function PlannerPage() {
               onDayLongPress={handleDayLongPress}
               onDaySelect={handleDaySelect}
               locale={detectedCountry?.countryCode}
-              connectedToken={connectedToken}
+              connectedToken={isConnectedCalendarApplied ? connectedToken : ""}
             />
           </div>
         </div>
@@ -599,7 +606,11 @@ function PlannerPage() {
 
 
 function getDayLipDetails(day: CalendarDay): DayLipDetails {
-  const shouldShowSharedDetail = day.sharedType && (day.sharedType !== day.type || day.sharedType === DayType.PublicHoliday);
+  const shouldShowSharedDetail = day.sharedType && (
+    day.sharedType !== day.type
+    || day.sharedType === DayType.PublicHoliday
+    || day.sharedType === DayType.Vacation
+  );
 
   return {
     formattedDate: parseCalendarDate(day.date).toLocaleDateString("en-US", {

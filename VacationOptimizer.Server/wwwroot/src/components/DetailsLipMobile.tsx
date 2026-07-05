@@ -95,19 +95,23 @@ export default function DetailsLipMobile({
         <div
             className={`fixed inset-x-0 bottom-0 z-20 sm:hidden transition-transform duration-300 ease-in-out ${visible ? "translate-y-0" : "translate-y-full"}`}
         >
-            <div className="border border-border border-b-0 rounded-t-2xl bg-background shadow-lg px-4 py-3 sm:border-b sm:rounded-2xl">
+            <div className="border border-border border-b-0 rounded-t-[1.75rem] bg-background px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 shadow-[0_-16px_40px_rgba(0,0,0,0.26)] backdrop-blur sm:border-b sm:rounded-2xl">
                 {dayDetails ? (
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                            <p className="text-sm font-semibold text-text">
+                    <div className="space-y-3">
+                        <div className="space-y-1">
+                            <p className="text-[1.15rem] font-semibold leading-tight text-text">
                                 {dayDetails.formattedDate}
                             </p>
-                            <p className="text-sm text-text-muted">
+                            <p className="text-base leading-snug text-text">
                                 {dayDetails.label}
-                                {dayDetails.detail ? ` · ${dayDetails.detail}` : ""}
                             </p>
+                            {dayDetails.detail && (
+                                <p className="text-sm leading-snug text-text-muted">
+                                    {dayDetails.detail}
+                                </p>
+                            )}
                             {dayDetails.sharedDetail && (
-                                <p className="text-xs text-text-muted mt-0.5">
+                                <p className="rounded-2xl border border-border/70 bg-surface/70 px-3 py-2 text-sm leading-snug text-text-muted">
                                     {dayDetails.sharedDetail}
                                 </p>
                             )}
@@ -124,8 +128,8 @@ export default function DetailsLipMobile({
                         />
                     </div>
                 ) : (
-                    <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm text-text-muted">
+                    <div className="space-y-3">
+                        <p className="text-sm leading-snug text-text-muted">
                             Not happy with the result?
                         </p>
                         <ResultControls
@@ -171,7 +175,7 @@ function ResultControls({
     hasLockedBudgetLimit?: boolean;
 }) {
     return (
-        <div className="inline-flex items-center gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.35fr)] gap-2">
             <Button
                 id="previous-optimization"
                 type="button"
@@ -179,6 +183,8 @@ function ResultControls({
                 disabled={!canNavigatePrevious || isLoading}
                 onClick={onPrevious}
                 aria-label="Previous result"
+                fullWidth
+                className="justify-center px-0"
             >
                 <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -189,6 +195,8 @@ function ResultControls({
                 disabled={!canNavigateNext || isLoading}
                 onClick={onNext}
                 aria-label="Next result"
+                fullWidth
+                className="justify-center px-0"
             >
                 <ChevronRight className="w-4 h-4" />
             </Button>
@@ -199,6 +207,8 @@ function ResultControls({
                 disabled={isLoading || hasReachedShuffleLimit || hasLockedBudgetLimit}
                 onClick={onShuffle}
                 aria-label="Shuffle optimization"
+                fullWidth
+                className="justify-center"
             >
                 <Shuffle className="w-4 h-4" />
                 Shuffle

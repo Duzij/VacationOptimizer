@@ -137,9 +137,10 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
                     ? {
                         ...day,
                         sharedType: sharedDays[index],
-                        sharedMatchedRange: day.type === DayType.PublicHoliday
-                            && sharedDays[index] === DayType.PublicHoliday
-                            && matchedRangeDates.has(day.date),
+                        // Mark the full continuous matched time-off span so the
+                        // shared range styling can extend through holidays,
+                        // weekends, and suggested vacation days.
+                        sharedMatchedRange: matchedRangeDates.has(day.date),
                     }
                     : day;
                 currentMonth.addDay(dayWithShared);

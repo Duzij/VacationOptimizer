@@ -232,6 +232,8 @@ describe("App loading state", () => {
       expect(window.location.pathname).toBe("/app");
     });
 
+    expect(screen.queryByText(/Connected to/i)).toBeNull();
+    expect(screen.queryByRole("button", { name: "Disconnect" })).toBeNull();
     expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBe("same-seed");
     expect(window.localStorage.getItem("vacationOptimizer.v2.connectedCalendarName")).toBe("SomeoneElse");
     expect(window.localStorage.getItem("vacationOptimizer.v2.connectedCalendarYear")).toBe(String(Number(defaultYear) + 1));
