@@ -4,6 +4,7 @@ import Button from "./Button";
 
 interface Props {
   plannerSeed?: string | null;
+  plannerYear: number;
   initialCalendarName: string;
   onClose: () => void;
   onCalendarNameSave: (name: string) => void;
@@ -30,6 +31,7 @@ function normalizePlannerSeed(plannerSeed?: string | null) {
 
 export default function ShareCalendarModal({
   plannerSeed,
+  plannerYear,
   initialCalendarName,
   onClose,
   onCalendarNameSave,
@@ -65,10 +67,11 @@ export default function ShareCalendarModal({
     const params = new URLSearchParams({
       token: normalizedPlannerSeed,
       connectedCalendarName: trimmedCalendarName,
+      connectedCalendarYear: String(plannerYear),
     });
 
     return `${getOrigin()}/connect?${params.toString()}`;
-  }, [isValidCalendarName, normalizedPlannerSeed, trimmedCalendarName]);
+  }, [isValidCalendarName, normalizedPlannerSeed, trimmedCalendarName, plannerYear]);
 
   const handleCopy = useCallback(async (value: string, field: "connect") => {
     if (!value) {

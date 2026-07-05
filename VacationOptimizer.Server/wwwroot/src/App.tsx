@@ -564,6 +564,7 @@ function PlannerPage() {
       {showShareModal && result && (
         <ShareCalendarModal
           plannerSeed={normalizedPlannerSeed}
+          plannerYear={activeRequest?.year ?? currentYear}
           initialCalendarName={calendarName}
           onCalendarNameSave={(name) => {
             setCalendarName(name);
