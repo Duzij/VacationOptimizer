@@ -86,9 +86,18 @@ function buildConnectedRanges(calendar: CalendarDay[]) {
     return ranges;
 }
 
+function getStartMonthForYear(year: number, today = new Date()) {
+    const currentYear = today.getUTCFullYear();
+
+    if (year === currentYear) {
+        return today.getUTCMonth();
+    }
+
+    return 0;
+}
+
 export default function CalendarView({ calendar, ranges = [], year, country, locale, onDayLongPress, onDaySelect, connectedToken }: Props) {
-    // Start month is determent by the date today
-    const startMonth = new Date().getUTCMonth();
+    const startMonth = getStartMonthForYear(year);
     const months: MonthModel[] = Array.from({ length: 12 - startMonth }, (_, i) => new MonthModel(startMonth + i, locale || "en-US"));
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
 
