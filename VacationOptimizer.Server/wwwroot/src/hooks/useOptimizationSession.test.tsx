@@ -31,6 +31,7 @@ function createResult(resultToken: string, totalDaysOff = Number(resultToken.mat
     vacationDaysUsed: 0,
     publicHolidaysCount: 0,
     resultToken,
+    plannerSeed: `planner-${resultToken}`,
   };
 }
 
@@ -55,6 +56,7 @@ describe("useOptimizationSession", () => {
       vacationDaysUsed: 0,
       publicHolidaysCount: 0,
       resultToken: "",
+      plannerSeed: "",
     });
     window.history.replaceState({}, "", "/app?country=DE");
 
@@ -80,6 +82,7 @@ describe("useOptimizationSession", () => {
       vacationDaysUsed: 0,
       publicHolidaysCount: 0,
       resultToken: "",
+      plannerSeed: "",
     });
     window.history.replaceState({}, "", "/app?country=DE&vacationDays=&minDays=&maxDays=");
 

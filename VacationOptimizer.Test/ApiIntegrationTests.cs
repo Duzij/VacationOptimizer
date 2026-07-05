@@ -386,6 +386,23 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"publicHolidaysCount\":1", json);
     }
 
+    [Fact]
+    public async Task DecodeSeed_ReturnsDayTypes()
+    {
+        var client = _factory.CreateClient();
+        using var scope = _factory.Services.CreateScope();
+        var calendarSeed = scope.ServiceProvider.GetRequiredService<CalendarSeed>();
+        
+        var seedString = calendarSeed.GetCalendarSeed(new List<CalendarDay> { new CalendarDay { Type = DayType.Vacation } });
+        
+        var payload = JsonContent.Create(new { seedToken = seedString });
+        var response = await client.PostAsync("/api/vacations/decode-seed", payload);
+        
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Vacation", json);
+    }
+
     private sealed record CountryResponse(string Code, string Name);
 
     private sealed record StateResponse(string Code, string Name);

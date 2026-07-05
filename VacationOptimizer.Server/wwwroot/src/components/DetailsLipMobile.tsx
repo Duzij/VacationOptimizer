@@ -7,6 +7,7 @@ export interface DayLipDetails {
     formattedDate: string;
     label: string;
     detail?: string | null;
+    sharedDetail?: string | null;
 }
 
 interface Props {
@@ -105,6 +106,11 @@ export default function DetailsLipMobile({
                                 {dayDetails.label}
                                 {dayDetails.detail ? ` · ${dayDetails.detail}` : ""}
                             </p>
+                            {dayDetails.sharedDetail && (
+                                <p className="text-xs text-text-muted mt-0.5">
+                                    {dayDetails.sharedDetail}
+                                </p>
+                            )}
                         </div>
                         <ResultControls
                             isLoading={isLoading}

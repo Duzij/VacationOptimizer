@@ -72,6 +72,7 @@ builder.Services.AddSingleton<IResultTokenService>(
     new ResultTokenService(resultTokenSigningKey ?? "development-result-token-signing-key"));
 builder.Services.AddScoped<VacationOptimizerService>();
 builder.Services.AddScoped<IDetectCountryService, DetectedCountryService>();
+builder.Services.AddScoped<CalendarSeed>();
 
 builder.Services.AddEndpointsApiExplorer().AddControllers().AddJsonOptions(o =>
 {
@@ -180,6 +181,20 @@ api.MapPost("/optimize", (OptimizeRequest request, VacationOptimizerService opti
         return Results.Conflict(new { error = ex.Message });
     }
     catch (ArgumentException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+api.MapPost("/decode-seed", (DecodeSeedRequest request, CalendarSeed calendarSeed) =>
+{
+    try
+    {
+        var days = calendarSeed.GetCalendarDaysFromSeed(request.SeedToken);
+        return Results.Ok(days.Select(d => d.Type));
+    }
+
+    catch (FormatException ex)
     {
         return Results.BadRequest(new { error = ex.Message });
     }
@@ -306,5 +321,7 @@ static string BuildSitemapXml(IEnumerable<SitemapPage> pages)
 }
 
 public sealed record SitemapPage(string Path, DateOnly LastModified, string ChangeFrequency, decimal Priority);
+
+public record DecodeSeedRequest(string SeedToken);
 
 public partial class Program { }

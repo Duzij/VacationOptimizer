@@ -11,12 +11,14 @@ public class VacationOptimizerService
     private readonly CalendarService _calendarService;
     private readonly IResultTokenService _resultTokenService;
     private readonly IMemoryCache _memoryCache;
+    private readonly CalendarSeed _calendarSeed;
 
-    public VacationOptimizerService(CalendarService calendarService, IResultTokenService resultTokenService, IMemoryCache memoryCache)
+    public VacationOptimizerService(CalendarService calendarService, IResultTokenService resultTokenService, IMemoryCache memoryCache, CalendarSeed calendarSeed)
     {
         _calendarService = calendarService;
         _resultTokenService = resultTokenService;
         _memoryCache = memoryCache;
+        _calendarSeed = calendarSeed;
     }
 
     public OptimizeResult Optimize(OptimizeRequest request)
@@ -84,7 +86,8 @@ public class VacationOptimizerService
             var result = OptimizeCalendar(calendar, request, rng);
             var outputSeed = ComputeOutputSeed(result);
             var resultToken = _resultTokenService.CreateToken(attempt, outputSeed, requestFingerprint);
-            result = result with { ResultToken = resultToken };
+            var plannerSeed = _calendarSeed.GetCalendarSeed(result.Calendar.Days);
+            result = result with { ResultToken = resultToken, PlannerSeed = plannerSeed };
             generatedResults.Add(result);
         }
 

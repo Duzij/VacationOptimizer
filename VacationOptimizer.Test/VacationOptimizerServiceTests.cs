@@ -31,7 +31,7 @@ public class VacationOptimizerServiceTests
         _holidayService = new PublicHolidayService(dbContext);
         _calendarService = new CalendarService(_holidayService);
         _resultTokenService = new ResultTokenService("test-result-token-signing-key");
-        _optimizer = new VacationOptimizerService(_calendarService, _resultTokenService, new MemoryCache(new MemoryCacheOptions()));
+        _optimizer = new VacationOptimizerService(_calendarService, _resultTokenService, new MemoryCache(new MemoryCacheOptions()), new CalendarSeed());
     }
 
     [Fact]

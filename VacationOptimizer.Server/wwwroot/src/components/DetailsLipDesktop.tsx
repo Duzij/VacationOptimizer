@@ -6,10 +6,11 @@ interface Props {
     formattedDate: string;
     label: string;
     detail?: string | null;
+    sharedDetail?: string | null;
     onClose: () => void;
 }
 
-export default function DetailsLipDesktop({ formattedDate, label, detail, onClose }: Props) {
+export default function DetailsLipDesktop({ formattedDate, label, detail, sharedDetail, onClose }: Props) {
     const content = (
         <div className="fixed inset-x-0 bottom-0 z-20 sm:inset-x-auto sm:left-1/2 hidden sm:block sm:bottom-4 sm:w-full sm:max-w-md sm:-translate-x-1/2">
             <div className="border border-border border-b-0 rounded-t-2xl bg-background shadow-lg px-4 py-3 sm:border-b sm:rounded-2xl">
@@ -22,6 +23,11 @@ export default function DetailsLipDesktop({ formattedDate, label, detail, onClos
                             {label}
                             {detail ? ` · ${detail}` : ""}
                         </p>
+                        {sharedDetail && (
+                            <p className="text-xs text-text-muted mt-0.5">
+                                {sharedDetail}
+                            </p>
+                        )}
                     </div>
                     <Button
                         type="button"

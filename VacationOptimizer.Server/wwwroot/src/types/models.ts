@@ -56,6 +56,8 @@ export interface CalendarDay {
     type: DayType;
     holidayName: string | null;
     isLockedVacationDay?: boolean;
+    sharedType?: DayType;
+    sharedMatchedRange?: boolean;
 }
 
 export interface VacationRange {
@@ -80,6 +82,7 @@ export interface OptimizationResultBase {
     vacationDaysUsed: number;
     publicHolidaysCount: number;
     resultToken: string;
+    plannerSeed: string;
 }
 
 export interface LegacyOptimizeResult extends OptimizationResultBase {

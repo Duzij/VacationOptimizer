@@ -15,6 +15,8 @@ interface GridProps {
     onDaySelect?: (day: CalendarDay) => void;
 }
 
+type SharedHolidayRangePosition = "single" | "first" | "middle" | "last" | null;
+
 function getDayClass(type: DayType | string): string {
     switch (type) {
         case "Vacation": return "bg-vacation font-semibold";
@@ -36,12 +38,77 @@ function parseDate(dateStr: string): Date {
     return new Date(Date.UTC(year, month - 1, day));
 }
 
+function getSharedClass(day: CalendarDay) {
+    if (!day.sharedType) {
+        return "";
+    }
+
+    const shouldShowSharedIndicator = day.sharedType !== day.type || day.sharedType === DayType.PublicHoliday;
+    if (!shouldShowSharedIndicator) {
+        return "";
+    }
+
+    if (day.sharedType === DayType.Vacation) return "shared-vacation";
+    if (day.sharedType === DayType.WorkDay) return "shared-workday";
+    if (day.sharedType === DayType.PublicHoliday) return "shared-holiday";
+    if (day.sharedType === DayType.NeverHoliday) return "shared-never-holiday";
+
+    return "";
+}
+
+function isMatchingSharedHoliday(day: CalendarDay | undefined) {
+    return day?.type === DayType.PublicHoliday
+        && day.sharedType === DayType.PublicHoliday
+        && day.sharedMatchedRange === true;
+}
+
+function areConsecutiveDays(left: CalendarDay | undefined, right: CalendarDay | undefined) {
+    if (!left || !right) {
+        return false;
+    }
+
+    const leftDate = parseDate(left.date);
+    const rightDate = parseDate(right.date);
+    const diffInMs = rightDate.getTime() - leftDate.getTime();
+
+    return diffInMs === 24 * 60 * 60 * 1000;
+}
+
+function getSharedHolidayRangePosition(
+    day: CalendarDay,
+    previousDay: CalendarDay | undefined,
+    nextDay: CalendarDay | undefined,
+): SharedHolidayRangePosition {
+    if (!isMatchingSharedHoliday(day)) {
+        return null;
+    }
+
+    const hasPreviousMatch = isMatchingSharedHoliday(previousDay) && areConsecutiveDays(previousDay, day);
+    const hasNextMatch = isMatchingSharedHoliday(nextDay) && areConsecutiveDays(day, nextDay);
+
+    if (hasPreviousMatch && hasNextMatch) {
+        return "middle";
+    }
+
+    if (hasPreviousMatch) {
+        return "last";
+    }
+
+    if (hasNextMatch) {
+        return "first";
+    }
+
+    return "single";
+}
+
 function DayCell({
     day,
+    sharedHolidayRangePosition,
     onDayLongPress,
     onDaySelect,
 }: {
     day: CalendarDay;
+    sharedHolidayRangePosition: SharedHolidayRangePosition;
     onDayLongPress?: (day: CalendarDay) => void;
     onDaySelect?: (day: CalendarDay) => void;
 }) {
@@ -74,9 +141,15 @@ function DayCell({
     const { isPressed, ...longPressHandlers } = useLongPress(handleLongPress);
     const dayNum = parseDate(day.date).getUTCDate();
 
+    const sharedClass = getSharedClass(day);
+    const sharedBaseClass = sharedClass ? "shared-vacation-icon " + sharedClass : "";
+    const sharedHolidayRangeClass = sharedHolidayRangePosition
+        ? `shared-holiday-range shared-holiday-range-${sharedHolidayRangePosition}`
+        : "";
+
     return (
         <div
-            className={`relative aspect-square flex items-center justify-center rounded-md text-[11px] leading-none select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""} ${isFlashing ? "animate-cell-flash z-10" : "transition-colors"}`}
+            className={`${sharedBaseClass} ${sharedHolidayRangeClass} relative aspect-square flex items-center justify-center rounded-md text-[11px] leading-none select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""} ${isFlashing ? "animate-cell-flash z-10" : "transition-colors"}`}
             title={
                 day.isLockedVacationDay ? "Locked vacation day"
                     : day.holidayName ? day.holidayName
@@ -119,8 +192,14 @@ export function MonthGrid({ month, year, id, onDayLongPress, onDaySelect }: Grid
                     <div key={`empty-${i}`} className="aspect-square" />
                 ))}
 
-                {sortedDays.map((day) => (
-                    <DayCell key={day.date} day={day} onDayLongPress={onDayLongPress} onDaySelect={onDaySelect} />
+                {sortedDays.map((day, index) => (
+                    <DayCell
+                        key={day.date}
+                        day={day}
+                        sharedHolidayRangePosition={getSharedHolidayRangePosition(day, sortedDays[index - 1], sortedDays[index + 1])}
+                        onDayLongPress={onDayLongPress}
+                        onDaySelect={onDaySelect}
+                    />
                 ))}
             </div>
         </div>
@@ -151,8 +230,14 @@ export function USMonthGrid({ month, year, id, onDayLongPress, onDaySelect }: Gr
                     <div key={`empty-${i}`} className="aspect-square" />
                 ))}
 
-                {sortedDays.map((day) => (
-                    <DayCell key={day.date} day={day} onDayLongPress={onDayLongPress} onDaySelect={onDaySelect} />
+                {sortedDays.map((day, index) => (
+                    <DayCell
+                        key={day.date}
+                        day={day}
+                        sharedHolidayRangePosition={getSharedHolidayRangePosition(day, sortedDays[index - 1], sortedDays[index + 1])}
+                        onDayLongPress={onDayLongPress}
+                        onDaySelect={onDaySelect}
+                    />
                 ))}
             </div>
         </div>

@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  calendarNameStorageKey,
   clearAppLocalStorage,
+  connectedCalendarNameStorageKey,
+  connectedTokenStorageKey,
   getCanonicalAppPath,
   normalizeCanonicalAppPath,
   parseRequestFromUrl,
@@ -44,6 +47,21 @@ describe("optimizationPersistence", () => {
     });
 
     expect(window.location.search).toBe("?country=DE");
+  });
+
+  it("preserves connected calendar params in the app URL", () => {
+    window.localStorage.setItem(connectedTokenStorageKey, "partner-seed");
+    window.localStorage.setItem(connectedCalendarNameStorageKey, "Friends");
+
+    updateUrlFromRequest({
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: defaultVacationDays,
+      minimumDaysPerRange: defaultMinimumDaysPerRange,
+      maximumDaysPerRange: defaultMaximumDaysPerRange,
+    });
+
+    expect(window.location.search).toBe("?country=DE&connectedToken=partner-seed&connectedCalendarName=Friends");
   });
 
   it("normalizes nested production app paths back to /app while preserving the query string", () => {
@@ -90,6 +108,9 @@ describe("optimizationPersistence", () => {
   it("clears only the app-owned local storage entries", () => {
     window.localStorage.setItem(savedRequestStorageKey, "{}");
     window.localStorage.setItem(savedResultStorageKey, "{}");
+    window.localStorage.setItem(calendarNameStorageKey, "Friends");
+    window.localStorage.setItem(connectedTokenStorageKey, "partner-seed");
+    window.localStorage.setItem(connectedCalendarNameStorageKey, "Friends");
     window.localStorage.setItem(themeStorageKey, "dark");
     window.localStorage.setItem("unrelated.key", "keep-me");
 
@@ -97,6 +118,9 @@ describe("optimizationPersistence", () => {
 
     expect(window.localStorage.getItem(savedRequestStorageKey)).toBeNull();
     expect(window.localStorage.getItem(savedResultStorageKey)).toBeNull();
+    expect(window.localStorage.getItem(calendarNameStorageKey)).toBeNull();
+    expect(window.localStorage.getItem(connectedTokenStorageKey)).toBeNull();
+    expect(window.localStorage.getItem(connectedCalendarNameStorageKey)).toBeNull();
     expect(window.localStorage.getItem(themeStorageKey)).toBeNull();
     expect(window.localStorage.getItem("unrelated.key")).toBe("keep-me");
   });

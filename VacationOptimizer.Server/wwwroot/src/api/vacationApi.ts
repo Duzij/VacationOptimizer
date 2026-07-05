@@ -5,6 +5,7 @@ import {
     type OptimizeRequest,
     type OptimizeResult,
     type StateOption,
+    type DayType,
 } from "../types/models";
 import {
     isIndiaOptimizeRequest,
@@ -42,6 +43,19 @@ export async function fetchStates(countryCode: string): Promise<StateOption[]> {
 export async function fetchDetectedCountry(): Promise<DetectedCountry> {
     const res = await fetch(`${BASE}/detected-country`);
     if (!res.ok) throw new Error("Failed to detect country");
+    return res.json();
+}
+
+export async function decodeSeed(seedToken: string): Promise<DayType[]> {
+    const res = await fetch(`${BASE}/decode-seed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ seedToken }),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw createApiError(err.error || "Failed to decode seed", res.status);
+    }
     return res.json();
 }
 

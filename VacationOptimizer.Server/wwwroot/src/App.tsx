@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, Clipboard, Shuffle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 import DetailsLipMobile from "./components/DetailsLipMobile";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
@@ -22,6 +22,9 @@ import {
 } from "./components/PublicPages";
 import OptimizerForm from "./components/OptimizerForm";
 import CalendarView from "./components/CalendarView";
+import PlannerSeed from "./components/PlannerSeed";
+import ConnectRedirect from "./components/ConnectRedirect";
+import ShareCalendarModal from "./components/ShareCalendarModal";
 import { getDefaultYear } from "./optimizerDefaults";
 import { useTheme } from "./hooks/useTheme";
 import { useOptimizationSession } from "./hooks/useOptimizationSession";
@@ -30,6 +33,13 @@ import { useDetectedCountry } from "./api/vacationApi";
 import { DayType } from "./types/models";
 import type { CalendarDay, OptimizeRequest } from "./types/models";
 import type { DayLipDetails } from "./components/DetailsLipMobile";
+import {
+  clearConnectedCalendar,
+  consumeConnectRedirectFlag,
+  persistCalendarName,
+  persistConnectedCalendar,
+  updateUrlFromRequest,
+} from "./utils/optimizationPersistence";
 
 const queryClient = new QueryClient();
 
@@ -136,6 +146,7 @@ function Main() {
             }
           />
           <Route path="/app" element={<PlannerPage />} />
+          <Route path="/connect" element={<ConnectRedirect />} />
           <Route
             path="*"
             element={
@@ -164,9 +175,16 @@ function PlannerPage() {
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
   const [selectedDayDetails, setSelectedDayDetails] = useState<DayLipDetails | null>(null);
   const [showShuffleLimitModal, setShowShuffleLimitModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
+  const [arrivedFromConnect] = useState(() => consumeConnectRedirectFlag());
 
   const {
     initialRequest,
+    initialCalendarName,
+    initialConnectedToken,
+    initialConnectedCalendarName,
+    hasStoredPlannerState,
     result,
     activeRequest,
     optimize,
@@ -188,6 +206,9 @@ function PlannerPage() {
     hasReachedShuffleLimit,
     hasLockedBudgetLimit,
   } = useOptimizationSession();
+  const [calendarName, setCalendarName] = useState(initialCalendarName);
+  const [connectedToken, setConnectedToken] = useState(initialConnectedToken);
+  const [connectedCalendarName, setConnectedCalendarName] = useState(initialConnectedCalendarName);
   const handleCalendarRunOptimization = useCallback((
     req: OptimizeRequest,
     overrideIgnoredHolidayDates?: string[],
@@ -260,6 +281,50 @@ function PlannerPage() {
     setSelectedDayDetails(getDayLipDetails(day));
   }, []);
 
+  const handleDisconnectConnectedCalendar = useCallback(() => {
+    setConnectedToken("");
+    setConnectedCalendarName("");
+    clearConnectedCalendar();
+    updateUrlFromRequest(activeRequest, {
+      connectedToken: null,
+      connectedCalendarName: null,
+      pathname: "/app",
+    });
+  }, [activeRequest]);
+
+  useEffect(() => {
+    if (!connectedToken) {
+      return;
+    }
+
+    persistConnectedCalendar(connectedToken, connectedCalendarName);
+  }, [connectedCalendarName, connectedToken]);
+
+  useEffect(() => {
+    if (!connectedToken || hasStoredPlannerState) {
+      return;
+    }
+
+    setConnectionWarning(arrivedFromConnect
+      ? "Looks like it’s your first time using a website. You can start by building your own calendar or ask a friend to share a connect link."
+      : "This connect link needs one of your own saved planner calendars first. Build your own calendar, then try connecting again.");
+    handleDisconnectConnectedCalendar();
+  }, [arrivedFromConnect, connectedToken, handleDisconnectConnectedCalendar, hasStoredPlannerState]);
+
+  useEffect(() => {
+    if (!connectedToken || !result?.plannerSeed) {
+      return;
+    }
+
+    if (connectedToken.trim() === result.plannerSeed.trim()) {
+      setConnectionWarning("This connect link points to the same calendar you already have open, so it was not applied.");
+      handleDisconnectConnectedCalendar();
+      return;
+    }
+
+    setConnectionWarning(null);
+  }, [connectedToken, handleDisconnectConnectedCalendar, result?.plannerSeed]);
+
   return (
     <>
       <RouteMeta
@@ -276,6 +341,17 @@ function PlannerPage() {
               Enter your country and vacation-day rules, then generate suggested vacation ranges. Results are meant to support planning,
               not replace checking your employer policy, local holiday changes, or team availability.
             </p>
+            {connectedToken && (
+              <div className="max-w-3xl rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text">
+                Connected to <span className="font-semibold">{connectedCalendarName || "shared calendar"}</span>.
+                You can compare your planner with this shared calendar and disconnect at any time.
+              </div>
+            )}
+            {connectionWarning && (
+              <div className="max-w-3xl rounded-xl border border-holiday-text/20 bg-holiday/20 px-4 py-3 text-sm text-holiday-text">
+                {connectionWarning}
+              </div>
+            )}
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)] xl:items-start">
@@ -400,16 +476,26 @@ function PlannerPage() {
             </div>
           </ResultsSummary>
 
-          <CalendarView
-            calendar={result.calendar.days}
-            year={activeRequest?.year ?? currentYear}
-            country={activeRequest?.country}
-            onDayLongPress={handleDayLongPress}
-            onDaySelect={handleDaySelect}
-            locale={detectedCountry?.countryCode}
-          />
+          <div className="space-y-3">
+            <PlannerSeed
+              isVisible={true}
+              connectedCalendarName={connectedCalendarName}
+              isConnected={Boolean(connectedToken)}
+              onDisconnect={handleDisconnectConnectedCalendar}
+              onOpenShareModal={() => setShowShareModal(true)}
+            />
 
-          <PlannerSeed isVisible={false} seed={result.resultToken} />
+            <CalendarView
+              calendar={result.calendar.days}
+              ranges={result.ranges}
+              year={activeRequest?.year ?? currentYear}
+              country={activeRequest?.country}
+              onDayLongPress={handleDayLongPress}
+              onDaySelect={handleDaySelect}
+              locale={detectedCountry?.countryCode}
+              connectedToken={connectedToken}
+            />
+          </div>
         </div>
       )}
 
@@ -432,6 +518,7 @@ function PlannerPage() {
           formattedDate={selectedDayDetails.formattedDate}
           label={selectedDayDetails.label}
           detail={selectedDayDetails.detail}
+          sharedDetail={selectedDayDetails.sharedDetail}
           onClose={() => setSelectedDayDetails(null)}
         />
       )}
@@ -452,63 +539,26 @@ function PlannerPage() {
         />
       )}
       {showShuffleLimitModal && <ShuffleLimitModal onClose={() => setShowShuffleLimitModal(false)} />}
+      {showShareModal && result && (
+        <ShareCalendarModal
+          plannerSeed={result.plannerSeed}
+          initialCalendarName={calendarName}
+          onCalendarNameSave={(name) => {
+            setCalendarName(name);
+            persistCalendarName(name);
+          }}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </>
   );
 }
 
-function PlannerSeed({ isVisible, seed }: { isVisible: boolean; seed: string }) {
-  const [hasCopied, setHasCopied] = useState(false);
 
-  const handleCopy = useCallback(async () => {
-    if (!seed) {
-      return;
-    }
-
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(seed);
-    } else {
-      const textarea = document.createElement("textarea");
-      textarea.value = seed;
-      textarea.setAttribute("readonly", "");
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-    }
-
-    setHasCopied(true);
-    window.setTimeout(() => setHasCopied(false), 1600);
-  }, [seed]);
-
-  if (!seed || !isVisible) {
-    return null;
-  }
-
-  return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 border-t border-border pt-4 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
-        <span className="font-medium text-text">Planner seed</span>
-        <code className="mt-1 block break-all rounded-md border border-border bg-surface/50 px-2 py-1 font-mono text-[11px] leading-5 text-text-muted">
-          {seed}
-        </code>
-      </div>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="action-btn action-btn-secondary shrink-0"
-        aria-label="Copy planner seed"
-        title="Copy planner seed"
-      >
-        {hasCopied ? <Check className="w-4 h-4" /> : <Clipboard className="w-4 h-4" />}
-        {hasCopied ? "Copied" : "Copy"}
-      </button>
-    </div>
-  );
-}
 
 function getDayLipDetails(day: CalendarDay): DayLipDetails {
+  const shouldShowSharedDetail = day.sharedType && (day.sharedType !== day.type || day.sharedType === DayType.PublicHoliday);
+
   return {
     formattedDate: parseCalendarDate(day.date).toLocaleDateString("en-US", {
       month: "long",
@@ -518,6 +568,9 @@ function getDayLipDetails(day: CalendarDay): DayLipDetails {
     }),
     label: getDayLabel(day),
     detail: getDayDetail(day),
+    sharedDetail: shouldShowSharedDetail
+      ? `Partner: ${getDayLabel({ ...day, type: day.sharedType } as CalendarDay).toLowerCase()}` 
+      : null,
   };
 }
 

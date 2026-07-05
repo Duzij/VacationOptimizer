@@ -1,6 +1,9 @@
-import { MonthModel } from "../types/models";
-import type { CalendarDay } from "../types/models";
+import { useMemo } from "react";
+import { DayType, MonthModel } from "../types/models";
+import type { CalendarDay, VacationRange } from "../types/models";
 import { MonthGrid, USMonthGrid } from "./MonthGrid";
+import { useQuery } from "@tanstack/react-query";
+import { decodeSeed } from "../api/vacationApi";
 
 function parseDate(dateStr: string): Date {
     const [year, month, day] = dateStr.split("-").map(Number);
@@ -9,24 +12,129 @@ function parseDate(dateStr: string): Date {
 
 interface Props {
     calendar?: CalendarDay[];
+    ranges?: VacationRange[];
     year: number;
     country?: string;
     onDayLongPress?: (day: CalendarDay) => void;
     onDaySelect?: (day: CalendarDay) => void;
     locale?: string | null | undefined;
+    connectedToken?: string;
 }
 
-export default function CalendarView({ calendar, year, country, locale, onDayLongPress, onDaySelect }: Props) {
+function toDateKey(date: Date) {
+    return date.toISOString().slice(0, 10);
+}
+
+function buildRangeSignature(range: VacationRange) {
+    return `${range.start}:${range.end}`;
+}
+
+function buildDateSetForRanges(ranges: VacationRange[]) {
+    const dates = new Set<string>();
+
+    ranges.forEach((range) => {
+        let current = parseDate(range.start);
+        const end = parseDate(range.end);
+
+        while (current <= end) {
+            dates.add(toDateKey(current));
+            current = new Date(current.getTime() + 24 * 60 * 60 * 1000);
+        }
+    });
+
+    return dates;
+}
+
+function isConnectedRangeDay(day: CalendarDay) {
+    return day.type !== DayType.WorkDay && day.type !== DayType.NeverHoliday;
+}
+
+function buildConnectedRanges(calendar: CalendarDay[]) {
+    const ranges: VacationRange[] = [];
+    let index = 0;
+
+    while (index < calendar.length) {
+        if (!isConnectedRangeDay(calendar[index]!)) {
+            index++;
+            continue;
+        }
+
+        const startIndex = index;
+        let vacationDaysUsed = 0;
+
+        while (index < calendar.length && isConnectedRangeDay(calendar[index]!)) {
+            if (calendar[index]!.type === DayType.Vacation) {
+                vacationDaysUsed++;
+            }
+
+            index++;
+        }
+
+        const endIndex = index - 1;
+        const totalDaysOff = endIndex - startIndex + 1;
+
+        if (vacationDaysUsed > 0 || totalDaysOff >= 3) {
+            ranges.push({
+                start: calendar[startIndex]!.date,
+                end: calendar[endIndex]!.date,
+                totalDaysOff,
+                vacationDaysUsed,
+            });
+        }
+    }
+
+    return ranges;
+}
+
+export default function CalendarView({ calendar, ranges = [], year, country, locale, onDayLongPress, onDaySelect, connectedToken }: Props) {
     // Start month is determent by the date today
     const startMonth = new Date().getUTCMonth();
     const months: MonthModel[] = Array.from({ length: 12 - startMonth }, (_, i) => new MonthModel(startMonth + i, locale || "en-US"));
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
 
+    const { data: sharedDays } = useQuery({
+        queryKey: ["decode-seed", connectedToken],
+        queryFn: () => decodeSeed(connectedToken!),
+        enabled: Boolean(connectedToken),
+        staleTime: Infinity,
+        retry: false
+    });
+
+    const matchedRangeDates = useMemo(() => {
+        if (!calendar || !sharedDays || sharedDays.length !== calendar.length || ranges.length === 0) {
+            return new Set<string>();
+        }
+
+        const connectedCalendar = calendar.map((day, index) => ({
+            ...day,
+            type: sharedDays[index] ?? day.type,
+            sharedType: undefined,
+            sharedMatchedRange: undefined,
+            isLockedVacationDay: false,
+        }));
+
+        const connectedRangeSignatures = new Set(buildConnectedRanges(connectedCalendar).map(buildRangeSignature));
+        const matchingRanges = ranges.filter((range) => connectedRangeSignatures.has(buildRangeSignature(range)));
+
+        return buildDateSetForRanges(matchingRanges);
+    }, [calendar, ranges, sharedDays]);
+
     if (calendar) {
-        calendar.forEach((day) => {
+        calendar.forEach((day, index) => {
             const d = parseDate(day.date);
             const currentMonth = months.find((m) => m.monthIndex === d.getUTCMonth());
-            currentMonth?.addDay(day);
+            if (currentMonth) {
+                const dayWithShared = sharedDays && sharedDays[index]
+                    ? {
+                        ...day,
+                        sharedType: sharedDays[index],
+                        sharedMatchedRange: day.type === DayType.PublicHoliday
+                            && sharedDays[index] === DayType.PublicHoliday
+                            && matchedRangeDates.has(day.date),
+                    }
+                    : day;
+                currentMonth.addDay(dayWithShared);
+            }
         });
     }
 

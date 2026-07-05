@@ -295,6 +295,10 @@ export function useOptimizationSession() {
 
   return {
     initialRequest: initialStateRef.current.initialRequest,
+    initialCalendarName: initialStateRef.current.initialCalendarName,
+    initialConnectedToken: initialStateRef.current.initialConnectedToken,
+    initialConnectedCalendarName: initialStateRef.current.initialConnectedCalendarName,
+    hasStoredPlannerState: initialStateRef.current.hasStoredPlannerState,
     result,
     activeRequest,
     ignoredHolidayDates,
