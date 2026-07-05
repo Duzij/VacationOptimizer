@@ -165,9 +165,17 @@ export function markConnectRedirected() {
   window.sessionStorage.setItem(connectRedirectFlagStorageKey, "1");
 }
 
-export function consumeConnectRedirectFlag() {
-  const redirected = window.sessionStorage.getItem(connectRedirectFlagStorageKey) === "1";
+export function hasConnectRedirectFlag() {
+  return window.sessionStorage.getItem(connectRedirectFlagStorageKey) === "1";
+}
+
+export function clearConnectRedirectFlag() {
   window.sessionStorage.removeItem(connectRedirectFlagStorageKey);
+}
+
+export function consumeConnectRedirectFlag() {
+  const redirected = hasConnectRedirectFlag();
+  clearConnectRedirectFlag();
   return redirected;
 }
 

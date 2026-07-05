@@ -17,7 +17,7 @@ export default function ConnectRedirect() {
       markConnectRedirected();
     }
 
-    navigate("/app", { replace: true });
+    navigate("/app", { replace: true, state: { fromConnect: true } });
   }, [navigate, searchParams]);
 
   return (

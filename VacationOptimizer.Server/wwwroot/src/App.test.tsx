@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 import { getDefaultYear } from "./optimizerDefaults";
@@ -26,9 +27,43 @@ vi.mock("./api/vacationApi", () => ({
 }));
 
 vi.mock("./components/OptimizerForm", () => ({
-  default: ({ isLoading }: { isLoading: boolean }) => (
-    <div data-testid="optimizer-form-loading">{String(isLoading)}</div>
-  ),
+  default: ({
+    isLoading,
+    initialRequest,
+    onResult,
+  }: {
+    isLoading: boolean;
+    initialRequest?: { year?: number; country?: string; vacationDays?: number; minimumDaysPerRange?: number; maximumDaysPerRange?: number } | null;
+    onResult: (request: { country: string; year: number; vacationDays: number; minimumDaysPerRange: number; maximumDaysPerRange: number }) => void;
+  }) => {
+    const [year, setYear] = useState(initialRequest?.year ?? getDefaultYear());
+
+    return (
+      <div>
+        <div data-testid="optimizer-form-loading">{String(isLoading)}</div>
+        <label htmlFor="mock-year">Year</label>
+        <input
+          id="mock-year"
+          aria-label="Year"
+          type="number"
+          value={year}
+          onChange={(event) => setYear(Number(event.target.value))}
+        />
+        <button
+          type="button"
+          onClick={() => onResult({
+            country: initialRequest?.country ?? "DE",
+            year,
+            vacationDays: initialRequest?.vacationDays ?? 25,
+            minimumDaysPerRange: initialRequest?.minimumDaysPerRange ?? 4,
+            maximumDaysPerRange: initialRequest?.maximumDaysPerRange ?? 14,
+          })}
+        >
+          Apply year
+        </button>
+      </div>
+    );
+  },
 }));
 
 vi.mock("./components/CalendarView", () => ({
@@ -183,7 +218,7 @@ describe("App loading state", () => {
     expect(screen.getAllByText(/Connected to/i)[0]?.textContent).toContain("SomeoneElse");
   });
 
-  it("refuses to connect when the shared token is for a different year", async () => {
+  it("retains the connected token on the initial /connect redirect when the shared year differs", async () => {
     const defaultYear = getDefaultYear();
     mutateAsync.mockResolvedValue(createSavedResult("same-seed"));
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
@@ -194,7 +229,7 @@ describe("App loading state", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("This connect link is for a different year and was not applied.")).toBeTruthy();
+      expect(window.location.pathname).toBe("/app");
     });
 
     expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBe("same-seed");
@@ -203,6 +238,34 @@ describe("App loading state", () => {
     expect(window.location.search).toContain("connectedToken=same-seed");
     expect(window.location.search).toContain("connectedCalendarName=SomeoneElse");
     expect(window.location.search).toContain(`connectedCalendarYear=${Number(defaultYear) + 1}`);
+  });
+
+  it("disconnects when the user later changes the planner year into a mismatch", async () => {
+    const defaultYear = getDefaultYear();
+    mutateAsync.mockResolvedValue(createSavedResult("planner-seed-1"));
+    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
+    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("planner-seed-1")));
+    window.localStorage.setItem("vacationOptimizer.v2.connectedToken", "partner-seed");
+    window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarName", "Friends");
+    window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarYear", String(defaultYear));
+    window.history.replaceState({}, "", `/app?country=DE&connectedToken=partner-seed&connectedCalendarName=Friends&connectedCalendarYear=${defaultYear}`);
+
+    render(<App />);
+
+    await userEvent.clear(screen.getByLabelText("Year"));
+    await userEvent.type(screen.getByLabelText("Year"), String(defaultYear + 1));
+    await userEvent.click(screen.getByRole("button", { name: "Apply year" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("This shared calendar was disconnected because you changed the planner year.")).toBeTruthy();
+    });
+
+    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBeNull();
+    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedCalendarName")).toBeNull();
+    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedCalendarYear")).toBeNull();
+    expect(window.location.search).not.toContain("connectedToken=");
+    expect(window.location.search).not.toContain("connectedCalendarName=");
+    expect(window.location.search).not.toContain("connectedCalendarYear=");
   });
 
   it("reuses the saved calendar name in the share modal", async () => {

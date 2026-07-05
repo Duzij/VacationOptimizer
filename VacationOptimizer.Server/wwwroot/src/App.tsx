@@ -34,8 +34,9 @@ import { DayType } from "./types/models";
 import type { CalendarDay, OptimizeRequest } from "./types/models";
 import type { DayLipDetails } from "./components/DetailsLipMobile";
 import {
+  clearConnectRedirectFlag,
   clearConnectedCalendar,
-  consumeConnectRedirectFlag,
+  hasConnectRedirectFlag,
   persistCalendarName,
   persistConnectedCalendar,
   updateUrlFromRequest,
@@ -169,6 +170,7 @@ function Main() {
 }
 
 function PlannerPage() {
+  const location = useLocation();
   const currentYear = getDefaultYear();
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
@@ -176,7 +178,9 @@ function PlannerPage() {
   const [showShuffleLimitModal, setShowShuffleLimitModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
-  const [arrivedFromConnect] = useState(() => consumeConnectRedirectFlag());
+  const arrivedFromConnect = useRef(
+    Boolean((location.state as { fromConnect?: boolean } | null)?.fromConnect) || hasConnectRedirectFlag(),
+  ).current;
 
   const {
     initialRequest,
@@ -210,6 +214,8 @@ function PlannerPage() {
   const [connectedToken, setConnectedToken] = useState(initialConnectedToken);
   const [connectedCalendarName, setConnectedCalendarName] = useState(initialConnectedCalendarName);
   const [connectedCalendarYear, setConnectedCalendarYear] = useState(initialConnectedCalendarYear);
+  const initialPlannerYearRef = useRef(initialRequest?.year ?? currentYear);
+  const hasExitedInitialConnectStateRef = useRef(false);
   const normalizedPlannerSeed = typeof result?.plannerSeed === "string"
     && result.plannerSeed.trim()
     && result.plannerSeed.trim().toLowerCase() !== "undefined"
@@ -316,11 +322,12 @@ function PlannerPage() {
     setConnectionWarning(arrivedFromConnect
       ? "Looks like it’s your first time using a website. You can start by building your own calendar or ask a friend to share a connect link."
       : "This connect link needs one of your own saved planner calendars first. Build your own calendar, then try connecting again.");
+    clearConnectRedirectFlag();
     handleDisconnectConnectedCalendar();
   }, [arrivedFromConnect, connectedToken, handleDisconnectConnectedCalendar, hasStoredPlannerState]);
 
   useEffect(() => {
-    if (!connectedToken || !result?.plannerSeed) {
+    if (!connectedToken || !activeRequest) {
       return;
     }
 
@@ -328,16 +335,29 @@ function PlannerPage() {
     // currently selected/requested year, refuse to apply the connection and
     // show a year-mismatch warning. Otherwise allow the connection (including
     // when the token matches the existing planner seed).
-    const currentYear = activeRequest?.year ?? getDefaultYear();
+    const currentYear = activeRequest.year ?? getDefaultYear();
     const parsedConnectedYear = connectedCalendarYear ? Number(connectedCalendarYear) : null;
 
+    if (activeRequest.year !== initialPlannerYearRef.current) {
+      hasExitedInitialConnectStateRef.current = true;
+    }
+
     if (parsedConnectedYear !== null && parsedConnectedYear !== Number(currentYear)) {
-      setConnectionWarning("This connect link is for a different year and was not applied.");
+      if (arrivedFromConnect && !hasExitedInitialConnectStateRef.current) {
+        clearConnectRedirectFlag();
+        setConnectionWarning("This connect link is for a different year and was not applied. Change the planner year to match the shared calendar, or ask the sender for a new link.");
+        return;
+      }
+
+      setConnectionWarning("This shared calendar was disconnected because you changed the planner year.");
+      handleDisconnectConnectedCalendar();
       return;
     }
 
+    hasExitedInitialConnectStateRef.current = true;
+    clearConnectRedirectFlag();
     setConnectionWarning(null);
-  }, [connectedToken, result?.plannerSeed, connectedCalendarYear, activeRequest?.year]);
+  }, [connectedToken, handleDisconnectConnectedCalendar, connectedCalendarYear, activeRequest]);
 
   return (
     <>
