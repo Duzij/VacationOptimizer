@@ -166,7 +166,7 @@ describe("App loading state", () => {
     expect(window.location.search).toBe("");
   });
 
-  it("refuses to connect when the shared token matches the current planner seed even if the name differs", async () => {
+  it("allows connecting even when the shared token matches the current planner seed", async () => {
     mutateAsync.mockResolvedValue(createSavedResult("same-seed"));
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("same-seed")));
@@ -175,7 +175,26 @@ describe("App loading state", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("This connect link points to the same calendar you already have open, so it was not applied.")).toBeTruthy();
+      expect(window.location.pathname).toBe("/app");
+    });
+
+    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBe("same-seed");
+    expect(window.location.search).toContain("connectedToken=same-seed");
+    expect(screen.getAllByText(/Connected to/i)[0]?.textContent).toContain("SomeoneElse");
+  });
+
+  it("refuses to connect when the shared token is for a different year", async () => {
+    const defaultYear = getDefaultYear();
+    mutateAsync.mockResolvedValue(createSavedResult("same-seed"));
+    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
+    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("same-seed")));
+    // connected link targets the following year
+    window.history.replaceState({}, "", `/connect?token=same-seed&connectedCalendarName=SomeoneElse&connectedCalendarYear=${Number(defaultYear) + 1}`);
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("This connect link is for a different year and was not applied.")).toBeTruthy();
     });
 
     expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBeNull();

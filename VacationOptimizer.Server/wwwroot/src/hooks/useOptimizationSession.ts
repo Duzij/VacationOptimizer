@@ -298,6 +298,7 @@ export function useOptimizationSession() {
     initialCalendarName: initialStateRef.current.initialCalendarName,
     initialConnectedToken: initialStateRef.current.initialConnectedToken,
     initialConnectedCalendarName: initialStateRef.current.initialConnectedCalendarName,
+    initialConnectedCalendarYear: initialStateRef.current.initialConnectedCalendarYear,
     hasStoredPlannerState: initialStateRef.current.hasStoredPlannerState,
     result,
     activeRequest,

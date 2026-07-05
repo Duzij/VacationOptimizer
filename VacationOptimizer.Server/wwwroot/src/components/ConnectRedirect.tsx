@@ -9,9 +9,11 @@ export default function ConnectRedirect() {
   useEffect(() => {
     const token = searchParams.get("token")?.trim() ?? "";
     const connectedCalendarName = searchParams.get("connectedCalendarName")?.trim() ?? "";
+    const connectedCalendarYear = searchParams.get("connectedCalendarYear")?.trim() ?? "";
 
     if (token) {
-      persistConnectedCalendar(token, connectedCalendarName);
+      // persist token, optional display name, and optional year
+      persistConnectedCalendar(token, connectedCalendarName, connectedCalendarYear || null);
       markConnectRedirected();
     }
 

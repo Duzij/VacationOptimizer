@@ -53,6 +53,7 @@ describe("optimizationPersistence", () => {
   it("preserves connected calendar params in the app URL", () => {
     window.localStorage.setItem(connectedTokenStorageKey, "partner-seed");
     window.localStorage.setItem(connectedCalendarNameStorageKey, "Friends");
+    window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarYear", String(getDefaultYear()));
 
     updateUrlFromRequest({
       country: "DE",
@@ -62,7 +63,7 @@ describe("optimizationPersistence", () => {
       maximumDaysPerRange: defaultMaximumDaysPerRange,
     });
 
-    expect(window.location.search).toBe("?country=DE&connectedToken=partner-seed&connectedCalendarName=Friends");
+    expect(window.location.search).toBe(`?country=DE&connectedToken=partner-seed&connectedCalendarName=Friends&connectedCalendarYear=${getDefaultYear()}`);
   });
 
   it("normalizes nested production app paths back to /app while preserving the query string", () => {
@@ -127,6 +128,7 @@ describe("optimizationPersistence", () => {
     window.localStorage.setItem(calendarNameStorageKey, "Friends");
     window.localStorage.setItem(connectedTokenStorageKey, "partner-seed");
     window.localStorage.setItem(connectedCalendarNameStorageKey, "Friends");
+    window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarYear", String(getDefaultYear()));
     window.localStorage.setItem(themeStorageKey, "dark");
     window.localStorage.setItem("unrelated.key", "keep-me");
 

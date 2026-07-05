@@ -9,18 +9,21 @@ export const savedResultStorageKey = "vacationOptimizer.v2.savedResult";
 export const calendarNameStorageKey = "vacationOptimizer.v2.calendarName";
 export const connectedTokenStorageKey = "vacationOptimizer.v2.connectedToken";
 export const connectedCalendarNameStorageKey = "vacationOptimizer.v2.connectedCalendarName";
+export const connectedCalendarYearStorageKey = "vacationOptimizer.v2.connectedCalendarYear";
 export const connectRedirectFlagStorageKey = "vacationOptimizer.v2.connectRedirected";
 export const themeStorageKey = "theme";
 
 interface ConnectedCalendarState {
   connectedToken: string;
   connectedCalendarName: string;
+  connectedCalendarYear?: string;
 }
 
 interface UpdateUrlOptions {
   connectedToken?: string | null;
   connectedCalendarName?: string | null;
   pathname?: string;
+  connectedCalendarYear?: string | null;
 }
 
 function normalizeStoredString(value: string | null | undefined) {
@@ -113,6 +116,7 @@ export function readConnectedCalendar(): ConnectedCalendarState {
   return {
     connectedToken: normalizeStoredString(window.localStorage.getItem(connectedTokenStorageKey)),
     connectedCalendarName: normalizeStoredString(window.localStorage.getItem(connectedCalendarNameStorageKey)),
+    connectedCalendarYear: normalizeStoredString(window.localStorage.getItem(connectedCalendarYearStorageKey)),
   };
 }
 
@@ -122,12 +126,14 @@ export function readConnectedCalendarFromUrl(): ConnectedCalendarState {
   return {
     connectedToken: normalizeStoredString(params.get("connectedToken")),
     connectedCalendarName: normalizeStoredString(params.get("connectedCalendarName")),
+    connectedCalendarYear: normalizeStoredString(params.get("connectedCalendarYear")),
   };
 }
 
-export function persistConnectedCalendar(connectedToken: string, connectedCalendarName?: string | null) {
+export function persistConnectedCalendar(connectedToken: string, connectedCalendarName?: string | null, connectedCalendarYear?: string | null) {
   const normalizedToken = normalizeStoredString(connectedToken);
   const normalizedCalendarName = normalizeStoredString(connectedCalendarName);
+  const normalizedCalendarYear = normalizeStoredString(connectedCalendarYear);
 
   if (!normalizedToken) {
     clearConnectedCalendar();
@@ -141,11 +147,18 @@ export function persistConnectedCalendar(connectedToken: string, connectedCalend
   } else {
     window.localStorage.removeItem(connectedCalendarNameStorageKey);
   }
+
+  if (normalizedCalendarYear) {
+    window.localStorage.setItem(connectedCalendarYearStorageKey, normalizedCalendarYear);
+  } else {
+    window.localStorage.removeItem(connectedCalendarYearStorageKey);
+  }
 }
 
 export function clearConnectedCalendar() {
   window.localStorage.removeItem(connectedTokenStorageKey);
   window.localStorage.removeItem(connectedCalendarNameStorageKey);
+  window.localStorage.removeItem(connectedCalendarYearStorageKey);
 }
 
 export function markConnectRedirected() {
@@ -184,6 +197,7 @@ export function hasAppLocalStorageData() {
     calendarNameStorageKey,
     connectedTokenStorageKey,
     connectedCalendarNameStorageKey,
+    connectedCalendarYearStorageKey,
     themeStorageKey,
   ].some((key) => window.localStorage.getItem(key) !== null);
 }
@@ -197,6 +211,9 @@ export function updateUrlFromRequest(request: OptimizeRequest | null, options: U
   const connectedCalendarName = Object.prototype.hasOwnProperty.call(options, "connectedCalendarName")
     ? normalizeStoredString(options.connectedCalendarName)
     : savedConnectedCalendar.connectedCalendarName;
+  const connectedCalendarYear = Object.prototype.hasOwnProperty.call(options, "connectedCalendarYear")
+    ? normalizeStoredString((options as any).connectedCalendarYear)
+    : savedConnectedCalendar.connectedCalendarYear;
 
   if (connectedToken) {
     params.set("connectedToken", connectedToken);
@@ -204,6 +221,10 @@ export function updateUrlFromRequest(request: OptimizeRequest | null, options: U
 
   if (connectedCalendarName) {
     params.set("connectedCalendarName", connectedCalendarName);
+  }
+
+  if (connectedCalendarYear) {
+    params.set("connectedCalendarYear", connectedCalendarYear);
   }
 
   const pathname = options.pathname ?? window.location.pathname;
@@ -223,10 +244,15 @@ export function getInitialOptimizationState() {
   const connectedCalendar = {
     connectedToken: connectedCalendarFromUrl.connectedToken || storedConnectedCalendar.connectedToken,
     connectedCalendarName: connectedCalendarFromUrl.connectedCalendarName || storedConnectedCalendar.connectedCalendarName,
+    connectedCalendarYear: connectedCalendarFromUrl.connectedCalendarYear || storedConnectedCalendar.connectedCalendarYear,
   };
 
   if (connectedCalendarFromUrl.connectedToken) {
-    persistConnectedCalendar(connectedCalendar.connectedToken, connectedCalendar.connectedCalendarName);
+    persistConnectedCalendar(
+      connectedCalendar.connectedToken,
+      connectedCalendar.connectedCalendarName,
+      connectedCalendar.connectedCalendarYear,
+    );
   }
 
   return {
@@ -237,6 +263,7 @@ export function getInitialOptimizationState() {
     initialCalendarName: readSavedCalendarName(),
     initialConnectedToken: connectedCalendar.connectedToken,
     initialConnectedCalendarName: connectedCalendar.connectedCalendarName,
+    initialConnectedCalendarYear: connectedCalendar.connectedCalendarYear,
     hasStoredPlannerState: Boolean(initialRequest || cachedRequest || cachedResult),
   };
 }

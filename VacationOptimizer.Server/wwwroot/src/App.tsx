@@ -183,6 +183,7 @@ function PlannerPage() {
     initialCalendarName,
     initialConnectedToken,
     initialConnectedCalendarName,
+    initialConnectedCalendarYear,
     hasStoredPlannerState,
     result,
     activeRequest,
@@ -208,6 +209,7 @@ function PlannerPage() {
   const [calendarName, setCalendarName] = useState(initialCalendarName);
   const [connectedToken, setConnectedToken] = useState(initialConnectedToken);
   const [connectedCalendarName, setConnectedCalendarName] = useState(initialConnectedCalendarName);
+  const [connectedCalendarYear, setConnectedCalendarYear] = useState(initialConnectedCalendarYear);
   const normalizedPlannerSeed = typeof result?.plannerSeed === "string"
     && result.plannerSeed.trim()
     && result.plannerSeed.trim().toLowerCase() !== "undefined"
@@ -288,10 +290,12 @@ function PlannerPage() {
   const handleDisconnectConnectedCalendar = useCallback(() => {
     setConnectedToken("");
     setConnectedCalendarName("");
+    setConnectedCalendarYear("");
     clearConnectedCalendar();
     updateUrlFromRequest(activeRequest, {
       connectedToken: null,
       connectedCalendarName: null,
+      connectedCalendarYear: null,
       pathname: "/app",
     });
   }, [activeRequest]);
@@ -301,7 +305,7 @@ function PlannerPage() {
       return;
     }
 
-    persistConnectedCalendar(connectedToken, connectedCalendarName);
+    persistConnectedCalendar(connectedToken, connectedCalendarName, connectedCalendarYear);
   }, [connectedCalendarName, connectedToken]);
 
   useEffect(() => {
@@ -320,14 +324,21 @@ function PlannerPage() {
       return;
     }
 
-    if (connectedToken.trim() === result.plannerSeed.trim()) {
-      setConnectionWarning("This connect link points to the same calendar you already have open, so it was not applied.");
+    // If a connected calendar year was provided and it differs from the
+    // currently selected/requested year, refuse to apply the connection and
+    // show a year-mismatch warning. Otherwise allow the connection (including
+    // when the token matches the existing planner seed).
+    const currentYear = activeRequest?.year ?? getDefaultYear();
+    const parsedConnectedYear = connectedCalendarYear ? Number(connectedCalendarYear) : null;
+
+    if (parsedConnectedYear !== null && parsedConnectedYear !== Number(currentYear)) {
+      setConnectionWarning("This connect link is for a different year and was not applied.");
       handleDisconnectConnectedCalendar();
       return;
     }
 
     setConnectionWarning(null);
-  }, [connectedToken, handleDisconnectConnectedCalendar, result?.plannerSeed]);
+  }, [connectedToken, handleDisconnectConnectedCalendar, result?.plannerSeed, connectedCalendarYear, activeRequest?.year]);
 
   return (
     <>
