@@ -197,8 +197,12 @@ describe("App loading state", () => {
       expect(screen.getByText("This connect link is for a different year and was not applied.")).toBeTruthy();
     });
 
-    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBeNull();
-    expect(window.location.search).not.toContain("connectedToken=");
+    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBe("same-seed");
+    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedCalendarName")).toBe("SomeoneElse");
+    expect(window.localStorage.getItem("vacationOptimizer.v2.connectedCalendarYear")).toBe(String(Number(defaultYear) + 1));
+    expect(window.location.search).toContain("connectedToken=same-seed");
+    expect(window.location.search).toContain("connectedCalendarName=SomeoneElse");
+    expect(window.location.search).toContain(`connectedCalendarYear=${Number(defaultYear) + 1}`);
   });
 
   it("reuses the saved calendar name in the share modal", async () => {

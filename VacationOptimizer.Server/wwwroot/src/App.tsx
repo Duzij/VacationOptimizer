@@ -306,7 +306,7 @@ function PlannerPage() {
     }
 
     persistConnectedCalendar(connectedToken, connectedCalendarName, connectedCalendarYear);
-  }, [connectedCalendarName, connectedToken]);
+  }, [connectedCalendarName, connectedCalendarYear, connectedToken]);
 
   useEffect(() => {
     if (!connectedToken || hasStoredPlannerState) {
@@ -333,12 +333,11 @@ function PlannerPage() {
 
     if (parsedConnectedYear !== null && parsedConnectedYear !== Number(currentYear)) {
       setConnectionWarning("This connect link is for a different year and was not applied.");
-      handleDisconnectConnectedCalendar();
       return;
     }
 
     setConnectionWarning(null);
-  }, [connectedToken, handleDisconnectConnectedCalendar, result?.plannerSeed, connectedCalendarYear, activeRequest?.year]);
+  }, [connectedToken, result?.plannerSeed, connectedCalendarYear, activeRequest?.year]);
 
   return (
     <>
