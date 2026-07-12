@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Net.Sockets;
+using System.IO;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Extensions.Caching.Memory;
 using Scalar.AspNetCore;
@@ -229,6 +230,23 @@ app.MapGet("/ads.txt", () => Results.Text(adsTxt, "text/plain"));
 app.MapGet("/app/ads.txt", () => Results.Text(adsTxt, "text/plain"));
 app.MapGet("/sitemap.xml", () => Results.Text(sitemapXml, "application/xml"));
 app.MapGet("/app/sitemap.xml", () => Results.Text(sitemapXml, "application/xml"));
+app.MapGet("/api/blog", (IWebHostEnvironment environment) =>
+{
+    var candidatePaths = new[]
+    {
+        Path.Combine(environment.ContentRootPath, "wwwroot", "dist", "blog", "index.json"),
+        Path.Combine(environment.ContentRootPath, "wwwroot", "public", "blog", "index.json"),
+    };
+
+    var jsonPath = candidatePaths.FirstOrDefault(File.Exists);
+
+    if (jsonPath is null)
+    {
+        return Results.NotFound(new { error = "Blog index is not available." });
+    }
+
+    return Results.File(jsonPath, "application/json");
+});
 
 // SPA hosting
 app.UseStaticFiles();

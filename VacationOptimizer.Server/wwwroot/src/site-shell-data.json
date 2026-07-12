@@ -1,0 +1,18 @@
+{
+  "brandName": "Vacation Optimizer",
+  "navLinks": [
+    { "href": "/app", "label": "Planner" },
+    { "href": "/blog/", "label": "Blog", "isDocument": true },
+    { "href": "/contact", "label": "Contact" },
+    { "href": "/privacy", "label": "Privacy" },
+    { "href": "/terms", "label": "Terms" },
+    { "href": "/about", "label": "About" }
+  ],
+  "footerLinks": [
+    { "href": "/blog/", "label": "Blog", "isDocument": true },
+    { "href": "/contact", "label": "Contact" },
+    { "href": "/privacy", "label": "Privacy" },
+    { "href": "/terms", "label": "Terms" },
+    { "href": "/about", "label": "About" }
+  ]
+}
