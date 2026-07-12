@@ -252,7 +252,7 @@ app.MapGet("/api/blog", (IWebHostEnvironment environment) =>
 app.UseDefaultFiles();   // rewrites directory-style requests to look for index.html
 app.UseStaticFiles();
 app.UseRouting();
-
+app.MapFallbackToFile("index.html");
 app.UseSpa(spa =>
 {
     if (app.Environment.IsProduction())
