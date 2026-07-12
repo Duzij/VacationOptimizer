@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/generate-blog-static.mjs",
-    "build_prod": "tsc -b && vite build --mode production",
+    "build_prod": "tsc -b && vite build --mode production && node scripts/generate-blog-static.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview"
