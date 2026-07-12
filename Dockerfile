@@ -22,7 +22,7 @@ COPY . ./
 WORKDIR /src/VacationOptimizer.Server
 
 # copy built frontend into expected location
-COPY --from=frontend /app/dist ./wwwroot/dist
+COPY --from=frontend /app/dist ./wwwroot
 
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
