@@ -68,6 +68,10 @@ async function generateStaticBlog() {
       );
     }),
   );
+
+  // Generate sitemap
+  const publicDir = path.join(projectRoot, "public");
+  await generateSitemap(posts, publicDir);
 }
 
 async function loadBlogPosts() {
@@ -413,4 +417,39 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+async function generateSitemap(posts, publicDir) {
+  const BASE_URL = "https://longvacation.eu";
+  const today = new Date().toISOString().split("T")[0];
+
+  const staticPages = [
+    { loc: "/", changefreq: "weekly", priority: "1.0", lastmod: today },
+    { loc: "/about/", changefreq: "monthly", priority: "0.8", lastmod: today },
+    { loc: "/contact/", changefreq: "monthly", priority: "0.7", lastmod: today },
+    { loc: "/privacy/", changefreq: "monthly", priority: "0.6", lastmod: today },
+    { loc: "/terms/", changefreq: "monthly", priority: "0.6", lastmod: today },
+    { loc: "/app/", changefreq: "weekly", priority: "0.9", lastmod: today },
+  ];
+
+  function urlEntry(loc, lastmod, changefreq, priority) {
+    return `<url>
+<loc>${BASE_URL}${loc}</loc>
+<lastmod>${lastmod}</lastmod>
+<changefreq>${changefreq}</changefreq>
+<priority>${priority}</priority>
+</url>`;
+  }
+
+  const staticEntries = staticPages.map(p => urlEntry(p.loc, p.lastmod, p.changefreq, p.priority));
+  const blogIndexEntry = urlEntry("/blog/", today, "weekly", "0.8");
+  const postEntries = posts.map(p => urlEntry(`/blog/${p.slug}/`, p.date, "monthly", "0.6"));
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${[...staticEntries, blogIndexEntry, ...postEntries].join("\n")}
+</urlset>`;
+
+  await fs.mkdir(publicDir, { recursive: true });
+  await fs.writeFile(path.join(publicDir, "sitemap.xml"), sitemap, "utf8");
 }
