@@ -34,5 +34,5 @@ content: |
 
   To enjoy even longer vacations, combine your PTO with holidays that fall on Mondays or Fridays. This way, you can easily extend your breaks by adding just a few vacation days before or after the long weekend.
 
-  Considering that the average American employee receives only **11 days of paid vacation per year**, it's definitely worth optimizing every single one. [LongVacation.eu](https://longvacation.eu/app?country=US&year=2027) can help you make the most of them.
+  Considering that the average American employee receives only **11 days of paid vacation per year**, it's definitely worth optimizing every single one. [LongVacation.eu](https://longvacation.eu/app?country=US&amp;year=2027) can help you make the most of them.
 ---
