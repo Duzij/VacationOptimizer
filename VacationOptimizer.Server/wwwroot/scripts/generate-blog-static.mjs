@@ -89,6 +89,10 @@ async function loadBlogPostFromFile(fileName) {
   const { data } = matter(source);
   const content = requireString(data.content, "content", fileName);
 
+  let html = markdown.render(content);
+  // Add blog-post-link class to all links in blog content
+  html = html.replace(/<a\s+href/g, '<a class="blog-post-link" href');
+
   return {
     title: requireString(data.title, "title", fileName),
     date: normalizeDate(data.date, fileName),
@@ -96,7 +100,7 @@ async function loadBlogPostFromFile(fileName) {
     slug: requireString(data.slug, "slug", fileName),
     summary: requireString(data.summary, "summary", fileName),
     tags: requireStringArray(data.tags, "tags", fileName),
-    html: markdown.render(content),
+    html,
   };
 }
 
