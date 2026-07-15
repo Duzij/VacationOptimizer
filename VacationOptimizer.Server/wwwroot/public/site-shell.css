@@ -490,6 +490,19 @@ html, body {
 .blog-post-content a {
   color: var(--color-accent, #0f7b83);
   text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25rem;
+  transition: opacity 0.2s ease, text-decoration-color 0.2s ease;
+  cursor: pointer;
+}
+
+.blog-post-content a:hover {
+  opacity: 0.8;
+  text-decoration-thickness: 3px;
+}
+
+.blog-post-content a:active {
+  opacity: 0.7;
 }
 
 .blog-post-content table {
