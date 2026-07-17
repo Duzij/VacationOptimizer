@@ -27,7 +27,7 @@ const sourceDir = path.join(projectRoot, "content", "blog");
 const outputDir = path.join(projectRoot, "public", "blog");
 const indexHtmlPath = path.join(projectRoot, "index.html");
 const siteDataPath = path.join(projectRoot, "src", "site-shell-data.json");
-const siteUrl = "https://longvacation.eu";
+const siteUrl = process.env.SITE_URL || "https://longvacation.eu";
 const markdown = new MarkdownIt({
   html: false,
   linkify: true,
@@ -70,8 +70,8 @@ async function generateStaticBlog() {
   );
 
   // Generate sitemap
-  const publicDir = path.join(projectRoot, "public");
-  await generateSitemap(posts, publicDir);
+  // const publicDir = path.join(projectRoot, "public");
+  // await generateSitemap(posts, publicDir);
 }
 
 async function loadBlogPosts() {
@@ -424,7 +424,7 @@ function escapeHtml(value) {
 }
 
 async function generateSitemap(posts, publicDir) {
-  const BASE_URL = "https://longvacation.eu";
+  const BASE_URL = process.env.SITE_URL || siteUrl;
   const today = new Date().toISOString().split("T")[0];
 
   const staticPages = [
