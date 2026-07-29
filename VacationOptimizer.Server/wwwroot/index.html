@@ -53,6 +53,33 @@
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <style>
+    html {
+      background: #ffffff;
+      color-scheme: light;
+    }
+
+    html.dark {
+      background: #222222;
+      color-scheme: dark;
+    }
+
+    body {
+      background: inherit;
+    }
+  </style>
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem("theme");
+        var isDark = storedTheme === "dark"
+          || (storedTheme === null && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        var root = document.documentElement;
+        root.classList.add(isDark ? "dark" : "light");
+        root.style.colorScheme = isDark ? "dark" : "light";
+      } catch (e) { }
+    })();
+  </script>
   <link rel="stylesheet" href="/site-shell.css" />
 
   <!-- ═══ Fonts with display=swap for faster text rendering ═══ -->
@@ -96,7 +123,7 @@
 
 <body>
   <div id="root">
-    <main style="max-width:960px;margin:0 auto;padding:32px 16px 48px;font-family:Inter,system-ui,sans-serif;line-height:1.6;color:#222">
+    <main style="max-width:960px;margin:0 auto;padding:32px 16px 48px;font-family:Inter,system-ui,sans-serif;line-height:1.6;color:var(--color-text, #222)">
       <h1 style="font-size:clamp(2rem,4vw,3.5rem);line-height:1.1;margin:0 0 16px">Vacation Optimizer</h1>
       <p style="max-width:720px;font-size:1.05rem;margin:0 0 16px">
         Vacation Optimizer is a vacation-day planning site that helps people compare vacation-day options around public holidays, weekends, and local calendar constraints.

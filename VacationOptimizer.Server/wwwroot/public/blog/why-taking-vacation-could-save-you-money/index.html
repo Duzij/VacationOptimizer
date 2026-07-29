@@ -50,6 +50,33 @@
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <style>
+    html {
+      background: #ffffff;
+      color-scheme: light;
+    }
+
+    html.dark {
+      background: #222222;
+      color-scheme: dark;
+    }
+
+    body {
+      background: inherit;
+    }
+  </style>
+  <script>
+    (function () {
+      try {
+        var storedTheme = localStorage.getItem("theme");
+        var isDark = storedTheme === "dark"
+          || (storedTheme === null && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        var root = document.documentElement;
+        root.classList.add(isDark ? "dark" : "light");
+        root.style.colorScheme = isDark ? "dark" : "light";
+      } catch (e) { }
+    })();
+  </script>
   <link rel="stylesheet" href="/site-shell.css" />
 
   <!-- ═══ Fonts with display=swap for faster text rendering ═══ -->
@@ -80,14 +107,6 @@
 
   <!-- ═══ App Bootstrap (deferred for fast first paint) ═══ -->
   <link rel="stylesheet" href="/assets/index-BwKKt9WQ.css">
-    <script>
-      (function() {
-        try {
-          var isDark = localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
-          if (isDark) document.documentElement.classList.add("dark");
-        } catch (e) {}
-      })();
-    </script>
   </head>
   <body>
     <div id="root">

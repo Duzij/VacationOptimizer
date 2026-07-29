@@ -150,7 +150,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData) {
         </a>
       </div>
     </article>
-  `).join("");
+  `).join("").replace(/\n[ \t]+\n/g, "\n\n");
 
   return renderDocument({
     appIndexHtml,
@@ -349,14 +349,6 @@ function renderDocument({ appIndexHtml, title, description, canonicalPath, body 
 <html lang="en">
   <head>
 ${head}
-    <script>
-      (function() {
-        try {
-          var isDark = localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
-          if (isDark) document.documentElement.classList.add("dark");
-        } catch (e) {}
-      })();
-    </script>
   </head>
   <body>
     <div id="root">
