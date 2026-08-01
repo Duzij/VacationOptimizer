@@ -68,6 +68,12 @@ namespace VacationOptimizer.Server.Migrations
                         },
                         new
                         {
+                            Id = 6,
+                            IsoCode = "ID",
+                            Name = "Indonesia"
+                        },
+                        new
+                        {
                             Id = 5,
                             IsoCode = "ES",
                             Name = "Spain"

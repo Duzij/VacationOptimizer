@@ -22,6 +22,7 @@ function getDayClass(type: DayType | string): string {
         case "Vacation": return "bg-vacation font-semibold";
         case "CustomFreeDay": return "bg-custom";
         case "PublicHoliday": return "bg-holiday";
+        case "CollectiveLeave": return "bg-collective-leave";
         case "Weekend": return "bg-weekend";
         case "PassedDay": return "bg-past";
         case "Today": return "bg-today";
@@ -45,6 +46,7 @@ function getSharedClass(day: CalendarDay) {
 
     const shouldShowSharedIndicator = day.sharedType !== day.type
         || day.sharedType === DayType.PublicHoliday
+        || day.sharedType === DayType.CollectiveLeave
         || day.sharedType === DayType.Vacation;
     if (!shouldShowSharedIndicator) {
         return "";
@@ -53,6 +55,7 @@ function getSharedClass(day: CalendarDay) {
     if (day.sharedType === DayType.Vacation) return "shared-vacation";
     if (day.sharedType === DayType.WorkDay) return "shared-workday";
     if (day.sharedType === DayType.PublicHoliday) return "shared-holiday";
+    if (day.sharedType === DayType.CollectiveLeave) return "shared-collective-leave";
     if (day.sharedType === DayType.NeverHoliday) return "shared-never-holiday";
 
     return "";

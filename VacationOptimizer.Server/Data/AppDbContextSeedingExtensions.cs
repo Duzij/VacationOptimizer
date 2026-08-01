@@ -10,7 +10,7 @@ public static class AppDbContextSeedingExtensions
         {
             if (context is AppDbContext appDbContext)
             {
-                ReferenceDataSeeder.SeedIndiaAndSpain(appDbContext);
+                ReferenceDataSeeder.SeedCountryReferenceData(appDbContext);
             }
         });
 
@@ -18,7 +18,7 @@ public static class AppDbContextSeedingExtensions
         {
             if (context is AppDbContext appDbContext)
             {
-                await ReferenceDataSeeder.SeedIndiaAndSpainAsync(appDbContext, cancellationToken);
+                await ReferenceDataSeeder.SeedCountryReferenceDataAsync(appDbContext, cancellationToken);
             }
         });
 

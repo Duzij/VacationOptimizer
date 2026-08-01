@@ -26,6 +26,7 @@ export const DayType = {
     WorkDay: "WorkDay",
     Weekend: "Weekend",
     PublicHoliday: "PublicHoliday",
+    CollectiveLeave: "CollectiveLeave",
     CustomFreeDay: "CustomFreeDay",
     Vacation: "Vacation",
     Today: "Today",

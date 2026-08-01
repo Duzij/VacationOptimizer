@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using VacationOptimizer.Server.Data;
 using VacationOptimizer.Server.Data.SeedData;
+using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
 using Xunit;
 
@@ -33,6 +34,7 @@ public class PublicHolidayServiceTests
         Assert.Contains("ES", countries);
         Assert.Contains("DE", countries);
         Assert.Contains("US", countries);
+        Assert.Contains("ID", countries);
     }
 
     [Fact]
@@ -105,5 +107,33 @@ public class PublicHolidayServiceTests
         Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 1, 1) && h.Name == "New Year's Day");
         Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 3, 19) && h.Name == "St Joseph's Day");
         Assert.Contains(holidays, h => h.Date == new DateOnly(2026, 7, 25) && h.Name == "National Day of Galicia");
+    }
+
+    [Fact]
+    public void GetHolidays_Indonesia_ReturnsCountryHolidaysAndCollectiveLeaveDays()
+    {
+        var holidays = _holidayService.GetHolidays("ID", 2026);
+
+        Assert.Equal(25, holidays.Count);
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == new DateOnly(2026, 2, 16)
+            && holiday.Name == "Imlek Holiday"
+            && holiday.Type == DayType.CollectiveLeave);
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == new DateOnly(2026, 2, 17)
+            && holiday.Name == "Imlek"
+            && holiday.Type == DayType.PublicHoliday);
+    }
+
+    [Fact]
+    public void GetHolidays_Indonesia2027_ReturnsNationalHolidaysWithoutCollectiveLeaveDays()
+    {
+        var holidays = _holidayService.GetHolidays("ID", 2027);
+
+        Assert.Equal(16, holidays.Count);
+        Assert.All(holidays, holiday => Assert.Equal(DayType.PublicHoliday, holiday.Type));
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == new DateOnly(2027, 12, 25)
+            && holiday.Name == "Christmas Day / Isra Miraj");
     }
 }

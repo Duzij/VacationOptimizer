@@ -120,7 +120,7 @@ export function useCalendarInteractions({
       return;
     }
 
-    if (day.type === DayType.PublicHoliday) {
+    if (day.type === DayType.PublicHoliday || day.type === DayType.CollectiveLeave) {
       setConfirmDay({ date: day.date, mode: "holidayActions", holidayName: day.holidayName });
       return;
     }

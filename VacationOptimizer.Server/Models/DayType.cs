@@ -13,6 +13,6 @@ public enum DayType
     Vacation,
     Today,
     PassedDay,
-    NeverHoliday
+    NeverHoliday,
+    CollectiveLeave
 }
-

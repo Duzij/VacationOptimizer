@@ -6,16 +6,17 @@ namespace VacationOptimizer.Server.Data;
 
 public static class ReferenceDataSeeder
 {
-    public static void SeedIndiaAndSpain(AppDbContext dbContext)
+    public static void SeedCountryReferenceData(AppDbContext dbContext)
     {
         SeedCountry(dbContext, IndiaSeedData.Country, IndiaSeedData.States, IndiaSeedData.Holidays);
         SeedCountry(dbContext, SpainSeedData.Country, SpainSeedData.States, SpainSeedData.Holidays);
+        SeedCountry(dbContext, IndonesiaSeedData.Country, IndonesiaSeedData.States, IndonesiaSeedData.Holidays);
         dbContext.SaveChanges();
     }
 
-    public static Task SeedIndiaAndSpainAsync(AppDbContext dbContext, CancellationToken cancellationToken = default)
+    public static Task SeedCountryReferenceDataAsync(AppDbContext dbContext, CancellationToken cancellationToken = default)
     {
-        SeedIndiaAndSpain(dbContext);
+        SeedCountryReferenceData(dbContext);
         return Task.CompletedTask;
     }
 

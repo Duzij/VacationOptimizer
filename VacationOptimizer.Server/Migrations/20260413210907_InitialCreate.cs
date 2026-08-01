@@ -86,7 +86,8 @@ namespace VacationOptimizer.Server.Migrations
                     { 2, "DE", "Germany" },
                     { 3, "US", "United States" },
                     { 4, "IN", "India" },
-                    { 5, "ES", "Spain" }
+                    { 5, "ES", "Spain" },
+                    { 6, "ID", "Indonesia" }
                 });
 
             migrationBuilder.CreateIndex(

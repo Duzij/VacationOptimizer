@@ -610,6 +610,7 @@ function getDayLipDetails(day: CalendarDay): DayLipDetails {
   const shouldShowSharedDetail = day.sharedType && (
     day.sharedType !== day.type
     || day.sharedType === DayType.PublicHoliday
+    || day.sharedType === DayType.CollectiveLeave
     || day.sharedType === DayType.Vacation
   );
 
@@ -641,6 +642,8 @@ function getDayLabel(day: CalendarDay): string {
       return "Custom free day";
     case DayType.PublicHoliday:
       return "Public holiday";
+    case DayType.CollectiveLeave:
+      return "Collective leave day";
     case DayType.Weekend:
       return "Weekend";
     case DayType.PassedDay:

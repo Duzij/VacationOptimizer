@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
                 AustriaSeedData.Country,
                 GermanySeedData.Country,
                 IndiaSeedData.Country,
+                IndonesiaSeedData.Country,
                 SpainSeedData.Country,
                 UnitedStatesSeedData.Country);
 

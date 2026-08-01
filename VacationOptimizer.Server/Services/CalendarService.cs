@@ -24,7 +24,7 @@ public class CalendarService
         var holidays = _holidayService.GetHolidays(country, year, stateCode)
             .Where(h => !ignoredHolidayDateSet.Contains(h.Date))
             .ToList();
-        var holidayLookup = holidays.ToDictionary(h => h.Date, h => h.Name);
+        var holidayLookup = holidays.ToDictionary(h => h.Date);
         var customFreeDayLookup = customFreeDays?.ToDictionary(c => c.Date, c => c) ?? new Dictionary<DateOnly, CustomFreeDay>();
 
         var days = new List<CalendarDay>();
@@ -54,10 +54,10 @@ public class CalendarService
                 type = DayType.CustomFreeDay;
                 holidayName = customDay.GetTitle();
             }
-            else if (holidayLookup.TryGetValue(date, out var name))
+            else if (holidayLookup.TryGetValue(date, out var holiday))
             {
-                type = DayType.PublicHoliday;
-                holidayName = name;
+                type = holiday.Type;
+                holidayName = holiday.Name;
             }
             else if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
             {

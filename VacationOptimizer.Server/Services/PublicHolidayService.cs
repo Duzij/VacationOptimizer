@@ -2,11 +2,13 @@ using PublicHoliday;
 using System.Reflection;
 using VacationOptimizer.Server.CountrySpecific.Switzerland;
 using VacationOptimizer.Server.Data;
+using VacationOptimizer.Server.Data.SeedData;
 using Microsoft.EntityFrameworkCore;
+using VacationOptimizer.Server.Models;
 
 namespace VacationOptimizer.Server.Services;
 
-public record HolidayInfo(DateOnly Date, string Name);
+public record HolidayInfo(DateOnly Date, string Name, DayType Type = DayType.PublicHoliday);
 public record StateInfo(string Code, string Name);
 public record CountryInfo(string Code, string Name);
 
@@ -144,7 +146,12 @@ public class PublicHolidayService : IPublicHolidayService
             }
 
             var dbHolidays = query
-                .Select(h => new HolidayInfo(h.Date, h.Name))
+                .Select(h => new { h.Date, h.Name })
+                .AsEnumerable()
+                .Select(holiday => new HolidayInfo(
+                    holiday.Date,
+                    holiday.Name,
+                    GetDayType(countryCode, holiday.Date)))
                 .ToList();
 
             return dbHolidays.OrderBy(h => h.Date).ToList();
@@ -152,7 +159,19 @@ public class PublicHolidayService : IPublicHolidayService
 
         // 2. Fallback to NuGet package
         if (!_countryFactories.TryGetValue(countryCode, out var factory))
+        {
+            var isDatabaseCountry = _dbContext.Countries
+                .Any(country => country.IsoCode == countryCode);
+
+            // Seeded countries can publish holiday calendars year by year. Keep their future
+            // calendars usable while the next year's country-specific dates are being added.
+            if (isDatabaseCountry)
+            {
+                return [];
+            }
+
             throw new ArgumentException($"Unsupported country code: {countryCode}");
+        }
 
         var provider = factory();
         ConfigureFallbackProvider(provider, countryCode, stateCode);
@@ -247,4 +266,9 @@ public class PublicHolidayService : IPublicHolidayService
 
         swissProvider.Canton = canton;
     }
+
+    private static DayType GetDayType(string countryCode, DateOnly date) =>
+        string.Equals(countryCode, IndonesiaSeedData.Country.IsoCode, StringComparison.OrdinalIgnoreCase)
+            ? IndonesiaSeedData.GetDayType(date)
+            : DayType.PublicHoliday;
 }

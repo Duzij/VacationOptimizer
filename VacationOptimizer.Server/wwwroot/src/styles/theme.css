@@ -52,6 +52,8 @@
   --calendar-weekend-text: #888888;
   --calendar-holiday-bg: #ffe5e5;
   --calendar-holiday-text: #b91c1c;
+  --calendar-collective-leave-bg: #fef3c7;
+  --calendar-collective-leave-text: #92400e;
   --calendar-vacation-bg: #e0f7fa;
   --calendar-vacation-text: #006064;
   --calendar-custom-bg: #f5f5dc;
@@ -87,6 +89,8 @@
   --calendar-weekend-text: #888888;
   --calendar-holiday-bg: #7f1d1d;
   --calendar-holiday-text: #fee2e2;
+  --calendar-collective-leave-bg: #78350f;
+  --calendar-collective-leave-text: #fef3c7;
   --calendar-vacation-bg: #006064;
   --calendar-vacation-text: #e0f7fa;
   --calendar-custom-bg: #7f5d1d;

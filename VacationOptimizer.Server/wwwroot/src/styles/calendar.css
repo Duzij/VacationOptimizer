@@ -43,6 +43,10 @@
   --calendar-shared-vacation-indicator: var(--calendar-holiday-bg);
 }
 
+.shared-vacation-icon.shared-collective-leave {
+  --calendar-shared-vacation-indicator: var(--calendar-collective-leave-bg);
+}
+
 .shared-vacation-icon.shared-never-holiday{
   overflow: hidden;
 }
@@ -96,6 +100,11 @@
 .bg-holiday {
   background-color: var(--calendar-holiday-bg);
   color: var(--calendar-holiday-text);
+}
+
+.bg-collective-leave {
+  background-color: var(--calendar-collective-leave-bg);
+  color: var(--calendar-collective-leave-text);
 }
 
 .bg-weekend {

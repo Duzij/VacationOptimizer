@@ -6,7 +6,7 @@ public record CalendarDay
     public DayType Type { get; set; }
     public string? HolidayName { get; init; }
     public bool IsLockedVacationDay { get; init; }
-    public bool IsHoliday => Type == DayType.PublicHoliday;
+    public bool IsHoliday => Type is DayType.PublicHoliday or DayType.CollectiveLeave;
 
     public bool IsVacation => Type == DayType.Vacation;
 
