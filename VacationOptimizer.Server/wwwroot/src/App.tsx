@@ -86,8 +86,8 @@ function Main() {
             element={
               <>
                 <RouteMeta
-                  title="Vacation Optimizer | Plan Vacation Days Around Public Holidays"
-                  description="Learn how Vacation Optimizer helps employees turn limited vacation days into longer breaks. Explore planning guidance, examples, FAQs, and the interactive planner."
+                  title="Holiday Optimizer & PTO Optimizer | Vacation Optimizer"
+                  description="Use Vacation Optimizer, a holiday optimizer and PTO optimizer, to plan vacation days around public holidays, weekends, and local calendar rules."
                   canonicalPath="/"
                 />
                 <HomePage />
@@ -370,7 +370,7 @@ function PlannerPage() {
     <>
       <RouteMeta
         title="Vacation Planner | Vacation Optimizer"
-        description="Use the Vacation Optimizer planner to compare vacation-day scenarios around public holidays, weekends, and custom free days."
+        description="Use this holiday optimizer and PTO optimizer to compare vacation-day scenarios around public holidays, weekends, and custom free days."
         canonicalPath="/app"
       />
 

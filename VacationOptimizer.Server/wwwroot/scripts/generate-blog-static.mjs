@@ -25,9 +25,20 @@ try {
 
 const sourceDir = path.join(projectRoot, "content", "blog");
 const outputDir = path.join(projectRoot, "public", "blog");
+const distOutputDir = path.join(projectRoot, "dist", "blog");
 const indexHtmlPath = path.join(projectRoot, "index.html");
 const siteDataPath = path.join(projectRoot, "src", "site-shell-data.json");
 const siteUrl = process.env.SITE_URL || "https://longvacation.eu";
+const seoKeywords = [
+  "holiday optimizer",
+  "holidays optimizer",
+  "pto optimizer",
+  "vacation-day optimization",
+  "public holiday calendar",
+  "maximizing vacation days",
+  "vacation planner",
+  "time off planner",
+];
 const markdown = new MarkdownIt({
   html: false,
   linkify: true,
@@ -69,9 +80,25 @@ async function generateStaticBlog() {
     }),
   );
 
+  // Vite copies public/ before this script runs. Mirror the freshly generated
+  // pages so production builds always contain the current blog content.
+  if (!isDev && await pathExists(path.join(projectRoot, "dist"))) {
+    await fs.rm(distOutputDir, { recursive: true, force: true });
+    await fs.cp(outputDir, distOutputDir, { recursive: true });
+  }
+
   // Generate sitemap
   // const publicDir = path.join(projectRoot, "public");
   // await generateSitemap(posts, publicDir);
+}
+
+async function pathExists(targetPath) {
+  try {
+    await fs.access(targetPath);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function loadBlogPosts() {
@@ -154,8 +181,8 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData) {
 
   return renderDocument({
     appIndexHtml,
-    title: "Blog | Vacation Optimizer",
-    description: "Read planning tips, product notes, and country-aware vacation guidance from Vacation Optimizer.",
+    title: "Holiday Optimizer & PTO Optimizer Blog | Vacation Optimizer",
+    description: "Read holiday optimizer and PTO optimizer planning tips, product notes, and country-aware vacation guidance from Vacation Optimizer.",
     canonicalPath: "/blog/",
     body: `
       <div class="blog-shell">
@@ -163,8 +190,8 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData) {
         <main class="blog-page">
           <section class="stack-lg">
             <div class="blog-hero stack-sm">
-              <h1>Blog</h1>
-              <p>Product notes, planning tips, and country-aware vacation guidance published as static HTML for fast delivery and search-friendly indexing.</p>
+              <h1>Holiday Optimizer and PTO Optimizer Blog</h1>
+              <p>Planning tips and country-aware guidance for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
             </div>
             <div class="blog-post-grid">${cards}</div>
           </section>
@@ -370,6 +397,7 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl 
     headline: title,
     name: title,
     description,
+    keywords: seoKeywords,
     url: canonicalUrl,
     publisher: {
       "@type": "Organization",
@@ -382,6 +410,7 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl 
   var allHeadContent = headMatch[1]
       .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
       .replace(/<meta name="description"[\s\S]*?\/>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
+      .replace(/<meta name="keywords"[\s\S]*?\/>/i, `<meta name="keywords" content="${escapeHtml(seoKeywords.join(", "))}" />`)
       .replace(/<link rel="canonical"[\s\S]*?\/>/i, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />`)
       .replace(/<meta property="og:url"[\s\S]*?\/>/i, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`)
       .replace(/<meta property="og:title"[\s\S]*?\/>/i, `<meta property="og:title" content="${escapeHtml(title)}" />`)

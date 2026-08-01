@@ -30,6 +30,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB:-vacation_optimizer};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-dev-postgres}
+      - DatabaseSecurityHealthCheck__AccessToken=${DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN:-}
     cpus: 0.5
     mem_limit: 512m
     volumes:

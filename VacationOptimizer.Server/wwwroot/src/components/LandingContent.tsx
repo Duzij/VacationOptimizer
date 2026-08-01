@@ -19,8 +19,9 @@ export default function LandingContent() {
                   </span>
                 </h1>
                 <h2 className="max-w-xl text-base leading-7 text-text-muted md:text-lg">
-                  Vacation Optimizer helps people turn scattered public holidays
-                  and weekends into longer, more useful breaks.
+                  Vacation Optimizer is a holiday optimizer and PTO optimizer
+                  that turns scattered public holidays and weekends into longer,
+                  more useful breaks.
                 </h2>
               </div>
 

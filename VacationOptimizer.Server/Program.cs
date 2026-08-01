@@ -1,8 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Net;
 using System.Net.Sockets;
 using System.IO;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.Headers;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
 using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +24,14 @@ var isRunningInContainer = string.Equals(
 
 builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Docker Compose assigns services an address from one of these private ranges. Restricting
+    // forwarded-header trust to them prevents direct callers from choosing their own client IP.
+    options.KnownIPNetworks.Add(new System.Net.IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
+    options.KnownIPNetworks.Add(new System.Net.IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
+});
 
 if (builder.Environment.IsDevelopment() && !isRunningInContainer)
 {
@@ -74,6 +85,15 @@ builder.Services.AddSingleton<IResultTokenService>(
 builder.Services.AddScoped<VacationOptimizerService>();
 builder.Services.AddScoped<IDetectCountryService, DetectedCountryService>();
 builder.Services.AddScoped<CalendarSeed>();
+builder.Services.Configure<DatabaseSecurityHealthCheckOptions>(
+    builder.Configuration.GetSection(DatabaseSecurityHealthCheckOptions.SectionName));
+builder.Services.AddSingleton<DatabaseSecurityHealthEndpointAccessGuard>();
+builder.Services.AddSingleton<DatabaseSecurityHealthReportStore>();
+builder.Services.AddScoped<IDatabaseSecurityHealthCheck, DatabaseSecurityHealthCheck>();
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddHostedService<DatabaseSecurityHealthCheckWorker>();
+}
 
 builder.Services.AddEndpointsApiExplorer().AddControllers().AddJsonOptions(o =>
 {
@@ -93,6 +113,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+app.UseForwardedHeaders();
 var sitemapPages = new[]
 {
     new SitemapPage("/", new DateOnly(2026, 4, 6), "weekly", 1.0m),
@@ -148,8 +169,6 @@ var sitemapXml = BuildSitemapXml(sitemapPages);
         }
     }
 // }
-
-app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
@@ -224,6 +243,30 @@ api.MapGet("/detected-country", (IDetectCountryService detectCountryService) =>
     return detectCountryService.DetectCountry();
 });
 
+app.MapGet("/api/internal/database-security", (
+    HttpContext context,
+    DatabaseSecurityHealthEndpointAccessGuard accessGuard,
+    DatabaseSecurityHealthReportStore reportStore) =>
+{
+    context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+    context.Response.Headers["X-Robots-Tag"] = "noindex, nofollow, noarchive";
+
+    var accessDecision = accessGuard.Authorize(context, context.Request.Query["accessKey"].ToString());
+    return accessDecision.Result switch
+    {
+        DatabaseSecurityHealthEndpointAccessResult.Granted when reportStore.LatestReport is { } report =>
+            report.Status == DatabaseSecurityHealthStatus.Unhealthy
+                ? Results.Json(report, statusCode: StatusCodes.Status503ServiceUnavailable)
+                : Results.Ok(report),
+        DatabaseSecurityHealthEndpointAccessResult.Granted =>
+            Results.StatusCode(StatusCodes.Status503ServiceUnavailable),
+        DatabaseSecurityHealthEndpointAccessResult.CoolingDown => CooldownResponse(context, accessDecision.RetryAfter),
+        _ => Results.NotFound()
+    };
+}).WithMetadata(new DisableCorsAttribute());
+
 app.MapGet("/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
 app.MapGet("/app/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
 app.MapGet("/ads.txt", () => Results.Text(adsTxt, "text/plain"));
@@ -252,6 +295,7 @@ app.MapGet("/api/blog", (IWebHostEnvironment environment) =>
 app.UseDefaultFiles();   // rewrites directory-style requests to look for index.html
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors();
 app.MapFallbackToFile("index.html");
 app.UseSpa(spa =>
 {
@@ -318,6 +362,16 @@ static bool IsTransientDbStartupException(Exception ex)
     }
 
     return false;
+}
+
+static IResult CooldownResponse(HttpContext context, TimeSpan? retryAfter)
+{
+    if (retryAfter is { } remaining)
+    {
+        context.Response.Headers["Retry-After"] = Math.Max(1, (int)Math.Ceiling(remaining.TotalSeconds)).ToString();
+    }
+
+    return Results.StatusCode(StatusCodes.Status429TooManyRequests);
 }
 
 static string BuildSitemapXml(IEnumerable<SitemapPage> pages)

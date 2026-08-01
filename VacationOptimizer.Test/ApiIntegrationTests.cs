@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -16,6 +17,7 @@ namespace VacationOptimizer.Test;
 
 public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    private const string DatabaseSecurityHealthAccessToken = "e144dedc-25cf-4f29-ba36-ff6e9f2b0eb1";
     private readonly WebApplicationFactory<Program> _factory;
 
     public ApiIntegrationTests(WebApplicationFactory<Program> factory)
@@ -23,6 +25,13 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         _factory = factory.WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment("Testing");
+            builder.ConfigureAppConfiguration((_, configuration) =>
+            {
+                configuration.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["DatabaseSecurityHealthCheck:AccessToken"] = DatabaseSecurityHealthAccessToken
+                });
+            });
             builder.ConfigureTestServices(services =>
             {
                 var databaseName = $"InMemoryDbForTesting-{Guid.NewGuid()}";
@@ -174,6 +183,32 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var json = await response.Content.ReadAsStringAsync();
         Assert.Contains("\"hasGeoHeaders\":false", json);
         Assert.Contains("\"countryCode\":null", json);
+    }
+
+    [Fact]
+    public async Task DatabaseSecurityHealthReport_HidesTheEndpointWithoutItsAccessToken()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/internal/database-security?accessKey=00000000-0000-0000-0000-000000000000");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DatabaseSecurityHealthReport_AcceptsTheConfiguredAccessToken()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync($"/api/internal/database-security?accessKey={DatabaseSecurityHealthAccessToken}");
+
+        // Hosted checks are disabled in the in-memory test host, so a valid request proves
+        // authentication by reaching the no-report-yet response rather than a 404.
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.True(response.Headers.CacheControl?.NoStore);
+        Assert.True(response.Headers.CacheControl?.NoCache);
+        Assert.True(response.Headers.CacheControl?.MustRevalidate);
+        Assert.Equal("no-referrer", response.Headers.GetValues("Referrer-Policy").Single());
     }
 
     [Fact]

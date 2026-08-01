@@ -82,12 +82,12 @@ export function BlogListPage() {
     <section className="max-w-6xl mx-auto px-4 py-4 lg:py-0 space-y-6">
       <div className="space-y-3">
         <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-text sm:text-5xl">
-          Blog
+          Holiday Optimizer and PTO Optimizer Blog
         </h1>
         <p className="max-w-3xl text-base leading-7 text-text-muted sm:text-lg">
-          Product notes, planning tips, and country-aware vacation ideas. This
-          first entry is a plain HTML sample we can use as a design and content
-          quality gate before adding markdown generation.
+          Product notes, planning tips, and country-aware vacation ideas for
+          anyone looking for a holiday optimizer, a holidays optimizer, or a
+          PTO optimizer.
         </p>
       </div>
 

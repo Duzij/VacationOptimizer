@@ -49,11 +49,14 @@ docker compose -f docker-compose.dev.yaml down
 - Ports `22` and `443` open on the server, the rest are closed by custom firewall
 - A valid `.env` file in the project root
 
-Update `.env` from `.env.example` and set a strong database password before starting production:
+Update `.env` from `.env.example`, set a strong database password, and generate a unique UUID for the security-report endpoint before starting production:
 
 ```bash
 cp .env.example .env
+uuidgen | tr '[:upper:]' '[:lower:]'
 ```
+
+Set the generated value as `DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN` in `.env`. It is intentionally not committed. Without a valid UUID, the report endpoint stays disabled and returns `404`.
 
 ## 2. First-time startup (works without TLS certs)
 
@@ -103,6 +106,19 @@ Add:
 ```
 
 ## 5. Useful operations
+
+### Database security report
+
+The application runs a read-only PostgreSQL role and connection audit at startup and then every 15 minutes. It checks login roles, elevated privileges, memberships in sensitive built-in PostgreSQL roles, and remote client connections. The endpoint only serves the last completed report; it never triggers database inspection itself.
+
+Request it with the UUID stored in `.env`:
+
+```bash
+curl --fail --silent --show-error \
+  "https://longvacation.eu/api/internal/database-security?accessKey=${DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN}"
+```
+
+Three invalid UUID attempts from one client IP start a 15-minute cooldown. Invalid requests always receive `404`; a valid UUID during its own cooldown receives `429` with `Retry-After`. Nginx disables access logging for this endpoint so the query-string token is not placed in its access log. Avoid opening the URL in a browser or sharing it, since query strings can still end up in browser history.
 
 Start:
 
