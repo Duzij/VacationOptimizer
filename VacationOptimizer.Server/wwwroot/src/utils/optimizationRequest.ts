@@ -1,5 +1,7 @@
 import {
   type CustomFreeDay,
+  MONTH_NAMES,
+  type MonthlyVacationLimits,
   type OptimizeRequest,
 } from "../types/models";
 import {
@@ -92,6 +94,68 @@ function normalizeLockedVacationDates(lockedVacationDates: string[] | undefined)
   return uniqueDates(lockedVacationDates);
 }
 
+function normalizeMonthlyVacationLimits(limits: MonthlyVacationLimits | undefined) {
+  if (!limits) {
+    return undefined;
+  }
+
+  const normalized: MonthlyVacationLimits = {};
+  for (const month of MONTH_NAMES) {
+    const limit = limits[month];
+    if (limit === undefined || !Number.isFinite(limit)) {
+      continue;
+    }
+
+    const clamped = clamp(Math.trunc(limit), 0, 31);
+    if (clamped <= 0) {
+      continue;
+    }
+
+    normalized[month] = clamped;
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function parseMonthlyVacationLimits(value: string | null) {
+  if (!value) {
+    return undefined;
+  }
+
+  const limits: MonthlyVacationLimits = {};
+  for (const entry of value.split(",")) {
+    const [monthText, limitText] = entry.split(":");
+    const monthIndex = Number(monthText);
+    const limit = Number(limitText);
+    const month = MONTH_NAMES[monthIndex - 1];
+
+    if (!month || !Number.isInteger(monthIndex) || !Number.isFinite(limit)) {
+      continue;
+    }
+
+    const clamped = clamp(Math.trunc(limit), 0, 31);
+    if (clamped <= 0) {
+      continue;
+    }
+
+    limits[month] = clamped;
+  }
+
+  return Object.keys(limits).length > 0 ? limits : undefined;
+}
+
+function getMonthlyVacationLimitEntries(limits: MonthlyVacationLimits | undefined) {
+  const normalized = normalizeMonthlyVacationLimits(limits);
+  if (!normalized) {
+    return [];
+  }
+
+  return MONTH_NAMES.flatMap((month, index) => {
+    const limit = normalized[month];
+    return limit === undefined ? [] : [`${index + 1}:${limit}`];
+  });
+}
+
 function normalizeSeedToken(seedToken: string | undefined) {
   const trimmed = seedToken?.trim();
   return trimmed || undefined;
@@ -102,6 +166,7 @@ function normalizeBaseFields(request: OptimizeRequest) {
   const ignoredHolidayDates = normalizeIgnoredHolidayDates(request.ignoredHolidayDates);
   const neverHolidayDates = normalizeNeverHolidayDates(request.neverHolidayDates);
   const lockedVacationDates = normalizeLockedVacationDates(request.lockedVacationDates);
+  const maxNumberOfVacationsPerMonth = normalizeMonthlyVacationLimits(request.maxNumberOfVacationsPerMonth);
   const seedToken = normalizeSeedToken(request.seedToken);
 
   return {
@@ -110,6 +175,7 @@ function normalizeBaseFields(request: OptimizeRequest) {
     vacationDays: clamp(request.vacationDays, 1, 40),
     minimumDaysPerRange: clamp(request.minimumDaysPerRange ?? defaultMinimumDaysPerRange, 1, 14),
     maximumDaysPerRange: clamp(request.maximumDaysPerRange ?? defaultMaximumDaysPerRange, 1, 31),
+    ...(maxNumberOfVacationsPerMonth ? { maxNumberOfVacationsPerMonth } : {}),
     ...(customFreeDays ? { customFreeDays } : {}),
     ...(ignoredHolidayDates ? { ignoredHolidayDates } : {}),
     ...(neverHolidayDates ? { neverHolidayDates } : {}),
@@ -191,6 +257,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
       minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
       maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+      maxNumberOfVacationsPerMonth: parseMonthlyVacationLimits(params.get("monthlyCaps")),
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
@@ -208,6 +275,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
       minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
       maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+      maxNumberOfVacationsPerMonth: parseMonthlyVacationLimits(params.get("monthlyCaps")),
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
@@ -229,6 +297,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
       minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
       maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+      maxNumberOfVacationsPerMonth: parseMonthlyVacationLimits(params.get("monthlyCaps")),
       customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
       ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
@@ -244,6 +313,7 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
     minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
     maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+    maxNumberOfVacationsPerMonth: parseMonthlyVacationLimits(params.get("monthlyCaps")),
     customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
     ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
     neverHolidayDates: parseDateList(params.get("neverHolidays")),
@@ -291,6 +361,11 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
 
   if (normalizedRequest.maximumDaysPerRange !== defaultMaximumDaysPerRange) {
     params.set("maxDays", String(normalizedRequest.maximumDaysPerRange));
+  }
+
+  const monthlyVacationLimitEntries = getMonthlyVacationLimitEntries(normalizedRequest.maxNumberOfVacationsPerMonth);
+  if (monthlyVacationLimitEntries.length > 0) {
+    params.set("monthlyCaps", monthlyVacationLimitEntries.join(","));
   }
 
   const customDayDates = uniqueDates((normalizedRequest.customFreeDays ?? []).map((day) => day.date));
@@ -350,6 +425,8 @@ export function requestsMatch(left: OptimizeRequest | null, right: OptimizeReque
     && normalizedLeft.vacationDays === normalizedRight.vacationDays
     && normalizedLeft.minimumDaysPerRange === normalizedRight.minimumDaysPerRange
     && normalizedLeft.maximumDaysPerRange === normalizedRight.maximumDaysPerRange
+    && JSON.stringify(normalizeMonthlyVacationLimits(normalizedLeft.maxNumberOfVacationsPerMonth) ?? {})
+      === JSON.stringify(normalizeMonthlyVacationLimits(normalizedRight.maxNumberOfVacationsPerMonth) ?? {})
     && JSON.stringify(normalizedLeft.customFreeDays ?? [])
       === JSON.stringify(normalizedRight.customFreeDays ?? [])
     && uniqueDates(normalizedLeft.ignoredHolidayDates ?? []).join(",")

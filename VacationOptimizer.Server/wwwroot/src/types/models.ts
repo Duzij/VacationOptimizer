@@ -73,6 +73,24 @@ export interface CustomFreeDay {
     title?: string;
 }
 
+export const MONTH_NAMES = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+] as const;
+
+export type MonthName = (typeof MONTH_NAMES)[number];
+export type MonthlyVacationLimits = Partial<Record<MonthName, number>>;
+
 export interface OptimizationResultBase {
     calendar: {
         days: CalendarDay[];
@@ -99,6 +117,7 @@ export interface SharedOptimizeRequestFields {
     vacationDays: number;
     minimumDaysPerRange?: number;
     maximumDaysPerRange?: number;
+    maxNumberOfVacationsPerMonth?: MonthlyVacationLimits;
     customFreeDays?: CustomFreeDay[];
     ignoredHolidayDates?: string[];
     neverHolidayDates?: string[];

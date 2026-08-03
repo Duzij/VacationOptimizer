@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 import { createPortal } from "react-dom";
 import Button from "./Button";
@@ -8,6 +8,7 @@ export interface DayLipDetails {
     label: string;
     detail?: string | null;
     sharedDetail?: string | null;
+    actions?: ReactNode;
 }
 
 interface Props {
@@ -114,6 +115,11 @@ export default function DetailsLipMobile({
                                 <p className="rounded-2xl border border-border/70 bg-surface/70 px-3 py-2 text-sm leading-snug text-text-muted">
                                     {dayDetails.sharedDetail}
                                 </p>
+                            )}
+                            {dayDetails.actions && (
+                                <div className="pt-1">
+                                    {dayDetails.actions}
+                                </div>
                             )}
                         </div>
                         <ResultControls

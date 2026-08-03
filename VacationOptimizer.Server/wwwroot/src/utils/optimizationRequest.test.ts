@@ -77,6 +77,33 @@ describe("optimizationRequest", () => {
     )).toBe(false);
   });
 
+  it("normalizes, compares, and round-trips monthly vacation caps", () => {
+    const request = normalizeOptimizeRequest({
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      maxNumberOfVacationsPerMonth: {
+        January: 2,
+        July: 3,
+      },
+    });
+    const params = buildSearchParamsFromRequest(request);
+
+    expect(request.maxNumberOfVacationsPerMonth).toEqual({
+      January: 2,
+      July: 3,
+    });
+    expect(params.get("monthlyCaps")).toBe("1:2,7:3");
+    expect(parseRequestFromSearchParams(params)?.maxNumberOfVacationsPerMonth).toEqual({
+      January: 2,
+      July: 3,
+    });
+    expect(requestsMatch(
+      { country: "DE", year: getDefaultYear(), vacationDays: 25 },
+      request,
+    )).toBe(false);
+  });
+
   it("round-trips the planner seed through search params without affecting request matching", () => {
     const request = normalizeOptimizeRequest({
       country: "DE",

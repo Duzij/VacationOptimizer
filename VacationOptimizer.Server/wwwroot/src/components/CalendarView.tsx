@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { DayType, MonthModel } from "../types/models";
-import type { CalendarDay, VacationRange } from "../types/models";
+import type { CalendarDay, MonthlyVacationLimits, VacationRange } from "../types/models";
 import { MonthGrid, USMonthGrid } from "./MonthGrid";
 import { useQuery } from "@tanstack/react-query";
 import { decodeSeed } from "../api/vacationApi";
@@ -19,6 +19,8 @@ interface Props {
     onDaySelect?: (day: CalendarDay) => void;
     locale?: string | null | undefined;
     connectedToken?: string;
+    monthlyCaps?: MonthlyVacationLimits;
+    onSetMonthCap?: (monthIndex: number) => void;
 }
 
 function toDateKey(date: Date) {
@@ -92,7 +94,7 @@ function getStartMonthForYear(year: number, today = new Date()) {
     return 0;
 }
 
-export default function CalendarView({ calendar, ranges = [], year, country, locale, onDayLongPress, onDaySelect, connectedToken }: Props) {
+export default function CalendarView({ calendar, ranges = [], year, country, locale, onDayLongPress, onDaySelect, connectedToken, monthlyCaps, onSetMonthCap }: Props) {
     const startMonth = getStartMonthForYear(year);
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
 
@@ -177,6 +179,8 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
                         year={year}
                         onDayLongPress={onDayLongPress}
                         onDaySelect={onDaySelect}
+                        monthlyCaps={monthlyCaps}
+                        onSetMonthCap={onSetMonthCap}
                     />
                 ))}
             </div>

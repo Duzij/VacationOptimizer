@@ -370,6 +370,59 @@ public class VacationOptimizerServiceTests
     }
 
     [Fact]
+    public void OptimizeCalendar_MonthlyVacationLimit_BlocksCandidatesInCappedMonth()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var calendar = new CalendarData(new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 4), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 5), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 6), DayType.Weekend),
+        });
+
+        var result = InvokeOptimizeCalendar(
+            calendar,
+            new OptimizeRequest(
+                Country: DefaultCountry,
+                Year: nextYear,
+                VacationDays: 2,
+                MaxNumberOfVacationsPerMonth: new Dictionary<Month, int> { [Month.January] = 1 }),
+            new Random(0));
+
+        Assert.Empty(result.SelectedVacationDays);
+    }
+
+    [Fact]
+    public void Optimize_MonthlyVacationLimit_RejectsLockedDaysAboveTheCap()
+    {
+        var lockedDates = new List<DateOnly>
+        {
+            new DateOnly(DefaultYear, 3, 10),
+            new DateOnly(DefaultYear, 3, 11),
+        };
+        var limits = new Dictionary<Month, int> { [Month.March] = 1 };
+
+        var exception = Assert.Throws<ArgumentException>(() => _optimizer.Optimize(CreateOptimizeRequest(
+            vacationDays: 2,
+            lockedVacationDates: lockedDates,
+            maxNumberOfVacationsPerMonth: limits)));
+
+        Assert.Contains("Locked vacation days exceed", exception.Message);
+    }
+
+    [Fact]
+    public void Optimize_MonthlyVacationLimit_RejectsInvalidLimit()
+    {
+        var limits = new Dictionary<Month, int> { [Month.January] = -1 };
+
+        var exception = Assert.Throws<ArgumentException>(() => _optimizer.Optimize(CreateOptimizeRequest(
+            maxNumberOfVacationsPerMonth: limits)));
+
+        Assert.Contains("between 0 and 31", exception.Message);
+    }
+
+    [Fact]
     public void Optimize_WithLockedVacationDates_KeepsLockedRangeVisibleEvenBelowMinimum()
     {
         var lockedDate = BuildDefaultCalendar().First(day => day.Type == DayType.WorkDay).Date;
@@ -576,14 +629,15 @@ public class VacationOptimizerServiceTests
         int vacationDays = DefaultBudget,
         int minimumDaysPerRange = 1,
         int maximumDaysPerRange = 365,
-        List<DateOnly>? lockedVacationDates = null) =>
+        List<DateOnly>? lockedVacationDates = null,
+        Dictionary<Month, int>? maxNumberOfVacationsPerMonth = null) =>
         new OptimizeRequest(
             country ?? DefaultCountry,
             year ?? DefaultYear,
             vacationDays,
             minimumDaysPerRange,
             maximumDaysPerRange,
-            null,
+            maxNumberOfVacationsPerMonth,
             null,
             null,
             null,

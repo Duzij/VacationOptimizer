@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import OptimizerForm from "./OptimizerForm";
@@ -124,6 +124,7 @@ vi.mock("../features/countrySpecific/switzerland/api", () => ({
 
 describe("OptimizerForm", () => {
   afterEach(() => {
+    cleanup();
     vi.clearAllMocks();
   });
 
@@ -166,5 +167,32 @@ describe("OptimizerForm", () => {
 
     const optimizeButton = screen.getByRole("button", { name: /Optimize/i });
     expect((optimizeButton as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("includes a monthly vacation cap in the optimization request", async () => {
+    const user = userEvent.setup();
+    const onResult = vi.fn();
+
+    render(
+      <OptimizerForm
+        onResult={onResult}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={null}
+      />,
+    );
+
+    await user.selectOptions(screen.getByLabelText("Country"), "DE");
+    await user.click(screen.getByRole("button", { name: "Advanced constraints" }));
+    await user.selectOptions(screen.getByLabelText("Add monthly vacation-day cap"), "January");
+    const increaseJanuaryCap = screen.getByRole("button", { name: /Increase January/i });
+    await user.click(increaseJanuaryCap);
+    await user.click(increaseJanuaryCap);
+    await user.click(screen.getByRole("button", { name: /Optimize/i }));
+
+    expect(onResult).toHaveBeenCalledWith(expect.objectContaining({
+      maxNumberOfVacationsPerMonth: { January: 2 },
+    }));
   });
 });

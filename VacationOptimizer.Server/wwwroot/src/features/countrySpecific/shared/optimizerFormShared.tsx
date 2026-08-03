@@ -1,23 +1,36 @@
 import { ChevronDown, ChevronUp, LockOpen, Loader2, Plane } from "lucide-react";
 import { getDefaultYear } from "../../../optimizerDefaults";
-import type { CustomFreeDay, StateOption } from "../../../types/models";
+import { type CustomFreeDay, type MonthlyVacationLimits, type StateOption } from "../../../types/models";
 import Button from "../../../components/Button";
 import CustomFreeDaysManager from "../../../components/CustomFreeDaysManager";
+import { MonthlyVacationCapEditor } from "../../../components/MonthlyVacationCapEditor";
 
 export interface SharedDraft {
     year: number;
     vacationDays: number;
     minimumDaysPerRange: number | null;
     maximumDaysPerRange: number | null;
+    maxNumberOfVacationsPerMonth?: MonthlyVacationLimits;
 }
 
 export function buildBaseRequest(country: string, draft: SharedDraft, customFreeDays: CustomFreeDay[]) {
+    const monthlyVacationLimits = Object.entries(draft.maxNumberOfVacationsPerMonth ?? {})
+        .reduce<MonthlyVacationLimits>((active, [month, limit]) => {
+            if (limit > 0) {
+                active[month as keyof MonthlyVacationLimits] = limit;
+            }
+            return active;
+        }, {});
+
     return {
         country,
         year: draft.year,
         vacationDays: draft.vacationDays,
         minimumDaysPerRange: draft.minimumDaysPerRange ?? undefined,
         maximumDaysPerRange: draft.maximumDaysPerRange ?? undefined,
+        maxNumberOfVacationsPerMonth: Object.keys(monthlyVacationLimits).length > 0
+            ? monthlyVacationLimits
+            : undefined,
         customFreeDays: customFreeDays.length > 0 ? customFreeDays : undefined,
     };
 }
@@ -109,6 +122,7 @@ export function SharedOptimizerControls({
     const currentYear = getDefaultYear();
     const minimumYear = yearMin ?? currentYear;
     const maximumYear = yearMax ?? currentYear + 5;
+    const monthlyVacationLimits = sharedDraft.maxNumberOfVacationsPerMonth ?? {};
 
     return (
         <>
@@ -233,6 +247,11 @@ export function SharedOptimizerControls({
                             </div>
                         </div>
 
+                        <MonthlyVacationCapEditor
+                            value={monthlyVacationLimits}
+                            onChange={(next) => onSharedDraftChange((draft) => ({ ...draft, maxNumberOfVacationsPerMonth: next }))}
+                        />
+
                         <CustomFreeDaysManager customFreeDays={customFreeDays} onUpdate={onCustomFreeDaysChange} />
                     </div>
                 )}
@@ -245,3 +264,5 @@ export function SharedOptimizerControls({
         </>
     );
 }
+
+

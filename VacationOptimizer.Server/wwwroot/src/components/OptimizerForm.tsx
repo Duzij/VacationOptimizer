@@ -30,6 +30,7 @@ function getInitialSharedDraft(initialRequest: OptimizeRequest | null | undefine
         vacationDays: initialRequest?.vacationDays ?? defaultVacationDays,
         minimumDaysPerRange: initialRequest?.minimumDaysPerRange ?? defaultMinimumDaysPerRange,
         maximumDaysPerRange: initialRequest?.maximumDaysPerRange ?? defaultMaximumDaysPerRange,
+        maxNumberOfVacationsPerMonth: initialRequest?.maxNumberOfVacationsPerMonth ?? {},
     };
 }
 

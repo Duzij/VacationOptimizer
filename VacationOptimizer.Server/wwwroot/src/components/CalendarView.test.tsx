@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import CalendarView from "./CalendarView";
 import { DayType } from "../types/models";
@@ -11,6 +12,7 @@ vi.mock("@tanstack/react-query", () => ({
 
 describe("CalendarView", () => {
   afterEach(() => {
+    cleanup();
     vi.useRealTimers();
     useQueryMock.mockReset();
   });
@@ -244,5 +246,23 @@ describe("CalendarView", () => {
     );
 
     expect(container.querySelectorAll(".shared-holiday-range")).toHaveLength(0);
+  });
+
+  it("shows a monthly cap value and opens the cap editor when the month icon is clicked", async () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+    const onSetMonthCap = vi.fn();
+
+    render(
+      <CalendarView
+        year={2027}
+        calendar={[]}
+        monthlyCaps={{ January: 3 }}
+        onSetMonthCap={onSetMonthCap}
+      />,
+    );
+
+    expect(screen.getByText("3")).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: /Set January vacation-day cap/i }));
+    expect(onSetMonthCap).toHaveBeenCalledWith(0);
   });
 });

@@ -28,6 +28,8 @@ public class VacationOptimizerService
             throw new OptimizationResultUnavailableException($"At most {OptimizationDefaults.MaxUsedResultTokens} used result tokens can be supplied.");
         }
 
+        ValidateMonthlyVacationLimits(request.MaxNumberOfVacationsPerMonth);
+
         var requestFingerprint = ComputeRequestFingerprint(request);
         var seedToken = ParseMatchingSeedToken(request.SeedToken, requestFingerprint);
         var matchingTokens = ParseMatchingTokens(request.UsedResultTokens, requestFingerprint);
@@ -97,6 +99,11 @@ public class VacationOptimizerService
     private static OptimizeResult OptimizeCalendar(CalendarData calendar, OptimizeRequest request, Random rng)
     {
         int lockedVacationDays = MarkLockedVacationDays(calendar.Days, request.LockedVacationDates);
+        var monthlyVacationLimits = request.MaxNumberOfVacationsPerMonth;
+        var vacationDaysByMonth = GetVacationDaysByMonth(calendar.Days);
+
+        EnsureLockedVacationDaysFitMonthlyLimits(vacationDaysByMonth, monthlyVacationLimits);
+
         int remainingBudget = Math.Max(0, request.VacationDays - lockedVacationDays);
 
         if (remainingBudget <= 0)
@@ -109,6 +116,7 @@ public class VacationOptimizerService
             var candidates = FindBridgeCandidates(calendar.Days)
                 .Where(c => c.WorkDaysCount <= remainingBudget)
                 .Where(c => c.TotalDaysOff >= request.MinimumDaysPerRange && c.TotalDaysOff <= request.MaximumDaysPerRange)
+                .Where(c => FitsMonthlyVacationLimits(calendar.Days, c, vacationDaysByMonth, monthlyVacationLimits))
                 .OrderByDescending(c => c.Score)
                 .ThenBy(c => c.WorkDaysCount)
                 .Take(5)
@@ -119,6 +127,7 @@ public class VacationOptimizerService
 
             var selected = candidates[rng.Next(candidates.Count)];
 
+            AddCandidateVacationDaysToMonthlyCounts(calendar.Days, selected, vacationDaysByMonth);
             MarkSegmentAsVacation(calendar.Days, selected.StartIndex, selected.EndIndex);
             remainingBudget -= selected.WorkDaysCount;
         }
@@ -471,6 +480,106 @@ public class VacationOptimizerService
         }
 
         return lockedVacationDays;
+    }
+
+    private static void ValidateMonthlyVacationLimits(Dictionary<Month, int>? limits)
+    {
+        if (limits is null)
+        {
+            return;
+        }
+
+        foreach (var (month, limit) in limits)
+        {
+            if (!Enum.IsDefined(typeof(Month), month))
+            {
+                throw new ArgumentException("Monthly vacation limits must use a valid month.");
+            }
+
+            if (limit is < 0 or > 31)
+            {
+                throw new ArgumentException($"The {month} monthly vacation limit must be between 0 and 31 days.");
+            }
+        }
+    }
+
+    private static Dictionary<Month, int> GetVacationDaysByMonth(IEnumerable<CalendarDay> calendar)
+    {
+        return calendar
+            .Where(day => day.Type == DayType.Vacation)
+            .GroupBy(day => (Month)day.Date.Month)
+            .ToDictionary(group => group.Key, group => group.Count());
+    }
+
+    private static void EnsureLockedVacationDaysFitMonthlyLimits(
+        IReadOnlyDictionary<Month, int> vacationDaysByMonth,
+        IReadOnlyDictionary<Month, int>? limits)
+    {
+        if (limits is null)
+        {
+            return;
+        }
+
+        foreach (var (month, limit) in limits)
+        {
+            if (limit <= 0)
+            {
+                continue;
+            }
+
+            if (vacationDaysByMonth.TryGetValue(month, out var vacationDays) && vacationDays > limit)
+            {
+                throw new ArgumentException($"Locked vacation days exceed the {month} monthly limit of {limit}.");
+            }
+        }
+    }
+
+    private static bool FitsMonthlyVacationLimits(
+        List<CalendarDay> calendar,
+        BridgeCandidate candidate,
+        IReadOnlyDictionary<Month, int> vacationDaysByMonth,
+        IReadOnlyDictionary<Month, int>? limits)
+    {
+        if (limits is null)
+        {
+            return true;
+        }
+
+        var candidateDaysByMonth = calendar
+            .Skip(candidate.StartIndex)
+            .Take(candidate.EndIndex - candidate.StartIndex + 1)
+            .Where(IsWorkDay)
+            .GroupBy(day => (Month)day.Date.Month);
+
+        return candidateDaysByMonth.All(group =>
+        {
+            if (!limits.TryGetValue(group.Key, out var limit) || limit <= 0)
+            {
+                return true;
+            }
+
+            var currentCount = vacationDaysByMonth.TryGetValue(group.Key, out var count) ? count : 0;
+            return currentCount + group.Count() <= limit;
+        });
+    }
+
+    private static void AddCandidateVacationDaysToMonthlyCounts(
+        List<CalendarDay> calendar,
+        BridgeCandidate candidate,
+        IDictionary<Month, int> vacationDaysByMonth)
+    {
+        for (var index = candidate.StartIndex; index <= candidate.EndIndex; index++)
+        {
+            var day = calendar[index];
+            if (!IsWorkDay(day))
+            {
+                continue;
+            }
+
+            var month = (Month)day.Date.Month;
+            var currentCount = vacationDaysByMonth.TryGetValue(month, out var count) ? count : 0;
+            vacationDaysByMonth[month] = currentCount + 1;
+        }
     }
 
     private static bool IsWorkDay(CalendarDay day) => day.Type == DayType.WorkDay;

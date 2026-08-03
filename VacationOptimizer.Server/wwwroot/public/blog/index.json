@@ -1,6 +1,18 @@
 {
   "posts": [
     {
+      "title": "Save Days for Later: Monthly Vacation Caps",
+      "date": "2026-08-03",
+      "author": "Team",
+      "slug": "monthly-vacation-caps",
+      "summary": "You can now tell the planner exactly how many vacation days it may use in any given month, so the rest of your allowance stays reserved for the trips you already have in mind.",
+      "tags": [
+        "feature",
+        "vacation-planning",
+        "pto"
+      ]
+    },
+    {
       "title": "Indonesia: Public Holidays vs. Collective Leave",
       "date": "2026-08-01",
       "author": "Team",

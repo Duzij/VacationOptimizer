@@ -1,14 +1,16 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Shuffle, X } from "lucide-react";
 import DetailsLipMobile from "./components/DetailsLipMobile";
+import { MonthCapLipActions } from "./components/MonthCapLipActions";
 import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
 import ShuffleLimitModal from "./components/ShuffleLimitModal";
 import DetailsLipDesktop from "./components/DetailsLipDesktop";
+import ErrorLip from "./components/ErrorLip";
 import AppHeader from "./components/AppHeader";
 import {
   AboutPage,
@@ -30,8 +32,8 @@ import { useTheme } from "./hooks/useTheme";
 import { useOptimizationSession } from "./hooks/useOptimizationSession";
 import { useCalendarInteractions } from "./hooks/useCalendarInteractions";
 import { useDetectedCountry } from "./api/vacationApi";
-import { DayType } from "./types/models";
-import type { CalendarDay, OptimizeRequest } from "./types/models";
+import { DayType, MONTH_NAMES } from "./types/models";
+import type { CalendarDay, MonthName, OptimizeRequest } from "./types/models";
 import type { DayLipDetails } from "./components/DetailsLipMobile";
 import {
   clearConnectRedirectFlag,
@@ -301,6 +303,51 @@ function PlannerPage() {
     setSelectedDayDetails(getDayLipDetails(day));
   }, []);
 
+  const handleApplyMonthCap = useCallback((month: MonthName, value: number) => {
+    if (!activeRequest) {
+      return;
+    }
+
+    const nextLimits = { ...(activeRequest.maxNumberOfVacationsPerMonth ?? {}) };
+    const clamped = Math.min(31, Math.max(0, value));
+    if (clamped <= 0) {
+      delete nextLimits[month];
+    } else {
+      nextLimits[month] = clamped;
+    }
+
+    const nextRequest: OptimizeRequest = {
+      ...activeRequest,
+      maxNumberOfVacationsPerMonth: Object.keys(nextLimits).length > 0 ? nextLimits : undefined,
+    };
+
+    setSelectedDayDetails(null);
+    void runOptimization(nextRequest);
+  }, [activeRequest, runOptimization]);
+
+  const handleSetMonthCap = useCallback((monthIndex: number) => {
+    if (!activeRequest) {
+      return;
+    }
+
+    const month = MONTH_NAMES[monthIndex];
+    const currentCap = activeRequest.maxNumberOfVacationsPerMonth?.[month] ?? 0;
+
+    setSelectedDayDetails({
+      formattedDate: month,
+      label: "Monthly vacation-day cap",
+      detail: currentCap > 0 ? `Max ${currentCap} vacation days` : "No cap set",
+      actions: (
+        <MonthCapLipActions
+          month={month}
+          initialValue={currentCap}
+          onApply={(value) => handleApplyMonthCap(month, value)}
+          onClose={() => setSelectedDayDetails(null)}
+        />
+      ),
+    });
+  }, [activeRequest, handleApplyMonthCap]);
+
   const handleDisconnectConnectedCalendar = useCallback(() => {
     setConnectedToken("");
     setConnectedCalendarName("");
@@ -402,7 +449,7 @@ function PlannerPage() {
               detectedCountry={detectedCountry}
               customFreeDays={customFreeDays}
               onCustomFreeDaysChange={setCustomFreeDays}
-              initialRequest={initialRequest}
+              initialRequest={activeRequest ?? initialRequest}
               lockedVacationDaysCount={lockedVacationDates.length}
               onResetLockedDays={handleResetLockedDays}
             />
@@ -469,9 +516,37 @@ function PlannerPage() {
       </section>
 
       {optimize.isError && (
-        <div className="max-w-md mx-auto text-center text-sm text-holiday-text bg-holiday/30 rounded-lg px-4 py-3">
-          {optimize.error.message}
-        </div>
+        result ? (
+          <ErrorLip
+            error={optimize.error.message}
+            onClose={() => optimize.reset()}
+          />
+        ) : (
+          <div className="max-w-md mx-auto flex flex-col gap-3 rounded-xl border border-holiday-text/20 bg-holiday px-4 py-3 text-sm text-holiday-text">
+            <div className="flex items-start gap-3">
+              <span className="flex-1">{optimize.error.message}</span>
+              <button
+                type="button"
+                onClick={() => optimize.reset()}
+                aria-label="Dismiss error"
+                className="shrink-0 inline-flex items-center justify-center rounded-lg border border-holiday-text/30 bg-holiday-text/10 p-1.5 text-holiday-text transition-colors hover:bg-holiday-text/20 cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            {lockedVacationDates.length > 0 && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleResetLockedDays}
+                  className="inline-flex items-center justify-center rounded-lg border border-holiday-text/30 bg-holiday-text/10 px-3 py-1.5 text-xs font-semibold text-holiday-text transition-colors hover:bg-holiday-text/20 cursor-pointer"
+                >
+                  Reset locked days
+                </button>
+              </div>
+            )}
+          </div>
+        )
       )}
 
       {result && (
@@ -543,6 +618,8 @@ function PlannerPage() {
               onDaySelect={handleDaySelect}
               locale={detectedCountry?.countryCode}
               connectedToken={isConnectedCalendarApplied ? connectedToken : ""}
+              monthlyCaps={activeRequest?.maxNumberOfVacationsPerMonth}
+              onSetMonthCap={handleSetMonthCap}
             />
           </div>
         </div>
@@ -568,6 +645,7 @@ function PlannerPage() {
           label={selectedDayDetails.label}
           detail={selectedDayDetails.detail}
           sharedDetail={selectedDayDetails.sharedDetail}
+          actions={selectedDayDetails.actions}
           onClose={() => setSelectedDayDetails(null)}
         />
       )}

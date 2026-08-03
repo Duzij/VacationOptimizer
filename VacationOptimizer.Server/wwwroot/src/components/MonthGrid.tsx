@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LockKeyhole } from "lucide-react";
-import { DayType } from "../types/models";
-import type { CalendarDay, MonthModel } from "../types/models";
+import { Gauge, LockKeyhole } from "lucide-react";
+import { DayType, MONTH_NAMES } from "../types/models";
+import type { CalendarDay, MonthModel, MonthlyVacationLimits } from "../types/models";
 import { useLongPress } from "../hooks/useLongPress";
 
 const ISO_DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
@@ -13,6 +13,8 @@ interface GridProps {
     id?: string;
     onDayLongPress?: (day: CalendarDay) => void;
     onDaySelect?: (day: CalendarDay) => void;
+    monthlyCaps?: MonthlyVacationLimits;
+    onSetMonthCap?: (monthIndex: number) => void;
 }
 
 type SharedHolidayRangePosition = "single" | "first" | "middle" | "last" | null;
@@ -171,16 +173,51 @@ function DayCell({
     );
 }
 
-export function MonthGrid({ month, year, id, onDayLongPress, onDaySelect }: GridProps) {
+function MonthHeader({
+    month,
+    year,
+    monthlyCaps,
+    onSetMonthCap,
+}: {
+    month: MonthModel;
+    year: number;
+    monthlyCaps?: MonthlyVacationLimits;
+    onSetMonthCap?: (monthIndex: number) => void;
+}) {
+    const monthName = MONTH_NAMES[month.monthIndex];
+    const cap = monthlyCaps?.[monthName] ?? 0;
+
+    return (
+        <div className="relative flex items-center justify-center mb-2">
+            <h3 className="text-sm font-semibold text-text text-center">
+                {month.monthName} {year}
+            </h3>
+            <button
+                type="button"
+                aria-label={`Set ${month.monthName} vacation-day cap`}
+                onClick={() => onSetMonthCap?.(month.monthIndex)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-md border border-border bg-background px-1.5 py-1 text-[10px] font-medium text-text-muted hover:text-text hover:bg-surface-hover active:scale-95 transition-colors cursor-pointer"
+            >
+                {cap > 0 && <span className="text-primary tabular-nums">{cap}</span>}
+                <Gauge className="w-3 h-3" />
+            </button>
+        </div>
+    );
+}
+
+export function MonthGrid({ month, year, id, onDayLongPress, onDaySelect, monthlyCaps, onSetMonthCap }: GridProps) {
     const firstDay = new Date(Date.UTC(year, month.monthIndex, 1));
     const startOffset = (firstDay.getUTCDay() + 6) % 7;
     const sortedDays = [...month.days].sort((a, b) => a.date.localeCompare(b.date));
 
     return (
         <div id={id} className="rounded-xl border border-border bg-surface/50 p-3 scroll-mt-24">
-            <h3 className="text-sm font-semibold text-text mb-2 text-center">
-                {month.monthName} {year}
-            </h3>
+            <MonthHeader
+                month={month}
+                year={year}
+                monthlyCaps={monthlyCaps}
+                onSetMonthCap={onSetMonthCap}
+            />
 
             <div className="grid grid-cols-7 gap-0.5 mb-1">
                 {ISO_DAY_LABELS.map((label, i) => (
@@ -209,16 +246,19 @@ export function MonthGrid({ month, year, id, onDayLongPress, onDaySelect }: Grid
     );
 }
 
-export function USMonthGrid({ month, year, id, onDayLongPress, onDaySelect }: GridProps) {
+export function USMonthGrid({ month, year, id, onDayLongPress, onDaySelect, monthlyCaps, onSetMonthCap }: GridProps) {
     const firstDay = new Date(Date.UTC(year, month.monthIndex, 1));
     const startOffset = firstDay.getUTCDay();
     const sortedDays = [...month.days].sort((a, b) => a.date.localeCompare(b.date));
 
     return (
         <div id={id} className="rounded-xl border border-border bg-surface/50 p-3 scroll-mt-24">
-            <h3 className="text-sm font-semibold text-text mb-2 text-center">
-                {month.monthName} {year}
-            </h3>
+            <MonthHeader
+                month={month}
+                year={year}
+                monthlyCaps={monthlyCaps}
+                onSetMonthCap={onSetMonthCap}
+            />
 
             <div className="grid grid-cols-7 gap-0.5 mb-1">
                 {US_DAY_LABELS.map((label, i) => (
