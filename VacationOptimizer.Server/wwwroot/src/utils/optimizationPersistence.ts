@@ -1,6 +1,7 @@
 import type { OptimizeRequest, OptimizeResult } from "../types/models";
 import {
   buildSearchParamsFromRequest,
+  hasSameHolidayScope,
   parseRequestFromSearchParams,
   requestsMatch,
 } from "./optimizationRequest";
@@ -263,11 +264,20 @@ export function getInitialOptimizationState() {
     );
   }
 
+  const matchingResult = initialRequest && cachedResult && requestsMatch(initialRequest, cachedRequest)
+    ? cachedResult
+    : null;
+  // Keep a non-matching saved result as a display-only fallback for failed
+  // restores, but never across a different country/region/year scope.
+  const staleResult = !matchingResult && cachedResult && cachedRequest && initialRequest
+    && hasSameHolidayScope(cachedRequest, initialRequest)
+    ? cachedResult
+    : null;
+
   return {
     initialRequest,
-    initialResult: initialRequest && cachedResult && requestsMatch(initialRequest, cachedRequest)
-      ? cachedResult
-      : null,
+    initialResult: matchingResult,
+    staleResult,
     initialCalendarName: readSavedCalendarName(),
     initialConnectedToken: connectedCalendar.connectedToken,
     initialConnectedCalendarName: connectedCalendar.connectedCalendarName,

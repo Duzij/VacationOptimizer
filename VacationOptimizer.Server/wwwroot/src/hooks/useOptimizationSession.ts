@@ -30,6 +30,7 @@ export function useOptimizationSession() {
 
   const [resultHistory, setResultHistory] = useState<OptimizeResult[]>(initialResultHistory);
   const [activeResultIndex, setActiveResultIndex] = useState(initialResultHistory.length > 0 ? 0 : -1);
+  const [initialRestoreFailed, setInitialRestoreFailed] = useState(false);
   const [activeRequest, setActiveRequest] = useState<OptimizeRequest | null>(initialStateRef.current.initialRequest);
   const [ignoredHolidayDates, setIgnoredHolidayDates] = useState<string[]>(
     initialStateRef.current.initialRequest?.ignoredHolidayDates ?? [],
@@ -265,6 +266,9 @@ export function useOptimizationSession() {
 
     void restoreOptimization(initialRequest).catch(() => {
       // Keep any cached result visible if refresh fails; the mutation error UI handles messaging.
+      // When no matching cached result exists, the stale-result fallback in the
+      // planner page keeps the last saved calendar visible instead.
+      setInitialRestoreFailed(true);
     });
   }, [restoreOptimization]);
 
@@ -300,6 +304,8 @@ export function useOptimizationSession() {
     initialConnectedCalendarName: initialStateRef.current.initialConnectedCalendarName,
     initialConnectedCalendarYear: initialStateRef.current.initialConnectedCalendarYear,
     hasStoredPlannerState: initialStateRef.current.hasStoredPlannerState,
+    staleResult: initialStateRef.current.staleResult,
+    initialRestoreFailed,
     result,
     activeRequest,
     ignoredHolidayDates,
