@@ -8,7 +8,6 @@ The stack includes:
 - `vacation-app` (application)
 - `postgres` (database)
 - `nginx` (reverse proxy)
-- `certbot` (manual certificate issuance/renewal; not started by default)
 
 Nginx config note:
 - Edit [`nginx/conf.d/default.conf`](/Users/admin/DEV/W001/VacationOptimizer/nginx/conf.d/default.conf) for application routes and proxy rules.
@@ -74,15 +73,11 @@ Important behavior:
 
 ## 3. Issue the first Let's Encrypt certificate
 
-Run certbot manually (the `certbot` service uses a profile and does not auto-start):
+Cloudflare Origin Certificate is used. After creating one with a 10-year validity, copy the `.pem` and `.key` files to the server:
 
 ```bash
-docker compose run --rm --profile certbot certbot certonly --webroot \
-  --webroot-path /var/www/certbot \
-  -d longvacation.eu \
-  --email pavelpavelpetrpetr@gmail.com \
-  --agree-tos \
-  --no-eff-email
+scp longvacation.eu.pem root@hetzner:/root/vacation-app/nginx/ssl
+scp longvacation.eu.key root@hetzner:/root/vacation-app/nginx/ssl
 ```
 
 Then restart nginx:

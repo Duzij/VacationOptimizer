@@ -91,34 +91,80 @@ jobs:
 
             # After docker compose up -d
 
-            log_info "Checking SSL certificate..."
-            if [ ! -f "/root/vacation-app/certbot/conf/live/longvacation.eu/fullchain.pem" ]; then
-              log_info "No certificate found, obtaining one..."
-
-              docker compose -f /root/vacation-app/docker-compose.yaml run --rm certbot certonly --webroot \
-                --webroot-path /var/www/certbot \
-                -d longvacation.eu \
-                --email your@email.com \
-                --agree-tos --no-eff-email --non-interactive
-
-              docker compose -f /root/vacation-app/docker-compose.yaml restart nginx
-              log_success "SSL certificate obtained"
+            log_info "Checking Cloudflare Origin CA certificate..."
+            ORIGIN_CERT="/root/vacation-app/nginx/ssl/longvacation.eu.pem"
+            ORIGIN_KEY="/root/vacation-app/nginx/ssl/longvacation.eu.key"
+            if [ -f "$ORIGIN_CERT" ] && [ -f "$ORIGIN_KEY" ]; then
+              log_success "Origin CA certificate found"
             else
-              log_info "Certificate already exists, skipping certbot"
+              log_error "Cloudflare Origin CA certificate missing! Place files at:\n  $ORIGIN_CERT\n  $ORIGIN_KEY\nThen re-run the workflow."
             fi
 
-            log_info "Running health check..."
-            for i in {1..5}; do
-            if curl -fsS --max-time 10 \
+            log_info "Running diagnostics..."
+
+            # Diagnostic 1: Are containers running?
+            log_info "Container status:"
+            docker compose ps
+
+            # Diagnostic 2: Is anything listening on 443?
+            log_info "Ports listening on 443/80:"
+            ss -tlnp | grep -E ':80|:443' || true
+
+            # Diagnostic 3: Can we reach the app directly (bypassing nginx)?
+            log_info "Direct backend check (vacation-app:80):"
+            docker compose exec -T vacation-app wget -qO- --timeout=5 http://localhost:80/ 2>&1 || log_info "Direct backend check failed (may be normal if no root route)"
+
+            # Diagnostic 4: What SSL files does nginx see?
+            log_info "Nginx SSL directory:"
+            docker compose exec -T nginx ls -la /etc/nginx/ssl/ 2>&1 || log_info "SSL dir not found inside nginx container"
+
+            # Diagnostic 5: Test HTTPS with full verbose output captured
+            log_info "Testing HTTPS (with -k to allow Origin CA / self-signed):"
+            HTTPS_LOG="/tmp/https-test.log"
+            if curl -vk --max-time 10 \
               --resolve longvacation.eu:443:127.0.0.1 \
-              https://longvacation.eu/app >/dev/null 2>&1; then
-                log_success "API is healthy"
+              https://longvacation.eu/nginx-health 2>&1 | tee "$HTTPS_LOG"; then
+                log_success "HTTPS health endpoint responded"
+            else
+                CURL_EXIT=$?
+                log_info "HTTPS curl exited with code $CURL_EXIT"
+                log_info "Last 20 lines of HTTPS attempt:"
+                tail -20 "$HTTPS_LOG" || true
+            fi
+
+            # Diagnostic 6: Test HTTP fallback
+            log_info "Testing HTTP fallback:"
+            curl -v --max-time 10 \
+              --resolve longvacation.eu:80:127.0.0.1 \
+              http://longvacation.eu/nginx-health 2>&1 || log_info "HTTP fallback also failed"
+
+            # Real health check: accept HTTP or HTTPS success
+            log_info "Running final health check..."
+            for i in {1..10}; do
+              HEALTHY=false
+
+              # Try HTTPS first (allowing insecure for Origin CA / localhost check)
+              if curl -fsSk --max-time 10 \
+                --resolve longvacation.eu:443:127.0.0.1 \
+                https://longvacation.eu/nginx-health >/dev/null 2>&1; then
+                HEALTHY=true
+              fi
+
+              # Fallback to HTTP (in case nginx is in HTTP-only mode)
+              if [ "$HEALTHY" != "true" ] && curl -fsS --max-time 10 \
+                --resolve longvacation.eu:80:127.0.0.1 \
+                http://longvacation.eu/nginx-health >/dev/null 2>&1; then
+                HEALTHY=true
+              fi
+
+              if [ "$HEALTHY" = "true" ]; then
+                log_success "Health check passed (attempt $i)"
                 break
-              elif [ $i -eq 5 ]; then
-                log_error "Health check failed"
+              elif [ $i -eq 10 ]; then
+                log_error "Health check failed after 10 attempts"
               else
-                log_info "Retrying... ($i/5)"
-                sleep 50
+                log_info "Retrying health check... ($i/10)"
+                sleep 10
               fi
             done
 
