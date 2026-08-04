@@ -6,6 +6,7 @@ Use the guide that owns the primary change. A change that crosses a boundary mus
 
 | Guide | Owns | Escalate to another guide when |
 | --- | --- | --- |
+| [feature-builder.md](feature-builder.md) | Describes that in case of a large-scale change need to start by creating a feature spec and a blog post later |
 | [server.md](server.md) | API, optimizer, holiday data, EF Core, and .NET tests | An API contract, generated content endpoint, schema, or runtime configuration changes |
 | [devops-infra.md](devops-infra.md) | Docker, Nginx, GitHub deployment, secrets, and production operation | The application build, ports, proxy behavior, database lifecycle, or required environment changes |
 | [frontend-ux.md](frontend-ux.md) | React/Vite UI, client state, accessibility, routes, and frontend tests | A page depends on a changed API contract, country schema, or deployment path |
