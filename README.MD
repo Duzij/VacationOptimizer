@@ -71,7 +71,7 @@ Important behavior:
 - PostgreSQL is not published publicly in the production stack.
 - The application container is only reachable through `nginx` inside the Compose network.
 
-## 3. Issue the first Let's Encrypt certificate
+## 3. Provision the first TLS certificate
 
 Cloudflare Origin Certificate is used. After creating one with a 10-year validity, copy the `.pem` and `.key` files to the server:
 
@@ -86,19 +86,9 @@ Then restart nginx:
 docker compose restart nginx
 ```
 
-## 4. Renewal automation (production)
+## 4. Certificate renewal
 
-Open crontab:
-
-```bash
-crontab -e
-```
-
-Add:
-
-```cron
-0 3 * * * cd /root/vacation-app && docker compose run --rm --profile certbot certbot renew && docker compose restart nginx
-```
+Cloudflare Origin Certificates are valid for 10 years and do not require automated renewal.
 
 ## 5. Useful operations
 
