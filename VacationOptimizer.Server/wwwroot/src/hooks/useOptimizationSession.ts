@@ -3,7 +3,7 @@ import { type ApiError, useOptimize } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/models";
 import { getInitialOptimizationState, persistOptimization, updateUrlFromRequest } from "../utils/optimizationPersistence";
 import { getOptimizationResultFingerprint } from "../utils/optimizationResult";
-import { hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
+import { ensureMonthlyCapsFitLockedDays, hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
 
 export const MAX_SHUFFLE_HISTORY = 50;
 
@@ -30,7 +30,6 @@ export function useOptimizationSession() {
 
   const [resultHistory, setResultHistory] = useState<OptimizeResult[]>(initialResultHistory);
   const [activeResultIndex, setActiveResultIndex] = useState(initialResultHistory.length > 0 ? 0 : -1);
-  const [initialRestoreFailed, setInitialRestoreFailed] = useState(false);
   const [activeRequest, setActiveRequest] = useState<OptimizeRequest | null>(initialStateRef.current.initialRequest);
   const [ignoredHolidayDates, setIgnoredHolidayDates] = useState<string[]>(
     initialStateRef.current.initialRequest?.ignoredHolidayDates ?? [],
@@ -179,28 +178,32 @@ export function useOptimizationSession() {
     options?: OptimizationRunOptions,
   ) => {
     const normalizedRequest = normalizeOptimizeRequest(req);
-    const nextIgnoredHolidayDates = hasSameHolidayScope(activeRequest, normalizedRequest) ? ignoredHolidayDates : [];
-    const nextNeverHolidayDates = normalizedRequest.neverHolidayDates
-      ?? (hasSameHolidayScope(activeRequest, normalizedRequest) ? neverHolidayDates : []);
-    const nextLockedVacationDates = normalizedRequest.lockedVacationDates
-      ?? (hasSameHolidayScope(activeRequest, normalizedRequest) ? lockedVacationDates : []);
+    // Locked vacation days always take priority over monthly caps. If a request
+    // would fail because a cap is lower than the number of locked days in that
+    // month, raise the cap automatically rather than showing an error.
+    const adjustedRequest = ensureMonthlyCapsFitLockedDays(normalizedRequest);
+    const nextIgnoredHolidayDates = hasSameHolidayScope(activeRequest, adjustedRequest) ? ignoredHolidayDates : [];
+    const nextNeverHolidayDates = adjustedRequest.neverHolidayDates
+      ?? (hasSameHolidayScope(activeRequest, adjustedRequest) ? neverHolidayDates : []);
+    const nextLockedVacationDates = adjustedRequest.lockedVacationDates
+      ?? (hasSameHolidayScope(activeRequest, adjustedRequest) ? lockedVacationDates : []);
     const effectiveIgnoredHolidayDates = overrideIgnoredHolidayDates ?? nextIgnoredHolidayDates;
     const showLoading = options?.showLoading ?? true;
 
-    if (!hasSameHolidayScope(activeRequest, normalizedRequest) && ignoredHolidayDates.length > 0 && !overrideIgnoredHolidayDates) {
+    if (!hasSameHolidayScope(activeRequest, adjustedRequest) && ignoredHolidayDates.length > 0 && !overrideIgnoredHolidayDates) {
       setIgnoredHolidayDates([]);
     }
 
-    if (!hasSameHolidayScope(activeRequest, normalizedRequest) && neverHolidayDates.length > 0) {
+    if (!hasSameHolidayScope(activeRequest, adjustedRequest) && neverHolidayDates.length > 0) {
       setNeverHolidayDates([]);
     }
 
-    if (!hasSameHolidayScope(activeRequest, normalizedRequest) && lockedVacationDates.length > 0) {
+    if (!hasSameHolidayScope(activeRequest, adjustedRequest) && lockedVacationDates.length > 0) {
       setLockedVacationDates([]);
     }
 
     const requestWithIgnoredDates = normalizeOptimizeRequest({
-      ...withIgnoredHolidayDates(normalizedRequest, effectiveIgnoredHolidayDates),
+      ...withIgnoredHolidayDates(adjustedRequest, effectiveIgnoredHolidayDates),
       neverHolidayDates: nextNeverHolidayDates.length > 0 ? nextNeverHolidayDates : undefined,
       lockedVacationDates: nextLockedVacationDates.length > 0 ? nextLockedVacationDates : undefined,
     });
@@ -262,13 +265,9 @@ export function useOptimizationSession() {
     }
 
     didRestoreInitialRequestRef.current = true;
-    updateUrlFromRequest(initialRequest);
 
     void restoreOptimization(initialRequest).catch(() => {
       // Keep any cached result visible if refresh fails; the mutation error UI handles messaging.
-      // When no matching cached result exists, the stale-result fallback in the
-      // planner page keeps the last saved calendar visible instead.
-      setInitialRestoreFailed(true);
     });
   }, [restoreOptimization]);
 
@@ -304,8 +303,6 @@ export function useOptimizationSession() {
     initialConnectedCalendarName: initialStateRef.current.initialConnectedCalendarName,
     initialConnectedCalendarYear: initialStateRef.current.initialConnectedCalendarYear,
     hasStoredPlannerState: initialStateRef.current.hasStoredPlannerState,
-    staleResult: initialStateRef.current.staleResult,
-    initialRestoreFailed,
     result,
     activeRequest,
     ignoredHolidayDates,

@@ -40,6 +40,48 @@ export function uniqueDates(values: string[]) {
   return [...new Set(values.filter(Boolean))].sort();
 }
 
+export function ensureMonthlyCapsFitLockedDays<T extends { lockedVacationDates?: string[]; maxNumberOfVacationsPerMonth?: MonthlyVacationLimits }>(
+  request: T,
+): T {
+  const lockedDates = request.lockedVacationDates;
+  if (!lockedDates || lockedDates.length === 0) {
+    return request;
+  }
+
+  const lockedDaysByMonth = new Map<string, number>();
+  for (const date of lockedDates) {
+    const monthIndex = Number(date.split("-")[1]) - 1;
+    if (monthIndex < 0 || monthIndex >= MONTH_NAMES.length) {
+      continue;
+    }
+    const month = MONTH_NAMES[monthIndex] as keyof MonthlyVacationLimits;
+    lockedDaysByMonth.set(month, (lockedDaysByMonth.get(month) ?? 0) + 1);
+  }
+
+  if (lockedDaysByMonth.size === 0) {
+    return request;
+  }
+
+  const currentLimits: MonthlyVacationLimits = request.maxNumberOfVacationsPerMonth ?? {} as MonthlyVacationLimits;
+  let nextLimits: MonthlyVacationLimits | undefined;
+  for (const [month, lockedCount] of lockedDaysByMonth) {
+    const monthKey = month as keyof MonthlyVacationLimits;
+    if ((currentLimits[monthKey] ?? 0) < lockedCount) {
+      nextLimits ??= { ...currentLimits };
+      nextLimits[monthKey] = lockedCount;
+    }
+  }
+
+  if (!nextLimits) {
+    return request;
+  }
+
+  return {
+    ...request,
+    maxNumberOfVacationsPerMonth: nextLimits,
+  };
+}
+
 function parseDateList(value: string | null) {
   if (!value) {
     return [];

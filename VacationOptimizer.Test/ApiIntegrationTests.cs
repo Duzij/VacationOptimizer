@@ -405,6 +405,73 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task OptimizeSpain_WithCity_RejectsLockedDaysExceedingMonthlyCap()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            stateCode = "ES-CT",
+            cityCode = "ES-CT-BCN",
+            year = 2027,
+            vacationDays = 5,
+            minimumDaysPerRange = 1,
+            maximumDaysPerRange = 14,
+            maxNumberOfVacationsPerMonth = new Dictionary<string, int> { { "July", 1 } },
+            lockedVacationDates = new[] { "2027-07-01", "2027-07-02" },
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/ES/optimize", payload);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Locked vacation days exceed the July monthly limit of 1.", json);
+    }
+
+    [Fact]
+    public async Task OptimizeIndia_RejectsLockedDaysExceedingMonthlyCap()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            stateCode = "IN-KA",
+            year = 2027,
+            vacationDays = 5,
+            minimumDaysPerRange = 1,
+            maximumDaysPerRange = 14,
+            maxNumberOfVacationsPerMonth = new Dictionary<string, int> { { "July", 1 } },
+            lockedVacationDates = new[] { "2027-07-01", "2027-07-02" },
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/IN/optimize", payload);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Locked vacation days exceed the July monthly limit of 1.", json);
+    }
+
+    [Fact]
+    public async Task OptimizeSwitzerland_RejectsLockedDaysExceedingMonthlyCap()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            cantonCode = "CH-ZH",
+            year = 2027,
+            vacationDays = 5,
+            minimumDaysPerRange = 1,
+            maximumDaysPerRange = 14,
+            maxNumberOfVacationsPerMonth = new Dictionary<string, int> { { "July", 1 } },
+            lockedVacationDates = new[] { "2027-07-01", "2027-07-02" },
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/CH/optimize", payload);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Locked vacation days exceed the July monthly limit of 1.", json);
+    }
+
+    [Fact]
     public async Task OptimizeLegacyEndpoint_StillWorksForNonIndiaCountries()
     {
         var client = _factory.CreateClient();

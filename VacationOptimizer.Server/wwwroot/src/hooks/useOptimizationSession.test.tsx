@@ -332,4 +332,30 @@ describe("useOptimizationSession", () => {
       expect(latestSession?.hasReachedShuffleLimit).toBe(true);
     });
   });
+
+  it("raises monthly caps to fit locked vacation days when running optimization", async () => {
+    const request: OptimizeRequest = {
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      minimumDaysPerRange: 4,
+      maximumDaysPerRange: 14,
+      maxNumberOfVacationsPerMonth: { August: 3 },
+      lockedVacationDates: ["2027-08-01", "2027-08-02", "2027-08-03", "2027-08-04"],
+    };
+
+    mutateAsync.mockResolvedValue(createResult("token-1"));
+
+    render(<HookHarness />);
+
+    await act(async () => {
+      await latestSession?.runOptimization(request);
+    });
+
+    expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({
+      maxNumberOfVacationsPerMonth: { August: 4 },
+      lockedVacationDates: ["2027-08-01", "2027-08-02", "2027-08-03", "2027-08-04"],
+    }));
+    expect(window.location.search).toContain("monthlyCaps=8%3A4");
+  });
 });

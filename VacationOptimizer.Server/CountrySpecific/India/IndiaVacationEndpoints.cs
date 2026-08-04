@@ -1,4 +1,3 @@
-using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
 using VacationOptimizer.Server.CountrySpecific;
 
@@ -26,56 +25,26 @@ public static class IndiaVacationEndpoints
 
         api.MapPost("/countries/IN/optimize", (IndiaOptimizeRequest request, IPublicHolidayService holidayService, VacationOptimizerService optimizer) =>
         {
-            try
+            if (string.IsNullOrWhiteSpace(request.StateCode))
             {
-                if (string.IsNullOrWhiteSpace(request.StateCode))
-                {
-                    return Results.BadRequest(new { error = "India optimizations require a stateCode." });
-                }
-
-                var state = holidayService
-                    .GetStates("IN")
-                    .FirstOrDefault(entry => string.Equals(entry.Code, request.StateCode, StringComparison.OrdinalIgnoreCase));
-
-                if (state is null)
-                {
-                    return Results.BadRequest(new { error = $"Unsupported state code '{request.StateCode}' for country 'IN'." });
-                }
-
-                var result = optimizer.Optimize(new OptimizeRequest(
-                    Country: "IN",
-                    Year: request.Year,
-                    VacationDays: request.VacationDays,
-                    MinimumDaysPerRange: request.MinimumDaysPerRange,
-                    MaximumDaysPerRange: request.MaximumDaysPerRange,
-                    CustomFreeDays: request.CustomFreeDays,
-                    State: state.Code,
-                    IgnoredHolidayDates: request.IgnoredHolidayDates,
-                    NeverHolidayDates: request.NeverHolidayDates,
-                    UsedResultTokens: request.UsedResultTokens,
-                    LockedVacationDates: request.LockedVacationDates,
-                    SeedToken: request.SeedToken));
-
-                return Results.Ok(new IndiaOptimizeResult(
-                    CountryCode: "IN",
-                    Scope: new IndiaOptimizationScope("state", state.Code, state.Name),
-                    Calendar: result.Calendar,
-                    SelectedVacationDays: result.SelectedVacationDays,
-                    Ranges: result.Ranges,
-                    TotalDaysOff: result.TotalDaysOff,
-                    VacationDaysUsed: result.VacationDaysUsed,
-                    PublicHolidaysCount: result.PublicHolidaysCount,
-                    ResultToken: result.ResultToken,
-                    PlannerSeed: result.PlannerSeed));
+                return Results.BadRequest(new { error = "India optimizations require a stateCode." });
             }
-            catch (OptimizationResultUnavailableException ex)
+
+            var state = holidayService
+                .GetStates("IN")
+                .FirstOrDefault(entry => string.Equals(entry.Code, request.StateCode, StringComparison.OrdinalIgnoreCase));
+
+            if (state is null)
             {
-                return Results.Conflict(new { error = ex.Message });
+                return Results.BadRequest(new { error = $"Unsupported state code '{request.StateCode}' for country 'IN'." });
             }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
+
+            return CountrySpecificEndpointHelper.Optimize(
+                request,
+                "IN",
+                state.Code,
+                new IndiaOptimizationScope("state", state.Code, state.Name),
+                optimizer);
         });
 
         return api;

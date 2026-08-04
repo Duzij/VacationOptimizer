@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildSearchParamsFromRequest, normalizeOptimizeRequest, parseRequestFromSearchParams, requestsMatch } from "./optimizationRequest";
+import { buildSearchParamsFromRequest, ensureMonthlyCapsFitLockedDays, normalizeOptimizeRequest, parseRequestFromSearchParams, requestsMatch } from "./optimizationRequest";
+import type { MonthlyVacationLimits } from "../types/models";
 import { getDefaultYear } from "../optimizerDefaults";
 
 describe("optimizationRequest", () => {
@@ -102,6 +103,41 @@ describe("optimizationRequest", () => {
       { country: "DE", year: getDefaultYear(), vacationDays: 25 },
       request,
     )).toBe(false);
+  });
+
+  it("raises monthly caps to fit locked vacation days", () => {
+    const adjusted = ensureMonthlyCapsFitLockedDays({
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      maxNumberOfVacationsPerMonth: { July: 1 },
+      lockedVacationDates: ["2027-07-01", "2027-07-02"],
+    });
+
+    expect(adjusted.maxNumberOfVacationsPerMonth).toEqual({ July: 2 });
+  });
+
+  it("adds a monthly cap when locked days exist but no cap is set", () => {
+    const adjusted = ensureMonthlyCapsFitLockedDays({
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      lockedVacationDates: ["2027-07-01", "2027-07-02", "2027-07-03"],
+    });
+
+    expect((adjusted as { maxNumberOfVacationsPerMonth?: MonthlyVacationLimits }).maxNumberOfVacationsPerMonth).toEqual({ July: 3 });
+  });
+
+  it("leaves caps unchanged when they already fit locked days", () => {
+    const request = {
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+      maxNumberOfVacationsPerMonth: { July: 5 },
+      lockedVacationDates: ["2027-07-01", "2027-07-02"],
+    };
+
+    expect(ensureMonthlyCapsFitLockedDays(request)).toBe(request);
   });
 
   it("round-trips the planner seed through search params without affecting request matching", () => {

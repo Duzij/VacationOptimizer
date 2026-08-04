@@ -5,7 +5,6 @@ import {
   connectedCalendarNameStorageKey,
   connectedTokenStorageKey,
   getCanonicalAppPath,
-  getInitialOptimizationState,
   normalizeCanonicalAppPath,
   parseRequestFromUrl,
   readSavedResult,
@@ -121,90 +120,6 @@ describe("optimizationPersistence", () => {
 
     expect(readSavedResult()).toBeNull();
     expect(window.localStorage.getItem(savedResultStorageKey)).toBeNull();
-  });
-
-  it("keeps a non-matching saved result as a stale fallback within the same holiday scope", () => {
-    const savedRequest = {
-      country: "DE",
-      year: getDefaultYear(),
-      vacationDays: defaultVacationDays,
-      minimumDaysPerRange: defaultMinimumDaysPerRange,
-      maximumDaysPerRange: defaultMaximumDaysPerRange,
-    };
-    const savedResult = {
-      calendar: { days: [] },
-      selectedVacationDays: [],
-      ranges: [],
-      totalDaysOff: 0,
-      vacationDaysUsed: 0,
-      publicHolidaysCount: 0,
-      resultToken: "token-1",
-      plannerSeed: "planner-seed-1",
-    };
-    window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(savedRequest));
-    window.localStorage.setItem(savedResultStorageKey, JSON.stringify(savedResult));
-    window.history.replaceState({}, "", `/app?country=DE&vacationDays=${defaultVacationDays + 5}`);
-
-    const state = getInitialOptimizationState();
-
-    expect(state.initialResult).toBeNull();
-    expect(state.staleResult).toEqual(savedResult);
-  });
-
-  it("does not treat a matching saved result as stale", () => {
-    const savedRequest = {
-      country: "DE",
-      year: getDefaultYear(),
-      vacationDays: defaultVacationDays,
-      minimumDaysPerRange: defaultMinimumDaysPerRange,
-      maximumDaysPerRange: defaultMaximumDaysPerRange,
-    };
-    const savedResult = {
-      calendar: { days: [] },
-      selectedVacationDays: [],
-      ranges: [],
-      totalDaysOff: 0,
-      vacationDaysUsed: 0,
-      publicHolidaysCount: 0,
-      resultToken: "token-1",
-      plannerSeed: "planner-seed-1",
-    };
-    window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(savedRequest));
-    window.localStorage.setItem(savedResultStorageKey, JSON.stringify(savedResult));
-    window.history.replaceState({}, "", "/app?country=DE");
-
-    const state = getInitialOptimizationState();
-
-    expect(state.initialResult).toEqual(savedResult);
-    expect(state.staleResult).toBeNull();
-  });
-
-  it("does not use a saved result from a different holiday scope as a stale fallback", () => {
-    const savedRequest = {
-      country: "DE",
-      year: getDefaultYear(),
-      vacationDays: defaultVacationDays,
-      minimumDaysPerRange: defaultMinimumDaysPerRange,
-      maximumDaysPerRange: defaultMaximumDaysPerRange,
-    };
-    const savedResult = {
-      calendar: { days: [] },
-      selectedVacationDays: [],
-      ranges: [],
-      totalDaysOff: 0,
-      vacationDaysUsed: 0,
-      publicHolidaysCount: 0,
-      resultToken: "token-1",
-      plannerSeed: "planner-seed-1",
-    };
-    window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(savedRequest));
-    window.localStorage.setItem(savedResultStorageKey, JSON.stringify(savedResult));
-    window.history.replaceState({}, "", `/app?country=DE&year=${getDefaultYear() + 1}`);
-
-    const state = getInitialOptimizationState();
-
-    expect(state.initialResult).toBeNull();
-    expect(state.staleResult).toBeNull();
   });
 
   it("clears only the app-owned local storage entries", () => {

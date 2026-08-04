@@ -1,18 +1,13 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Net;
-using System.Net.Sockets;
-using System.IO;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http.Headers;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.Caching.Memory;
-using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Npgsql;
+using Microsoft.Extensions.Caching.Memory;
+using Scalar.AspNetCore;
 using VacationOptimizer.Server.CountrySpecific;
 using VacationOptimizer.Server.Data;
+using VacationOptimizer.Server.Hosting;
 using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
 
@@ -24,35 +19,11 @@ var isRunningInContainer = string.Equals(
 
 builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // Docker Compose assigns services an address from one of these private ranges. Restricting
-    // forwarded-header trust to them prevents direct callers from choosing their own client IP.
-    options.KnownIPNetworks.Add(new System.Net.IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
-    options.KnownIPNetworks.Add(new System.Net.IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
-});
 
-if (builder.Environment.IsDevelopment() && !isRunningInContainer)
-{
-    builder.WebHost.ConfigureKestrel(options =>
-    {
-        options.ListenLocalhost(8080, listenOptions =>
-        {
-            listenOptions.UseHttps();
-        });
-    });
-}
-else
-{
-    builder.Services.AddSpaStaticFiles(configuration =>
-    {
-        configuration.RootPath = "wwwroot/dist";
-    });
-}
+builder.AddVacationOptimizerHosting(isRunningInContainer);
 
 // Add DB Context (using connection string from appsettings or env)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Host=localhost;Database=vacation_optimizer;Username=postgres;Password=postgres";
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -113,72 +84,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-app.UseForwardedHeaders();
-var sitemapPages = new[]
-{
-    new SitemapPage("/", new DateOnly(2026, 4, 6), "weekly", 1.0m),
-    new SitemapPage("/about", new DateOnly(2026, 4, 6), "monthly", 0.8m),
-    new SitemapPage("/contact", new DateOnly(2026, 4, 6), "monthly", 0.7m),
-    new SitemapPage("/privacy", new DateOnly(2026, 4, 6), "monthly", 0.6m),
-    new SitemapPage("/terms", new DateOnly(2026, 4, 6), "monthly", 0.6m),
-    new SitemapPage("/app", new DateOnly(2026, 4, 6), "weekly", 0.9m),
-};
 
-const string robotsTxt = """
-User-agent: *
-Allow: /
-Allow: /app/
-Allow: /manifest.json
-Allow: /icons/
-Allow: /about
-Allow: /contact
-Allow: /privacy
-Allow: /terms
-Allow: /sitemap.xml
-
-Sitemap: https://longvacation.eu/sitemap.xml
-""";
-const string adsTxt = """
-google.com, pub-9485445500768000, DIRECT, f08c47fec0942fa0
-""";
-var sitemapXml = BuildSitemapXml(sitemapPages);
-
-// Run migrations automatically on startup if not testing
-// if (!app.Environment.IsEnvironment("Testing"))
-// {
-    const int maxAttempts = 10;
-    var delay = TimeSpan.FromSeconds(3);
-
-    for (var attempt = 1; attempt <= maxAttempts; attempt++)
-    {
-        try
-        {
-            using var scope = app.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            if (db.Database.IsRelational())
-            {
-                db.Database.EnsureCreated();
-            }
-
-            break;
-        }
-        catch (Exception ex) when (attempt < maxAttempts && IsTransientDbStartupException(ex))
-        {
-            app.Logger.LogWarning(ex, "Database is not ready yet (attempt {Attempt}/{MaxAttempts}). Retrying in {DelaySeconds}s.", attempt, maxAttempts, delay.TotalSeconds);
-            Thread.Sleep(delay);
-        }
-    }
-// }
+PersistenceInitializer.Initialize(app);
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-}
-
-if (!builder.Environment.IsDevelopment() || !isRunningInContainer)
-{
-    app.UseHttpsRedirection();
 }
 
 // API Endpoints
@@ -213,17 +125,13 @@ api.MapPost("/decode-seed", (DecodeSeedRequest request, CalendarSeed calendarSee
         var days = calendarSeed.GetCalendarDaysFromSeed(request.SeedToken);
         return Results.Ok(days.Select(d => d.Type));
     }
-
     catch (FormatException ex)
     {
         return Results.BadRequest(new { error = ex.Message });
     }
 });
 
-api.MapGet("/countries", (IPublicHolidayService holidayService) =>
-{
-    return holidayService.GetCountries();
-});
+api.MapGet("/countries", (IPublicHolidayService holidayService) => holidayService.GetCountries());
 
 api.MapGet("/countries/{countryCode}/states", (string countryCode, IPublicHolidayService holidayService) =>
 {
@@ -238,10 +146,7 @@ api.MapGet("/countries/{countryCode}/states", (string countryCode, IPublicHolida
 
 api.MapCountrySpecificVacationEndpoints();
 
-api.MapGet("/detected-country", (IDetectCountryService detectCountryService) =>
-{
-    return detectCountryService.DetectCountry();
-});
+api.MapGet("/detected-country", (IDetectCountryService detectCountryService) => detectCountryService.DetectCountry());
 
 app.MapGet("/api/internal/database-security", (
     HttpContext context,
@@ -267,102 +172,10 @@ app.MapGet("/api/internal/database-security", (
     };
 }).WithMetadata(new DisableCorsAttribute());
 
-app.MapGet("/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
-app.MapGet("/app/robots.txt", () => Results.Text(robotsTxt, "text/plain"));
-app.MapGet("/ads.txt", () => Results.Text(adsTxt, "text/plain"));
-app.MapGet("/app/ads.txt", () => Results.Text(adsTxt, "text/plain"));
-app.MapGet("/sitemap.xml", () => Results.Text(sitemapXml, "application/xml"));
-app.MapGet("/app/sitemap.xml", () => Results.Text(sitemapXml, "application/xml"));
-app.MapGet("/api/blog", (IWebHostEnvironment environment) =>
-{
-    var candidatePaths = new[]
-    {
-        Path.Combine(environment.ContentRootPath, "wwwroot", "dist", "blog", "index.json"),
-        Path.Combine(environment.ContentRootPath, "wwwroot", "public", "blog", "index.json"),
-    };
-
-    var jsonPath = candidatePaths.FirstOrDefault(File.Exists);
-
-    if (jsonPath is null)
-    {
-        return Results.NotFound(new { error = "Blog index is not available." });
-    }
-
-    return Results.File(jsonPath, "application/json");
-});
-
-// SPA hosting
-app.UseDefaultFiles();   // rewrites directory-style requests to look for index.html
-app.UseStaticFiles();
-app.UseRouting();
-app.UseCors();
-app.MapFallbackToFile("index.html");
-app.UseSpa(spa =>
-{
-    if (app.Environment.IsProduction())
-    {
-        app.UseSpaStaticFiles(new StaticFileOptions
-        {
-            OnPrepareResponse = ctx =>
-            {
-                ResponseHeaders headers = ctx.Context.Response.GetTypedHeaders();
-                if (ctx.Context.Request.Path.Value?.StartsWith("/assets/", StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
-                    {
-                        Public = true,
-                        MaxAge = TimeSpan.FromDays(365)
-                    };
-                }
-                else
-                {
-                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
-                    {
-                        Public = true,
-                        MaxAge = TimeSpan.FromHours(1)
-                    };
-                }
-            }
-        });
-        spa.Options.SourcePath = "wwwroot/dist";
-        spa.Options.DefaultPageStaticFileOptions = new StaticFileOptions
-        {
-            OnPrepareResponse = ctx =>
-            {
-                ResponseHeaders headers = ctx.Context.Response.GetTypedHeaders();
-                headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
-                {
-                    NoCache = true,
-                    NoStore = true,
-                    MustRevalidate = true
-                };
-            }
-        };
-    }
-});
+app.MapContentEndpoints();
+app.UseVacationOptimizerHosting(isRunningInContainer);
 
 app.Run();
-
-static bool IsTransientDbStartupException(Exception ex)
-{
-    if (ex is NpgsqlException)
-    {
-        return true;
-    }
-
-    var current = ex;
-    while (current != null)
-    {
-        if (current is SocketException)
-        {
-            return true;
-        }
-
-        current = current.InnerException;
-    }
-
-    return false;
-}
 
 static IResult CooldownResponse(HttpContext context, TimeSpan? retryAfter)
 {
@@ -373,27 +186,6 @@ static IResult CooldownResponse(HttpContext context, TimeSpan? retryAfter)
 
     return Results.StatusCode(StatusCodes.Status429TooManyRequests);
 }
-
-static string BuildSitemapXml(IEnumerable<SitemapPage> pages)
-{
-    var entries = string.Join(Environment.NewLine, pages.Select(page => $"""
-  <url>
-    <loc>https://longvacation.eu{page.Path}/</loc>
-    <lastmod>{page.LastModified:yyyy-MM-dd}</lastmod>
-    <changefreq>{page.ChangeFrequency}</changefreq>
-    <priority>{page.Priority:0.0}</priority>
-  </url>
-""".Replace($"{page.Path}//", $"{page.Path}/").Replace("https://longvacation.eu//", "https://longvacation.eu/")));
-
-    return $$"""
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{{entries}}
-</urlset>
-""";
-}
-
-public sealed record SitemapPage(string Path, DateOnly LastModified, string ChangeFrequency, decimal Priority);
 
 public record DecodeSeedRequest(string SeedToken);
 

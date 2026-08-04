@@ -191,8 +191,6 @@ function PlannerPage() {
     initialConnectedCalendarName,
     initialConnectedCalendarYear,
     hasStoredPlannerState,
-    staleResult,
-    initialRestoreFailed,
     result,
     activeRequest,
     optimize,
@@ -242,12 +240,6 @@ function PlannerPage() {
     return runOptimization(req, overrideIgnoredHolidayDates, options);
   }, [runOptimization]);
 
-  // When the initial restore fails and no current result exists, fall back to
-  // the last saved same-scope result so the calendar stays visible and the user
-  // can unlock days or adjust caps instead of resetting all locked days.
-  const staleCalendarFallback = !result && initialRestoreFailed ? staleResult : null;
-  const displayResult = result ?? staleCalendarFallback;
-
   const {
     feedbackDraft,
     setFeedbackDraft,
@@ -260,7 +252,7 @@ function PlannerPage() {
     handleConfirmLockedVacationDay,
   } = useCalendarInteractions({
     activeRequest,
-    result: displayResult,
+    result,
     ignoredHolidayDates,
     setIgnoredHolidayDates,
     neverHolidayDates,
@@ -557,32 +549,6 @@ function PlannerPage() {
         )
       )}
 
-      {staleCalendarFallback && (
-        <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="w-full max-w-6xl mx-auto space-y-3">
-            <div className="rounded-xl border border-border bg-surface/70 px-4 py-3 text-sm text-text-muted">
-              Your restored settings could not be optimized, so this is your last saved plan.
-              Unlock vacation days or adjust your monthly caps, then run the optimizer again.
-            </div>
-            <Legend />
-          </div>
-
-          <CalendarView
-            key={staleCalendarFallback.resultToken || staleCalendarFallback.plannerSeed}
-            calendar={staleCalendarFallback.calendar.days}
-            ranges={staleCalendarFallback.ranges}
-            year={activeRequest?.year ?? currentYear}
-            country={activeRequest?.country}
-            onDayLongPress={handleDayLongPress}
-            onDaySelect={handleDaySelect}
-            locale={detectedCountry?.countryCode}
-            connectedToken={isConnectedCalendarApplied ? connectedToken : ""}
-            monthlyCaps={activeRequest?.maxNumberOfVacationsPerMonth}
-            onSetMonthCap={handleSetMonthCap}
-          />
-        </div>
-      )}
-
       {result && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <ResultsSummary result={result} shouldScroll={shouldScrollResults}>
@@ -659,7 +625,7 @@ function PlannerPage() {
         </div>
       )}
 
-      {(result || (staleCalendarFallback && selectedDayDetails)) && (
+      {result && (
         <DetailsLipMobile
           isLoading={isUserOptimizing}
           onShuffle={handleShuffleOptimization}
@@ -668,12 +634,12 @@ function PlannerPage() {
           canNavigatePrevious={canNavigatePrevious}
           canNavigateNext={canNavigateNext}
           dayDetails={selectedDayDetails}
-          hasReachedShuffleLimit={hasReachedShuffleLimit || Boolean(staleCalendarFallback)}
+          hasReachedShuffleLimit={hasReachedShuffleLimit}
           hasLockedBudgetLimit={hasLockedBudgetLimit}
         />
       )}
 
-      {selectedDayDetails && displayResult && (
+      {selectedDayDetails && result && (
         <DetailsLipDesktop
           formattedDate={selectedDayDetails.formattedDate}
           label={selectedDayDetails.label}

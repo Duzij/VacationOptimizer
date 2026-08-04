@@ -12,35 +12,13 @@ public record SwitzerlandCountrySchema(
     IReadOnlyList<OptimizationStateOption> Cantons
 );
 
-public record SwitzerlandOptimizeRequest(
-    string CantonCode,
-    int Year,
-    int VacationDays,
-    int MinimumDaysPerRange = OptimizationDefaults.MinimumDaysPerRange,
-    int MaximumDaysPerRange = OptimizationDefaults.MaximumDaysPerRange,
-    List<CustomFreeDay>? CustomFreeDays = null,
-    List<DateOnly>? IgnoredHolidayDates = null,
-    List<DateOnly>? NeverHolidayDates = null,
-    List<string>? UsedResultTokens = null,
-    List<DateOnly>? LockedVacationDates = null,
-    string? SeedToken = null
-);
+public record SwitzerlandOptimizeRequest : CountrySpecificOptimizeRequestBase
+{
+    public string CantonCode { get; init; } = "";
+}
 
 public record SwitzerlandOptimizationScope(
     string Type,
     string CantonCode,
     string CantonName
-);
-
-public record SwitzerlandOptimizeResult(
-    string CountryCode,
-    SwitzerlandOptimizationScope Scope,
-    CalendarData Calendar,
-    List<DateOnly> SelectedVacationDays,
-    List<VacationRange> Ranges,
-    int TotalDaysOff,
-    int VacationDaysUsed,
-    int PublicHolidaysCount,
-    string ResultToken,
-    string PlannerSeed
 );

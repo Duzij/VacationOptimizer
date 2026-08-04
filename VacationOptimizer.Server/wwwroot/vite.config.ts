@@ -4,6 +4,29 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
+function createProxyEntry(target: string) {
+  return {
+    target,
+    changeOrigin: true,
+    secure: false,
+  };
+}
+
+function contentProxy(target: string) {
+  const paths = [
+    "/sitemap.xml",
+    "/robots.txt",
+    "/ads.txt",
+    "/app/sitemap.xml",
+    "/app/robots.txt",
+    "/app/ads.txt",
+  ];
+
+  return Object.fromEntries(
+    paths.map((path) => [path, createProxyEntry(target)]),
+  );
+}
+
 export default defineConfig(({ command }) => {
   const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? "https://localhost:8080";
 
@@ -19,6 +42,7 @@ export default defineConfig(({ command }) => {
           changeOrigin: true,
           secure: apiProxyTarget.startsWith("https://"),
         },
+        ...contentProxy(apiProxyTarget),
       },
     } : {},
     build: {

@@ -169,51 +169,10 @@ describe("App loading state", () => {
     });
   });
 
-  it("shows the last saved calendar when the restored settings fail to optimize", async () => {
-    optimizeState.isError = true;
-    optimizeState.error = new Error("Locked vacation days exceed the monthly cap.");
-    mutateAsync.mockRejectedValue(optimizeState.error);
+  it("raises monthly caps to fit locked vacation days on restore", async () => {
+    mutateAsync.mockResolvedValue(createSavedResult());
 
-    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
-    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult()));
-    window.history.replaceState({}, "", `/app?country=DE&vacationDays=${30}`);
-
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("calendar-view")).toBeTruthy();
-    });
-
-    expect(screen.getByText(/last saved plan/i)).toBeTruthy();
-    expect(screen.queryByTestId("results-summary")).toBeNull();
-  });
-
-  it("keeps the last saved calendar visible after dismissing the restore error", async () => {
-    optimizeState.isError = true;
-    optimizeState.error = new Error("Locked vacation days exceed the monthly cap.");
-    mutateAsync.mockRejectedValue(optimizeState.error);
-
-    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
-    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult()));
-    window.history.replaceState({}, "", `/app?country=DE&vacationDays=${30}`);
-
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("calendar-view")).toBeTruthy();
-    });
-
-    await userEvent.click(screen.getByRole("button", { name: "Dismiss error" }));
-
-    expect(screen.getByTestId("calendar-view")).toBeTruthy();
-  });
-
-  it("does not show a saved calendar from a different year when restore fails", async () => {
-    mutateAsync.mockRejectedValue(new Error("Optimization failed."));
-
-    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
-    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult()));
-    window.history.replaceState({}, "", `/app?country=DE&year=${getDefaultYear() + 1}`);
+    window.history.replaceState({}, "", "/app?country=DE&year=2027&monthlyCaps=7:1&lockedVacationDays=2027-07-01,2027-07-02");
 
     render(<App />);
 
@@ -221,7 +180,26 @@ describe("App loading state", () => {
       expect(mutateAsync).toHaveBeenCalled();
     });
 
-    expect(screen.queryByTestId("calendar-view")).toBeNull();
+    const request = mutateAsync.mock.calls[0]![0] as { maxNumberOfVacationsPerMonth?: Record<string, number>; lockedVacationDates?: string[] };
+    expect(request.maxNumberOfVacationsPerMonth).toEqual({ July: 2 });
+    expect(request.lockedVacationDates).toEqual(["2027-07-01", "2027-07-02"]);
+    expect(window.location.search).toContain("monthlyCaps=7%3A2");
+    expect(screen.getByTestId("calendar-view")).toBeTruthy();
+  });
+
+  it("does not adjust monthly caps when they already fit locked days", async () => {
+    mutateAsync.mockResolvedValue(createSavedResult());
+
+    window.history.replaceState({}, "", "/app?country=DE&year=2027&monthlyCaps=7:2&lockedVacationDays=2027-07-01,2027-07-02");
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(mutateAsync).toHaveBeenCalled();
+    });
+
+    const request = mutateAsync.mock.calls[0]![0] as { maxNumberOfVacationsPerMonth?: Record<string, number> };
+    expect(request.maxNumberOfVacationsPerMonth).toEqual({ July: 2 });
   });
 
   it("redirects /connect to /app, persists the connected token, and updates the URL", async () => {

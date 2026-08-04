@@ -1,4 +1,3 @@
-using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
 using VacationOptimizer.Server.CountrySpecific;
 
@@ -31,71 +30,41 @@ public static class SpainVacationEndpoints
 
         api.MapPost("/countries/ES/optimize", (SpainOptimizeRequest request, IPublicHolidayService holidayService, VacationOptimizerService optimizer) =>
         {
-            try
+            var availableStates = holidayService.GetStates("ES");
+            var stateMap = availableStates.ToDictionary(state => state.Code, StringComparer.OrdinalIgnoreCase);
+
+            string? normalizedStateCode = string.IsNullOrWhiteSpace(request.StateCode) ? null : request.StateCode.Trim().ToUpperInvariant();
+            string? normalizedCityCode = string.IsNullOrWhiteSpace(request.CityCode) ? null : request.CityCode.Trim().ToUpperInvariant();
+
+            if (normalizedStateCode is not null && (!stateMap.TryGetValue(normalizedStateCode, out var selectedRegion) || IsSpainCityCode(selectedRegion.Code)))
             {
-                var availableStates = holidayService.GetStates("ES");
-                var stateMap = availableStates.ToDictionary(state => state.Code, StringComparer.OrdinalIgnoreCase);
+                return Results.BadRequest(new { error = $"Unsupported state code '{request.StateCode}' for country 'ES'." });
+            }
 
-                string? normalizedStateCode = string.IsNullOrWhiteSpace(request.StateCode) ? null : request.StateCode.Trim().ToUpperInvariant();
-                string? normalizedCityCode = string.IsNullOrWhiteSpace(request.CityCode) ? null : request.CityCode.Trim().ToUpperInvariant();
-
-                if (normalizedStateCode is not null && (!stateMap.TryGetValue(normalizedStateCode, out var selectedRegion) || IsSpainCityCode(selectedRegion.Code)))
+            if (normalizedCityCode is not null)
+            {
+                if (!stateMap.TryGetValue(normalizedCityCode, out var selectedCity) || !IsSpainCityCode(selectedCity.Code))
                 {
-                    return Results.BadRequest(new { error = $"Unsupported state code '{request.StateCode}' for country 'ES'." });
+                    return Results.BadRequest(new { error = $"Unsupported city code '{request.CityCode}' for country 'ES'." });
                 }
 
-                if (normalizedCityCode is not null)
-                {
-                    if (!stateMap.TryGetValue(normalizedCityCode, out var selectedCity) || !IsSpainCityCode(selectedCity.Code))
-                    {
-                        return Results.BadRequest(new { error = $"Unsupported city code '{request.CityCode}' for country 'ES'." });
-                    }
-
-                    normalizedStateCode = GetSpainParentStateCode(normalizedCityCode);
-                }
-
-                var result = optimizer.Optimize(new OptimizeRequest(
-                    Country: "ES",
-                    Year: request.Year,
-                    VacationDays: request.VacationDays,
-                    MinimumDaysPerRange: request.MinimumDaysPerRange,
-                    MaximumDaysPerRange: request.MaximumDaysPerRange,
-                    CustomFreeDays: request.CustomFreeDays,
-                    State: normalizedCityCode ?? normalizedStateCode,
-                    IgnoredHolidayDates: request.IgnoredHolidayDates,
-                    NeverHolidayDates: request.NeverHolidayDates,
-                    UsedResultTokens: request.UsedResultTokens,
-                    LockedVacationDates: request.LockedVacationDates,
-                    SeedToken: request.SeedToken));
-
-                stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);
-                stateMap.TryGetValue(normalizedCityCode ?? string.Empty, out var selectedCityResult);
-
-                return Results.Ok(new SpainOptimizeResult(
-                    CountryCode: "ES",
-                    Scope: new SpainOptimizationScope(
-                        Type: normalizedCityCode is not null ? "city" : normalizedStateCode is not null ? "state" : "national",
-                        StateCode: normalizedStateCode,
-                        StateName: selectedState?.Name,
-                        CityCode: normalizedCityCode,
-                        CityName: selectedCityResult?.Name),
-                    Calendar: result.Calendar,
-                    SelectedVacationDays: result.SelectedVacationDays,
-                    Ranges: result.Ranges,
-                    TotalDaysOff: result.TotalDaysOff,
-                    VacationDaysUsed: result.VacationDaysUsed,
-                    PublicHolidaysCount: result.PublicHolidaysCount,
-                    ResultToken: result.ResultToken,
-                    PlannerSeed: result.PlannerSeed));
+                normalizedStateCode = GetSpainParentStateCode(normalizedCityCode);
             }
-            catch (OptimizationResultUnavailableException ex)
-            {
-                return Results.Conflict(new { error = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
+
+            stateMap.TryGetValue(normalizedStateCode ?? string.Empty, out var selectedState);
+            stateMap.TryGetValue(normalizedCityCode ?? string.Empty, out var selectedCityResult);
+
+            return CountrySpecificEndpointHelper.Optimize(
+                request,
+                "ES",
+                normalizedCityCode ?? normalizedStateCode,
+                new SpainOptimizationScope(
+                    Type: normalizedCityCode is not null ? "city" : normalizedStateCode is not null ? "state" : "national",
+                    StateCode: normalizedStateCode,
+                    StateName: selectedState?.Name,
+                    CityCode: normalizedCityCode,
+                    CityName: selectedCityResult?.Name),
+                optimizer);
         });
 
         return api;

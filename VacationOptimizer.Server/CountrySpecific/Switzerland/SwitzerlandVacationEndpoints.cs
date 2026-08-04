@@ -1,4 +1,3 @@
-using VacationOptimizer.Server.Models;
 using VacationOptimizer.Server.Services;
 using VacationOptimizer.Server.CountrySpecific;
 
@@ -26,56 +25,26 @@ public static class SwitzerlandVacationEndpoints
 
         api.MapPost("/countries/CH/optimize", (SwitzerlandOptimizeRequest request, IPublicHolidayService holidayService, VacationOptimizerService optimizer) =>
         {
-            try
+            if (string.IsNullOrWhiteSpace(request.CantonCode))
             {
-                if (string.IsNullOrWhiteSpace(request.CantonCode))
-                {
-                    return Results.BadRequest(new { error = "Switzerland optimizations require a cantonCode." });
-                }
-
-                var canton = holidayService
-                    .GetStates("CH")
-                    .FirstOrDefault(entry => string.Equals(entry.Code, request.CantonCode, StringComparison.OrdinalIgnoreCase));
-
-                if (canton is null)
-                {
-                    return Results.BadRequest(new { error = $"Unsupported canton code '{request.CantonCode}' for country 'CH'." });
-                }
-
-                var result = optimizer.Optimize(new OptimizeRequest(
-                    Country: "CH",
-                    Year: request.Year,
-                    VacationDays: request.VacationDays,
-                    MinimumDaysPerRange: request.MinimumDaysPerRange,
-                    MaximumDaysPerRange: request.MaximumDaysPerRange,
-                    CustomFreeDays: request.CustomFreeDays,
-                    State: canton.Code,
-                    IgnoredHolidayDates: request.IgnoredHolidayDates,
-                    NeverHolidayDates: request.NeverHolidayDates,
-                    UsedResultTokens: request.UsedResultTokens,
-                    LockedVacationDates: request.LockedVacationDates,
-                    SeedToken: request.SeedToken));
-
-                return Results.Ok(new SwitzerlandOptimizeResult(
-                    CountryCode: "CH",
-                    Scope: new SwitzerlandOptimizationScope("canton", canton.Code, canton.Name),
-                    Calendar: result.Calendar,
-                    SelectedVacationDays: result.SelectedVacationDays,
-                    Ranges: result.Ranges,
-                    TotalDaysOff: result.TotalDaysOff,
-                    VacationDaysUsed: result.VacationDaysUsed,
-                    PublicHolidaysCount: result.PublicHolidaysCount,
-                    ResultToken: result.ResultToken,
-                    PlannerSeed: result.PlannerSeed));
+                return Results.BadRequest(new { error = "Switzerland optimizations require a cantonCode." });
             }
-            catch (OptimizationResultUnavailableException ex)
+
+            var canton = holidayService
+                .GetStates("CH")
+                .FirstOrDefault(entry => string.Equals(entry.Code, request.CantonCode, StringComparison.OrdinalIgnoreCase));
+
+            if (canton is null)
             {
-                return Results.Conflict(new { error = ex.Message });
+                return Results.BadRequest(new { error = $"Unsupported canton code '{request.CantonCode}' for country 'CH'." });
             }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
+
+            return CountrySpecificEndpointHelper.Optimize(
+                request,
+                "CH",
+                canton.Code,
+                new SwitzerlandOptimizationScope("canton", canton.Code, canton.Name),
+                optimizer);
         });
 
         return api;
