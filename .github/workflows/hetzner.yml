@@ -101,6 +101,10 @@ jobs:
             chmod 600 /root/vacation-app/nginx/ssl/longvacation.eu.key
             log_success "Certificates written to nginx/ssl/"
 
+            log_info "Restarting nginx to pick up new certificates..."
+            docker compose restart nginx
+            log_success "Nginx restarted"
+
             log_info "Running diagnostics..."
 
             # Diagnostic 1: Are containers running?
