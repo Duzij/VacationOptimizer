@@ -44,19 +44,10 @@ services:
       - ./nginx/conf.d:/etc/nginx/includes:ro
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./nginx/start-nginx.sh:/etc/nginx/start-nginx.sh:ro
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - vacation-app
     restart: always
-
-  certbot:
-    image: certbot/certbot
-    profiles:
-      - certbot
-    volumes:
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
 
 volumes:
   pgdata:

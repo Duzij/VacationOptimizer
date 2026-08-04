@@ -2,8 +2,8 @@
 
 set -eu
 
-CERT_PATH="/etc/letsencrypt/live/longvacation.eu/fullchain.pem"
-KEY_PATH="/etc/letsencrypt/live/longvacation.eu/privkey.pem"
+CERT_PATH="/etc/nginx/ssl/longvacation.eu.pem"
+KEY_PATH="/etc/nginx/ssl/longvacation.eu.key"
 TARGET_CONF="/etc/nginx/conf.d/default.conf"
 
 if [ -f "$CERT_PATH" ] && [ -f "$KEY_PATH" ]; then
