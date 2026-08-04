@@ -49,11 +49,13 @@ jobs:
           RESULT_TOKEN_SIGNING_KEY: ${{ secrets.RESULT_TOKEN_SIGNING_KEY }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
           SERVER_HOSTNAME: ${{ secrets.SERVER_HOSTNAME }}
+          CF_ORIGIN_CERT: ${{ secrets.CF_ORIGIN_CERT }}
+          CF_ORIGIN_KEY: ${{ secrets.CF_ORIGIN_KEY }}
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: TOKEN,JWT_SECRET,SOME_API_KEY,RESULT_TOKEN_SIGNING_KEY,SERVER_IP,SERVER_HOSTNAME
+          envs: TOKEN,JWT_SECRET,SOME_API_KEY,RESULT_TOKEN_SIGNING_KEY,SERVER_IP,SERVER_HOSTNAME,CF_ORIGIN_CERT,CF_ORIGIN_KEY
           script: |
             set -e
 
@@ -66,7 +68,7 @@ jobs:
             else
               cd "$APP_DIR"
               git reset --hard HEAD
-              git clean -fd --exclude=certbot
+              git clean -fd
               git remote set-url origin "https://${TOKEN}@github.com/Duzij/VacationOptimizer.git"
               git pull
             fi
@@ -91,14 +93,13 @@ jobs:
 
             # After docker compose up -d
 
-            log_info "Checking Cloudflare Origin CA certificate..."
-            ORIGIN_CERT="/root/vacation-app/nginx/ssl/longvacation.eu.pem"
-            ORIGIN_KEY="/root/vacation-app/nginx/ssl/longvacation.eu.key"
-            if [ -f "$ORIGIN_CERT" ] && [ -f "$ORIGIN_KEY" ]; then
-              log_success "Origin CA certificate found"
-            else
-              log_error "Cloudflare Origin CA certificate missing! Place files at:\n  $ORIGIN_CERT\n  $ORIGIN_KEY\nThen re-run the workflow."
-            fi
+            log_info "Writing Cloudflare Origin CA certificates..."
+            mkdir -p /root/vacation-app/nginx/ssl
+            printf '%s\n' "$CF_ORIGIN_CERT" > /root/vacation-app/nginx/ssl/longvacation.eu.pem
+            printf '%s\n' "$CF_ORIGIN_KEY" > /root/vacation-app/nginx/ssl/longvacation.eu.key
+            chmod 644 /root/vacation-app/nginx/ssl/longvacation.eu.pem
+            chmod 600 /root/vacation-app/nginx/ssl/longvacation.eu.key
+            log_success "Certificates written to nginx/ssl/"
 
             log_info "Running diagnostics..."
 
