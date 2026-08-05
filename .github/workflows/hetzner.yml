@@ -86,7 +86,7 @@ jobs:
 
             log_info "Deploying with docker compose..."
             docker compose pull || true
-            docker compose up -d --build
+            docker compose up -d --build --remove-orphans --wait
 
             # After docker compose up -d
 
@@ -114,7 +114,7 @@ jobs:
 
             # Diagnostic 3: Can we reach the app directly (bypassing nginx)?
             log_info "Direct backend check (vacation-app:80):"
-            docker compose exec -T vacation-app wget -qO- --timeout=5 http://localhost:80/ 2>&1 || log_info "Direct backend check failed (may be normal if no root route)"
+            docker compose exec -T vacation-app curl -fsS --max-time 5 http://localhost:80/ 2>&1 || log_info "Direct backend check failed (may be normal if no root route)"
 
             # Diagnostic 4: What SSL files does nginx see?
             log_info "Nginx SSL directory:"
