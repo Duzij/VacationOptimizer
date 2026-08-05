@@ -43,19 +43,56 @@ docker compose -f docker-compose.dev.yaml down
 
 ## 1. Prerequisites
 
-- Docker and Docker Compose plugin installed
-- DNS for `longvacation.eu` pointing to the server IP
-- Ports `22` and `443` open on the server, the rest are closed by custom firewall
-- A valid `.env` file in the project root
+### 1.1 Server
 
-Update `.env` from `.env.example`, set a strong database password, and generate a unique UUID for the security-report endpoint before starting production:
+- Docker and Docker Compose plugin installed
+- DNS for your domain pointing to the server IP
+- Ports `22` (SSH) and `443` (HTTPS) open on the server
+- A server user with SSH key access (the workflow uses `root` by default)
+
+### 1.2 GitHub repository secrets
+
+The deployment workflow (`.github/workflows/hetzner.yml`) expects the following repository secrets:
+
+| Secret | Purpose |
+|--------|---------|
+| `SERVER_IP` | IP address of the target server |
+| `SSH_PRIVATE_KEY` | Private key for SSH authentication to the server |
+| `TOKEN` | GitHub Personal Access Token with `repo` scope (used to clone the repository on the server) |
+| `RESULT_TOKEN_SIGNING_KEY` | Strong secret key for signing optimization result tokens. **Required in Production.** |
+| `DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN` | UUID that protects the database security report endpoint |
+| `CF_ORIGIN_CERT` | TLS certificate content (e.g., Cloudflare Origin CA certificate PEM) |
+| `CF_ORIGIN_KEY` | TLS private key content corresponding to the certificate |
+
+### 1.3 Local `.env` file
+
+For local development, create a `.env` file in the project root. It is intentionally not committed.
 
 ```bash
-cp .env.example .env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=<strong-password>
+POSTGRES_DB=vacation_optimizer
+DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN=<uuid>
+```
+
+Generate the UUID with:
+
+```bash
 uuidgen | tr '[:upper:]' '[:lower:]'
 ```
 
-Set the generated value as `DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN` in `.env`. It is intentionally not committed. Without a valid UUID, the report endpoint stays disabled and returns `404`.
+Without a valid UUID, the report endpoint stays disabled and returns `404`.
+
+In production, the deployment workflow recreates the `.env` file automatically from repository secrets.
+
+### 1.4 Domain customization
+
+The following files contain hard-coded domain references (currently `longvacation.eu`) that must be updated for your own domain before deploying:
+
+- `.github/workflows/hetzner.yml` — health check URLs and `--resolve` targets
+- `nginx/templates/default.ssl.conf` — `server_name` and certificate paths
+- `nginx/templates/default.http.conf` — `server_name`
+- `nginx/start-nginx.sh` — certificate file paths
 
 ## 2. First-time startup (works without TLS certs)
 

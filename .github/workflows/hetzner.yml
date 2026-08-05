@@ -44,19 +44,16 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           TOKEN: ${{ secrets.TOKEN }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET_KEY }}
-          SOME_API_KEY: ${{ secrets.SOME_API_KEY }}
           RESULT_TOKEN_SIGNING_KEY: ${{ secrets.RESULT_TOKEN_SIGNING_KEY }}
           DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN: ${{ secrets.DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_HOSTNAME: ${{ secrets.SERVER_HOSTNAME }}
           CF_ORIGIN_CERT: ${{ secrets.CF_ORIGIN_CERT }}
           CF_ORIGIN_KEY: ${{ secrets.CF_ORIGIN_KEY }}
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: TOKEN,JWT_SECRET,SOME_API_KEY,RESULT_TOKEN_SIGNING_KEY,DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN,SERVER_IP,SERVER_HOSTNAME,CF_ORIGIN_CERT,CF_ORIGIN_KEY
+          envs: TOKEN,RESULT_TOKEN_SIGNING_KEY,DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN,SERVER_IP,CF_ORIGIN_CERT,CF_ORIGIN_KEY
           script: |
             set -e
 
@@ -78,8 +75,6 @@ jobs:
 
             # Write env file for docker compose
             cat > .env <<EOF
-            JWT_SECRET_KEY=${JWT_SECRET}
-            SOME_API_KEY=${SOME_API_KEY}
             Optimization__ResultTokenSigningKey=${RESULT_TOKEN_SIGNING_KEY}
             DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN=${DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN}
             ASPNETCORE_ENVIRONMENT=Production

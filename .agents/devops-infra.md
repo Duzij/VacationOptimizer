@@ -8,7 +8,7 @@ Own the production and development delivery paths:
 - `docker-compose.yaml` and `docker-compose.dev.yaml`
 - `nginx/`
 - `.github/workflows/hetzner.yml`
-- operational guidance in `README.MD` and `.env.example`
+- operational guidance in `README.MD`
 
 ## Deployment architecture
 
@@ -32,7 +32,7 @@ The Dockerfile first builds the client with Node 22, then publishes the server w
 
 ## Secrets, database lifecycle, and workflow
 
-- `.env` supplies `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN`. The GitHub workflow writes `JWT_SECRET_KEY`, `SOME_API_KEY`, and `Optimization__ResultTokenSigningKey` from repository secrets on the server. Never commit actual values or print them in CI logs.
+- `.env` supplies `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN`. The GitHub workflow writes `Optimization__ResultTokenSigningKey` from repository secrets on the server. Never commit actual values or print them in CI logs.
 - Production startup uses `EnsureCreated`, not EF `Migrate`. A schema change needs an explicit, non-destructive plan for databases that already exist; do not assume `docker compose up --build` will apply a migration.
 - Pushes to `main` run `.github/workflows/hetzner.yml`, which SSHes to the Hetzner host, refreshes `/root/vacation-app`, recreates `.env`, runs Compose, bootstraps the main TLS certificate if missing, and probes `https://longvacation.eu/app` locally. Workflow edits must retain this fresh-host and repeat-deploy behavior.
 - Keep application health checks separate from the protected database-security report: the latter is not a general public health endpoint and must retain its proxy log exclusion.
