@@ -36,6 +36,7 @@ The Dockerfile first builds the client with Node 22, then publishes the server w
 - Production startup uses `EnsureCreated`, not EF `Migrate`. A schema change needs an explicit, non-destructive plan for databases that already exist; do not assume `docker compose up --build` will apply a migration.
 - Pushes to `main` run `.github/workflows/hetzner.yml`, which SSHes to the Hetzner host, refreshes `/root/vacation-app`, recreates `.env`, runs Compose, bootstraps the main TLS certificate if missing, and probes `https://longvacation.eu/app` locally. Workflow edits must retain this fresh-host and repeat-deploy behavior.
 - Keep application health checks separate from the protected database-security report: the latter is not a general public health endpoint and must retain its proxy log exclusion.
+- `GET /health` is the public liveness endpoint. The `vacation-app` Compose healthcheck probes it from inside the container with bash `/dev/tcp` (the aspnet runtime image has no curl/wget), nginx waits for `service_healthy`, and the deployment workflow probes `/health` through nginx. Do not rename or protect this route; the SPA fallback must never be mistaken for a health signal again.
 
 ## Validation and safe operation
 

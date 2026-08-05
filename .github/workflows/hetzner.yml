@@ -113,8 +113,12 @@ jobs:
             ss -tlnp | grep -E ':80|:443' || true
 
             # Diagnostic 3: Can we reach the app directly (bypassing nginx)?
-            log_info "Direct backend check (vacation-app:80):"
-            docker compose exec -T vacation-app curl -fsS --max-time 5 http://localhost:80/ 2>&1 || log_info "Direct backend check failed (may be normal if no root route)"
+            # The app image has no curl; probe it from the nginx container (busybox wget)
+            # over the internal Compose network.
+            log_info "Direct backend check (vacation-app:80/health via nginx container):"
+            docker compose exec -T nginx wget -q -O /dev/null -T 5 http://vacation-app/health \
+              && log_success "Backend responded on internal network" \
+              || log_info "Direct backend check failed"
 
             # Diagnostic 4: What SSL files does nginx see?
             log_info "Nginx SSL directory:"
@@ -125,7 +129,7 @@ jobs:
             HTTPS_LOG="/tmp/https-test.log"
             if curl -vk --max-time 10 \
               --resolve longvacation.eu:443:127.0.0.1 \
-              https://longvacation.eu/nginx-health 2>&1 | tee "$HTTPS_LOG"; then
+              https://longvacation.eu/health 2>&1 | tee "$HTTPS_LOG"; then
                 log_success "HTTPS health endpoint responded"
             else
                 CURL_EXIT=$?
@@ -138,7 +142,7 @@ jobs:
             log_info "Testing HTTP fallback:"
             curl -v --max-time 10 \
               --resolve longvacation.eu:80:127.0.0.1 \
-              http://longvacation.eu/nginx-health 2>&1 || log_info "HTTP fallback also failed"
+              http://longvacation.eu/health 2>&1 || log_info "HTTP fallback also failed"
 
             # Real health check: accept HTTP or HTTPS success
             log_info "Running final health check..."
@@ -148,14 +152,14 @@ jobs:
               # Try HTTPS first (allowing insecure for Origin CA / localhost check)
               if curl -fsSk --max-time 10 \
                 --resolve longvacation.eu:443:127.0.0.1 \
-                https://longvacation.eu/nginx-health >/dev/null 2>&1; then
+                https://longvacation.eu/health >/dev/null 2>&1; then
                 HEALTHY=true
               fi
 
               # Fallback to HTTP (in case nginx is in HTTP-only mode)
               if [ "$HEALTHY" != "true" ] && curl -fsS --max-time 10 \
                 --resolve longvacation.eu:80:127.0.0.1 \
-                http://longvacation.eu/nginx-health >/dev/null 2>&1; then
+                http://longvacation.eu/health >/dev/null 2>&1; then
                 HEALTHY=true
               fi
 

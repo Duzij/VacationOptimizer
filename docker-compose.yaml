@@ -12,6 +12,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    # No curl/wget in the aspnet runtime image; probe /health via bash /dev/tcp.
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/80 && printf \"GET /health HTTP/1.0\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && grep -q \"200 OK\" <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
     restart: unless-stopped
 
   postgres:
@@ -46,7 +53,8 @@ services:
       - ./nginx/start-nginx.sh:/etc/nginx/start-nginx.sh:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
-      - vacation-app
+      vacation-app:
+        condition: service_healthy
     restart: always
 
 volumes:

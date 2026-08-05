@@ -172,6 +172,9 @@ app.MapGet("/api/internal/database-security", (
     };
 }).WithMetadata(new DisableCorsAttribute());
 
+// Lightweight liveness probe for container health checks and deployment verification.
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
 app.MapContentEndpoints();
 app.UseVacationOptimizerHosting(isRunningInContainer);
 
