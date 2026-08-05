@@ -155,8 +155,13 @@ describe("App loading state", () => {
     expect(screen.getByTestId("optimizer-form-loading").textContent).toBe("false");
   });
 
-  it("shows the shuffle limit modal and disables shuffle when restore gets a 409", async () => {
-    mutateAsync.mockRejectedValue(Object.assign(new Error("No new optimization result is available."), { status: 409 }));
+  it("shows the error and disables shuffle when restore gets a 409", async () => {
+    const error = Object.assign(new Error("No new optimization result is available."), { status: 409 });
+    mutateAsync.mockImplementation(() => {
+      optimizeState.isError = true;
+      optimizeState.error = error;
+      return Promise.reject(error);
+    });
 
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult()));
@@ -165,8 +170,11 @@ describe("App loading state", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("Shuffle limit reached")).toBeTruthy();
+      expect(screen.getAllByText("No new optimization result is available.").length).toBeGreaterThan(0);
     });
+
+    expect(screen.queryByText("Shuffle limit reached")).toBeNull();
+    expect((screen.getByRole("button", { name: "Shuffle" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("raises monthly caps to fit locked vacation days on restore", async () => {

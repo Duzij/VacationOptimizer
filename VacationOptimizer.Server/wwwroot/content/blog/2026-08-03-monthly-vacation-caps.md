@@ -15,9 +15,9 @@ content: |
   There are two places to set a cap, and they stay in sync:
 
   - **Advanced constraints.** Open the advanced section of the planner form and use the **Add a month…** selector to pick the months you want to limit. Each added month starts at `0`, which means no cap. Raise or lower the value with the `+` and `−` buttons, or type the number directly. A month set back to `0` is simply unlimited again, and you can remove a month entirely with the `×` button.
-  - **The calendar.** Every month header in the calendar view has a small cap icon in the upper-right corner. Click it to set or change the limit for that month right where you are looking at the plan. When a cap is active, its value appears next to the icon so you can see your guardrails at a glance.
+  - **The calendar.** Every month header in the calendar view has a small cap icon in the upper-right corner. Click it to open a quick stepper for that month right where you are looking at the plan: `+` and `−` adjust the limit and every change applies immediately — there is nothing to confirm. When a cap is active, its value appears next to the icon so you can see your guardrails at a glance.
 
-  Once a cap is set, the optimizer skips any suggestion that would push that month over its limit. The rule also applies to days you have locked in yourself: if your locked days already exceed a cap, the planner tells you instead of quietly producing a plan that breaks your own rule.
+  Once a cap is set, the optimizer skips any suggestion that would push that month over its limit. Locked days always win against caps: if you lock more days than a month currently allows, the cap is raised to fit them instead of breaking your plans — and the calendar stepper won't let you lower a cap below the days you have already locked.
 
   Your caps travel with your plan. They are saved in the browser, included when you share a planner link, and applied in every supported country.
 

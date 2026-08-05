@@ -115,7 +115,7 @@
     crossorigin="anonymous"></script>
 
   <!-- ═══ App Bootstrap (deferred for fast first paint) ═══ -->
-  <link rel="stylesheet" href="/assets/index-DJz2hSus.css">
+  <link rel="stylesheet" href="/assets/index-DMRfNgWE.css">
   </head>
   <body>
     <div id="root">
@@ -196,9 +196,9 @@
 <p>There are two places to set a cap, and they stay in sync:</p>
 <ul>
 <li><strong>Advanced constraints.</strong> Open the advanced section of the planner form and use the <strong>Add a month…</strong> selector to pick the months you want to limit. Each added month starts at <code>0</code>, which means no cap. Raise or lower the value with the <code>+</code> and <code>−</code> buttons, or type the number directly. A month set back to <code>0</code> is simply unlimited again, and you can remove a month entirely with the <code>×</code> button.</li>
-<li><strong>The calendar.</strong> Every month header in the calendar view has a small cap icon in the upper-right corner. Click it to set or change the limit for that month right where you are looking at the plan. When a cap is active, its value appears next to the icon so you can see your guardrails at a glance.</li>
+<li><strong>The calendar.</strong> Every month header in the calendar view has a small cap icon in the upper-right corner. Click it to open a quick stepper for that month right where you are looking at the plan: <code>+</code> and <code>−</code> adjust the limit and every change applies immediately — there is nothing to confirm. When a cap is active, its value appears next to the icon so you can see your guardrails at a glance.</li>
 </ul>
-<p>Once a cap is set, the optimizer skips any suggestion that would push that month over its limit. The rule also applies to days you have locked in yourself: if your locked days already exceed a cap, the planner tells you instead of quietly producing a plan that breaks your own rule.</p>
+<p>Once a cap is set, the optimizer skips any suggestion that would push that month over its limit. Locked days always win against caps: if you lock more days than a month currently allows, the cap is raised to fit them instead of breaking your plans — and the calendar stepper won’t let you lower a cap below the days you have already locked.</p>
 <p>Your caps travel with your plan. They are saved in the browser, included when you share a planner link, and applied in every supported country.</p>
 <h2>Try it</h2>
 <p>Open the <a class="blog-post-link" href="/app">planner</a>, pick your country and allowance, then set a cap for the month you want to protect — either in Advanced constraints or straight from the calendar header. Run the optimization and watch the suggestions stay within your limit while the rest of the year is still optimized around holidays and weekends.</p>

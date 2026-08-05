@@ -20,7 +20,7 @@ interface Props {
     locale?: string | null | undefined;
     connectedToken?: string;
     monthlyCaps?: MonthlyVacationLimits;
-    onSetMonthCap?: (monthIndex: number) => void;
+    onSetMonthCap?: (monthIndex: number, monthName: string) => void;
 }
 
 function toDateKey(date: Date) {

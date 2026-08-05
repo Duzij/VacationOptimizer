@@ -8,7 +8,6 @@ import ResultsSummary from "./components/ResultsSummary";
 import Legend from "./components/Legend";
 import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
-import ShuffleLimitModal from "./components/ShuffleLimitModal";
 import DetailsLipDesktop from "./components/DetailsLipDesktop";
 import ErrorLip from "./components/ErrorLip";
 import AppHeader from "./components/AppHeader";
@@ -177,7 +176,6 @@ function PlannerPage() {
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
   const [selectedDayDetails, setSelectedDayDetails] = useState<DayLipDetails | null>(null);
-  const [showShuffleLimitModal, setShowShuffleLimitModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
   const arrivedFromConnect = useRef(
@@ -270,19 +268,6 @@ function PlannerPage() {
     runOptimization(req);
   }, [runOptimization]);
 
-  const hasShownLimitModalRef = useRef(false);
-
-  useEffect(() => {
-    if (hasReachedShuffleLimit) {
-      if (!hasShownLimitModalRef.current) {
-        hasShownLimitModalRef.current = true;
-        setShowShuffleLimitModal(true);
-      }
-    } else {
-      hasShownLimitModalRef.current = false;
-    }
-  }, [hasReachedShuffleLimit]);
-
   const handleShuffleOptimization = useCallback(() => {
     setShouldScrollResults(false);
     setSelectedDayDetails(null);
@@ -321,32 +306,36 @@ function PlannerPage() {
       maxNumberOfVacationsPerMonth: Object.keys(nextLimits).length > 0 ? nextLimits : undefined,
     };
 
-    setSelectedDayDetails(null);
     void runOptimization(nextRequest);
   }, [activeRequest, runOptimization]);
 
-  const handleSetMonthCap = useCallback((monthIndex: number) => {
+  const handleSetMonthCap = useCallback((monthIndex: number, monthName: string) => {
     if (!activeRequest) {
       return;
     }
 
     const month = MONTH_NAMES[monthIndex];
     const currentCap = activeRequest.maxNumberOfVacationsPerMonth?.[month] ?? 0;
+    const year = activeRequest.year ?? currentYear;
+    const lockedDaysInMonth = lockedVacationDates.filter((date) => {
+      const [dateYear, dateMonth] = date.split("-").map(Number);
+      return dateYear === year && dateMonth === monthIndex + 1;
+    }).length;
 
     setSelectedDayDetails({
-      formattedDate: month,
-      label: "Monthly vacation-day cap",
-      detail: currentCap > 0 ? `Max ${currentCap} vacation days` : "No cap set",
+      formattedDate: monthName,
+      dateTime: `${year}-${String(monthIndex + 1).padStart(2, "0")}`,
+      label: "Max vacation days",
       actions: (
         <MonthCapLipActions
           month={month}
           initialValue={currentCap}
+          minValue={lockedDaysInMonth}
           onApply={(value) => handleApplyMonthCap(month, value)}
-          onClose={() => setSelectedDayDetails(null)}
         />
       ),
     });
-  }, [activeRequest, handleApplyMonthCap]);
+  }, [activeRequest, currentYear, handleApplyMonthCap, lockedVacationDates]);
 
   const handleDisconnectConnectedCalendar = useCallback(() => {
     setConnectedToken("");
@@ -642,6 +631,7 @@ function PlannerPage() {
       {selectedDayDetails && result && (
         <DetailsLipDesktop
           formattedDate={selectedDayDetails.formattedDate}
+          dateTime={selectedDayDetails.dateTime}
           label={selectedDayDetails.label}
           detail={selectedDayDetails.detail}
           sharedDetail={selectedDayDetails.sharedDetail}
@@ -665,7 +655,6 @@ function PlannerPage() {
           onCancel={() => setConfirmDay(null)}
         />
       )}
-      {showShuffleLimitModal && <ShuffleLimitModal onClose={() => setShowShuffleLimitModal(false)} />}
       {showShareModal && result && (
         <ShareCalendarModal
           plannerSeed={normalizedPlannerSeed}
@@ -699,6 +688,7 @@ function getDayLipDetails(day: CalendarDay): DayLipDetails {
       year: "numeric",
       timeZone: "UTC",
     }),
+    dateTime: day.date,
     label: getDayLabel(day),
     detail: getDayDetail(day),
     sharedDetail: shouldShowSharedDetail

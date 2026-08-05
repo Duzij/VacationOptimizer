@@ -5,6 +5,7 @@ import Button from "./Button";
 
 export interface DayLipDetails {
     formattedDate: string;
+    dateTime?: string;
     label: string;
     detail?: string | null;
     sharedDetail?: string | null;
@@ -101,7 +102,11 @@ export default function DetailsLipMobile({
                     <div className="space-y-3">
                         <div className="space-y-1">
                             <p className="text-[1.15rem] font-semibold leading-tight text-text">
-                                {dayDetails.formattedDate}
+                                {dayDetails.dateTime ? (
+                                    <time dateTime={dayDetails.dateTime}>{dayDetails.formattedDate}</time>
+                                ) : (
+                                    dayDetails.formattedDate
+                                )}
                             </p>
                             <p className="text-base leading-snug text-text">
                                 {dayDetails.label}

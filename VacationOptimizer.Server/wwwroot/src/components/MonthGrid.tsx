@@ -14,7 +14,7 @@ interface GridProps {
     onDayLongPress?: (day: CalendarDay) => void;
     onDaySelect?: (day: CalendarDay) => void;
     monthlyCaps?: MonthlyVacationLimits;
-    onSetMonthCap?: (monthIndex: number) => void;
+    onSetMonthCap?: (monthIndex: number, monthName: string) => void;
 }
 
 type SharedHolidayRangePosition = "single" | "first" | "middle" | "last" | null;
@@ -165,7 +165,7 @@ function DayCell({
             onClick={() => onDaySelect?.(day)}
             {...(isLongPressEnabled ? longPressHandlers : {})}
         >
-            {dayNum}
+            <time dateTime={day.date}>{dayNum}</time>
             {day.isLockedVacationDay && (
                 <LockKeyhole className="locked-vacation-icon" aria-hidden="true" />
             )}
@@ -182,7 +182,7 @@ function MonthHeader({
     month: MonthModel;
     year: number;
     monthlyCaps?: MonthlyVacationLimits;
-    onSetMonthCap?: (monthIndex: number) => void;
+    onSetMonthCap?: (monthIndex: number, monthName: string) => void;
 }) {
     const monthName = MONTH_NAMES[month.monthIndex];
     const cap = monthlyCaps?.[monthName] ?? 0;
@@ -190,12 +190,14 @@ function MonthHeader({
     return (
         <div className="relative flex items-center justify-center mb-2">
             <h3 className="text-sm font-semibold text-text text-center">
-                {month.monthName} {year}
+                <time dateTime={`${year}-${String(month.monthIndex + 1).padStart(2, "0")}`}>
+                    {month.monthName} {year}
+                </time>
             </h3>
             <button
                 type="button"
                 aria-label={`Set ${month.monthName} vacation-day cap`}
-                onClick={() => onSetMonthCap?.(month.monthIndex)}
+                onClick={() => onSetMonthCap?.(month.monthIndex, month.monthName)}
                 className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-md border border-border bg-background px-1.5 py-1 text-[10px] font-medium text-text-muted hover:text-text hover:bg-surface-hover active:scale-95 transition-colors cursor-pointer"
             >
                 {cap > 0 && <span className="text-primary tabular-nums">{cap}</span>}

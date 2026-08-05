@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from "../utils/text";
 import type {
     IndiaOptimizeRequest,
     IndiaOptimizeResult,
@@ -43,7 +44,10 @@ export class MonthModel {
 
     constructor(monthIndex: number, locale: string) {
         this.monthIndex = monthIndex;
-        this.monthName = new Date(0, monthIndex).toLocaleString(locale, { month: "long" });
+        this.monthName = capitalizeFirstLetter(
+            new Date(0, monthIndex).toLocaleString(locale, { month: "long" }),
+            locale,
+        );
         this.days = [];
     }
 

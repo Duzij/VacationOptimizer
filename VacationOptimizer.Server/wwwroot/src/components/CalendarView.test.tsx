@@ -263,6 +263,6 @@ describe("CalendarView", () => {
 
     expect(screen.getByText("3")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: /Set January vacation-day cap/i }));
-    expect(onSetMonthCap).toHaveBeenCalledWith(0);
+    expect(onSetMonthCap).toHaveBeenCalledWith(0, "January");
   });
 });

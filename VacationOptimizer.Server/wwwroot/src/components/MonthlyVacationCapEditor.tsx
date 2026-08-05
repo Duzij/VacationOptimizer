@@ -1,5 +1,6 @@
 import { Minus, Plus, X } from "lucide-react";
 import { MONTH_NAMES, type MonthName, type MonthlyVacationLimits } from "../types/models";
+import { capitalizeFirstLetter } from "../utils/text";
 
 interface MonthlyVacationCapEditorProps {
     value: MonthlyVacationLimits;
@@ -40,19 +41,19 @@ export function MonthlyVacationCapEditor({ value, onChange }: MonthlyVacationCap
                                 key={month}
                                 className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-2.5 py-2 text-xs text-text-muted"
                             >
-                                <span className="font-medium">{month}</span>
+                                <span className="font-medium">{capitalizeFirstLetter(month)}</span>
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center rounded-md border border-border overflow-hidden">
                                         <button
                                             type="button"
-                                            aria-label={`Decrease ${month} vacation-day cap`}
+                                            aria-label={`Decrease ${capitalizeFirstLetter(month)} vacation-day cap`}
                                             onClick={() => updateLimit(month, currentValue - 1)}
                                             className="px-2.5 py-1.5 flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-hover active:scale-95 transition-colors cursor-pointer"
                                         >
                                             <Minus className="w-3 h-3" />
                                         </button>
                                         <input
-                                            aria-label={`${month} vacation-day cap`}
+                                            aria-label={`${capitalizeFirstLetter(month)} vacation-day cap`}
                                             type="number"
                                             min={0}
                                             max={31}
@@ -63,7 +64,7 @@ export function MonthlyVacationCapEditor({ value, onChange }: MonthlyVacationCap
                                         />
                                         <button
                                             type="button"
-                                            aria-label={`Increase ${month} vacation-day cap`}
+                                            aria-label={`Increase ${capitalizeFirstLetter(month)} vacation-day cap`}
                                             onClick={() => updateLimit(month, currentValue + 1)}
                                             className="px-2.5 py-1.5 flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-hover active:scale-95 transition-colors cursor-pointer"
                                         >
@@ -72,7 +73,7 @@ export function MonthlyVacationCapEditor({ value, onChange }: MonthlyVacationCap
                                     </div>
                                     <button
                                         type="button"
-                                        aria-label={`Remove ${month} vacation-day cap`}
+                                        aria-label={`Remove ${capitalizeFirstLetter(month)} vacation-day cap`}
                                         onClick={() => removeMonth(month)}
                                         className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-surface-hover active:scale-95 transition-colors cursor-pointer"
                                     >
@@ -103,7 +104,7 @@ export function MonthlyVacationCapEditor({ value, onChange }: MonthlyVacationCap
                     <option value="">Add a month…</option>
                     {remainingMonths.map((month) => (
                         <option key={month} value={month}>
-                            {month}
+                            {capitalizeFirstLetter(month)}
                         </option>
                     ))}
                 </select>
