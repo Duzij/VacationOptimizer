@@ -17,6 +17,7 @@ import {
     optimizeSpainVacation,
     optimizeSwitzerlandVacation,
 } from "../features/countrySpecific/countrySpecificApi";
+import { SHOWCASE_VACATION_DAYS, SHOWCASE_YEAR } from "../showcase";
 
 const BASE = "/api/vacations";
 
@@ -43,6 +44,15 @@ export async function fetchStates(countryCode: string): Promise<StateOption[]> {
 export async function fetchDetectedCountry(): Promise<DetectedCountry> {
     const res = await fetch(`${BASE}/detected-country`);
     if (!res.ok) throw new Error("Failed to detect country");
+    return res.json();
+}
+
+export async function fetchShowcaseDaysOff(countryCode: string): Promise<number> {
+    const res = await fetch(`${BASE}/showcase?country=${encodeURIComponent(countryCode)}&year=${SHOWCASE_YEAR}&vacationDays=${SHOWCASE_VACATION_DAYS}`);
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw createApiError(err.error || "Failed to fetch showcase data", res.status);
+    }
     return res.json();
 }
 
@@ -104,6 +114,15 @@ export function useDetectedCountry() {
         queryKey: ["detected-country"],
         queryFn: fetchDetectedCountry,
         staleTime: Infinity,
+    });
+}
+
+export function useShowcaseDaysOff(countryCode: string) {
+    return useQuery({
+        queryKey: ["showcase", countryCode],
+        queryFn: () => fetchShowcaseDaysOff(countryCode),
+        staleTime: Infinity,
+        enabled: Boolean(countryCode),
     });
 }
 

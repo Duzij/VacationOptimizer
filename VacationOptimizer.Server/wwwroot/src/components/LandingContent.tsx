@@ -1,5 +1,6 @@
 import { ArrowRight, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
+import CountryShowcase from "./CountryShowcase";
 import HtmlFragment from "./HtmlFragment";
 import landingBoxesHtml from "../content/landing-boxes.html?raw";
 
@@ -78,6 +79,8 @@ export default function LandingContent() {
           </aside>
         </div>
       </div>
+
+      <CountryShowcase />
 
       <div className="mt-6 space-y-4">
         <div className="landing-grid auto-rows-fr">

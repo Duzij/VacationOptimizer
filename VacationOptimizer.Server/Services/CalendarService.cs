@@ -24,7 +24,14 @@ public class CalendarService
         var holidays = _holidayService.GetHolidays(country, year, stateCode)
             .Where(h => !ignoredHolidayDateSet.Contains(h.Date))
             .ToList();
-        var holidayLookup = holidays.ToDictionary(h => h.Date);
+        // Holiday providers can emit two entries for the same date (for example a
+        // holiday and its observed substitute), so keep the first entry per date
+        // instead of letting ToDictionary throw on duplicate keys.
+        var holidayLookup = new Dictionary<DateOnly, HolidayInfo>();
+        foreach (var holiday in holidays)
+        {
+            holidayLookup.TryAdd(holiday.Date, holiday);
+        }
         var customFreeDayLookup = customFreeDays?.ToDictionary(c => c.Date, c => c) ?? new Dictionary<DateOnly, CustomFreeDay>();
 
         var days = new List<CalendarDay>();

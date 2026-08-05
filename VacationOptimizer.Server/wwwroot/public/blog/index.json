@@ -1,6 +1,18 @@
 {
   "posts": [
     {
+      "title": "See Your Country's Vacation Potential at a Glance",
+      "date": "2026-08-05",
+      "author": "Team",
+      "slug": "see-your-countrys-vacation-potential",
+      "summary": "The landing page now shows what the optimizer can really do: pick any supported country and see how 25 vacation days turn into a much longer stretch of time off, then jump straight into the planner with one click.",
+      "tags": [
+        "feature",
+        "vacation-planning",
+        "pto"
+      ]
+    },
+    {
       "title": "Save Days for Later: Monthly Vacation Caps",
       "date": "2026-08-03",
       "author": "Team",

@@ -24,7 +24,7 @@ services:
   vacation-app-dev:
     image: mcr.microsoft.com/dotnet/sdk:10.0
     working_dir: /src
-    command: ["dotnet", "watch", "--project", "VacationOptimizer.Server/VacationOptimizer.Server.csproj", "run", "--urls", "http://0.0.0.0:8080"]
+    command: ["dotnet", "watch", "--non-interactive", "--project", "VacationOptimizer.Server/VacationOptimizer.Server.csproj", "run", "--urls", "http://0.0.0.0:8080"]
     env_file:
       - .env
     environment:

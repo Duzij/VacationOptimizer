@@ -54,6 +54,7 @@ if (builder.Environment.IsProduction() && string.IsNullOrWhiteSpace(resultTokenS
 builder.Services.AddSingleton<IResultTokenService>(
     new ResultTokenService(resultTokenSigningKey ?? "development-result-token-signing-key"));
 builder.Services.AddScoped<VacationOptimizerService>();
+builder.Services.AddScoped<ShowcaseService>();
 builder.Services.AddScoped<IDetectCountryService, DetectedCountryService>();
 builder.Services.AddScoped<CalendarSeed>();
 builder.Services.Configure<DatabaseSecurityHealthCheckOptions>(
@@ -107,6 +108,27 @@ api.MapPost("/optimize", (OptimizeRequest request, VacationOptimizerService opti
 
         var result = optimizer.Optimize(request);
         return Results.Ok(result);
+    }
+    catch (OptimizationResultUnavailableException ex)
+    {
+        return Results.Conflict(new { error = ex.Message });
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+api.MapGet("/showcase", (string? country, int? year, int? vacationDays, ShowcaseService showcaseService) =>
+{
+    if (string.IsNullOrWhiteSpace(country))
+    {
+        return Results.BadRequest(new { error = "country is required." });
+    }
+
+    try
+    {
+        return Results.Ok(showcaseService.GetTotalDaysOff(country, year, vacationDays));
     }
     catch (OptimizationResultUnavailableException ex)
     {

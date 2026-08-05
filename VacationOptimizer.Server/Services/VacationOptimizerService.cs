@@ -60,7 +60,7 @@ public class VacationOptimizerService
             throw new OptimizationResultUnavailableException("No new optimization result is available. Try changing the planner settings.");
     }
 
-    private List<OptimizeResult> GenerateMaxAttemptResults(OptimizeRequest request, List<OptimizeResult> generatedResults, string requestFingerprint)
+    public List<OptimizeResult> GenerateMaxAttemptResults(OptimizeRequest request, List<OptimizeResult> generatedResults, string requestFingerprint)
     {
         var initialCalendar = _calendarService.BuildCalendar(
             request.Country,
@@ -69,17 +69,6 @@ public class VacationOptimizerService
             request.CustomFreeDays,
             request.IgnoredHolidayDates,
             request.NeverHolidayDates);
-
-        // Parallel.For(0, OptimizationDefaults.MaxUsedResultTokens, attempt =>
-        // {
-        //     var calendar = CloneCalendar(initialCalendar);
-        //     var rng = new Random(attempt);
-        //     var result = OptimizeCalendar(calendar, request, rng);
-        //     var outputSeed = ComputeOutputSeed(result);
-        //     var resultToken = _resultTokenService.CreateToken(attempt, outputSeed, requestFingerprint);
-        //     result = result with { ResultToken = resultToken };
-        //     generatedResults.Add(result);
-        // });
 
         for (int attempt = 0; attempt < OptimizationDefaults.MaxUsedResultTokens; attempt++)
         {

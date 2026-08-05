@@ -510,6 +510,99 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("Vacation", json);
     }
 
+    [Fact]
+    public async Task Showcase_ReturnsSingleNumberForGenericCountry()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=XX&year=2026&vacationDays=25");
+
+        response.EnsureSuccessStatusCode();
+        var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
+        Assert.True(totalDaysOff > 25, $"Expected more total days off than the 25 PTO days, got {totalDaysOff}.");
+    }
+
+    [Fact]
+    public async Task Showcase_UsesHardcodedDefaultsWhenParametersAreOmitted()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=XX");
+
+        response.EnsureSuccessStatusCode();
+        var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
+        Assert.True(totalDaysOff > 0);
+    }
+
+    [Fact]
+    public async Task Showcase_RequiresCountry()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Showcase_RejectsUnknownCountry()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=ZZ&year=2026");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Showcase_UsesDefaultStateForIndia()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=IN&year=2026&vacationDays=25");
+
+        response.EnsureSuccessStatusCode();
+        var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
+        Assert.True(totalDaysOff > 25, $"Expected more total days off than the 25 PTO days, got {totalDaysOff}.");
+    }
+
+    [Fact]
+    public async Task Showcase_Returns200ForEverySupportedCountry()
+    {
+        var client = _factory.CreateClient();
+        var countries = await client.GetFromJsonAsync<List<CountryResponse>>("/api/vacations/countries");
+
+        Assert.NotNull(countries);
+        Assert.NotEmpty(countries);
+
+        foreach (var country in countries)
+        {
+            var response = await client.GetAsync($"/api/vacations/showcase?country={country.Code}&year=2026&vacationDays=25");
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.True(
+                response.StatusCode == HttpStatusCode.OK,
+                $"Showcase failed for {country.Code}: {(int)response.StatusCode} {body}");
+
+            var totalDaysOff = JsonSerializer.Deserialize<int>(body);
+            Assert.True(
+                totalDaysOff > 25,
+                $"Expected more total days off than the 25 PTO days for {country.Code}, got {totalDaysOff}.");
+        }
+    }
+
+    [Fact]
+    public async Task Showcase_UsesDefaultCantonForSwitzerland()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=CH&year=2026&vacationDays=25");
+
+        response.EnsureSuccessStatusCode();
+        var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
+        Assert.True(totalDaysOff > 25, $"Expected more total days off than the 25 PTO days, got {totalDaysOff}.");
+    }
+
     private sealed record CountryResponse(string Code, string Name);
 
     private sealed record StateResponse(string Code, string Name);
