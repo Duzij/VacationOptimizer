@@ -220,8 +220,11 @@ export function PublicFooter() {
             ))}
           </div>
         </div>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[11px] text-text-muted/60">
               <a href="https://maidensail.com/startup/vacation-optimizer" rel="dofollow">
               <img src="https://maidensail.com/badge/vacation-optimizer.svg" alt="Listed on Maidensail" height="36" /></a>
+              <a href="https://www.producthunt.com/products/vacation-optimizer-is-live?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-vacation-optimizer" target="_blank" rel="noopener noreferrer"><img alt="Vacation Optimizer - There is a better way to use your days off | Product Hunt" width="170" height="36" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1216466&amp;theme=light&amp;t=1786011914042" /></a>
+        </div>
       </div>
     </footer>
   );
