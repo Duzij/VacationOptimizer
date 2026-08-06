@@ -220,6 +220,8 @@ export function PublicFooter() {
             ))}
           </div>
         </div>
+              <a href="https://maidensail.com/startup/vacation-optimizer" rel="dofollow">
+              <img src="https://maidensail.com/badge/vacation-optimizer.svg" alt="Listed on Maidensail" height="36" /></a>
       </div>
     </footer>
   );

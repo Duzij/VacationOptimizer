@@ -45,7 +45,7 @@ html, body {
 .site-header-shell {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 99;
   backdrop-filter: blur(10px);
 }
 
