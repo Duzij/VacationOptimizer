@@ -1,142 +1,233 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <!-- ═══ Critical Meta Tags ═══ -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-<head>
-  <!-- ═══ Critical Meta Tags ═══ -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <!-- ═══ Primary SEO ═══ -->
+    <title>
+      Vacation Optimizer | Plan Vacation Days Around Public Holidays
+    </title>
+    <meta
+      name="description"
+      content="Learn how Vacation Optimizer helps employees turn limited vacation days into longer breaks. Explore planning guidance, examples, FAQs, and the interactive planner."
+    />
+    <meta
+      name="keywords"
+      content="holiday optimizer, holidays optimizer, pto optimizer, vacation-day optimization, public holiday calendar, vacation planning tool, vacation planner, time off planner"
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://longvacation.eu/" />
 
-  <!-- ═══ Primary SEO ═══ -->
-  <title>Vacation Optimizer | Plan Vacation Days Around Public Holidays</title>
-  <meta name="description"
-    content="Learn how Vacation Optimizer helps employees turn limited vacation days into longer breaks. Explore planning guidance, examples, FAQs, and the interactive planner." />
-  <meta name="keywords"
-    content="holiday optimizer, holidays optimizer, pto optimizer, vacation-day optimization, public holiday calendar, vacation planning tool, vacation planner, time off planner" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://longvacation.eu/" />
+    <!-- ═══ Open Graph (Facebook / LinkedIn / WhatsApp) ═══ -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://longvacation.eu/" />
+    <meta
+      property="og:title"
+      content="Vacation Optimizer | Plan Vacation Days Around Public Holidays"
+    />
+    <meta
+      property="og:description"
+      content="Explore practical vacation-day planning guidance and use the planner to compare vacation-day options around public holidays and weekends."
+    />
+    <meta
+      property="og:image"
+      content="https://longvacation.eu/twitter_small.png"
+    >
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Vacation Optimizer" />
+    <meta property="og:locale" content="en_US" />
 
-  <!-- ═══ Open Graph (Facebook / LinkedIn / WhatsApp) ═══ -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://longvacation.eu/" />
-  <meta property="og:title" content="Vacation Optimizer | Plan Vacation Days Around Public Holidays" />
-  <meta property="og:description"
-    content="Explore practical vacation-day planning guidance and use the planner to compare vacation-day options around public holidays and weekends." />
-  <meta property="og:image" content="https://longvacation.eu/twitter_small.png">
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="Vacation Optimizer" />
-  <meta property="og:locale" content="en_US" />
+    <!-- ═══ X Card ═══ -->
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="Vacation Optimizer | Plan Vacation Days Around Public Holidays"
+    />
+    <meta
+      name="twitter:description"
+      content="Explore vacation-day planning guidance and use the planner to compare time-off strategies around weekends and public holidays."
+    />
+    <meta
+      name="twitter:image"
+      content="https://longvacation.eu/twitter_small.png"
+    >
 
-  <!-- ═══ X Card ═══ -->
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Vacation Optimizer | Plan Vacation Days Around Public Holidays" />
-  <meta name="twitter:description"
-    content="Explore vacation-day planning guidance and use the planner to compare time-off strategies around weekends and public holidays." />
-  <meta name="twitter:image" content="https://longvacation.eu/twitter_small.png">
+    <!-- ═══ PWA / Mobile ═══ -->
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-title" content="Vacation Optimizer" />
+    <meta name="application-name" content="Vacation Optimizer" />
 
-  <!-- ═══ PWA / Mobile ═══ -->
-  <meta name="theme-color" content="#6366f1" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="mobile-web-app-title" content="Vacation Optimizer" />
-  <meta name="application-name" content="Vacation Optimizer" />
+    <!-- ═══ Resource Hints for External Resources (reduce DNS lookup time) ═══ -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- ═══ Resource Hints for External Resources (reduce DNS lookup time) ═══ -->
-  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- ═══ Icons & Manifest (non-blocking) ═══ -->
+    <link rel="manifest" href="/manifest.json" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/icons/icon-192.png"
+    />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <style>
+      html {
+        background: #ffffff;
+        color-scheme: light;
+      }
 
-  <!-- ═══ Icons & Manifest (non-blocking) ═══ -->
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-  <style>
-    html {
-      background: #ffffff;
-      color-scheme: light;
-    }
+      html.dark {
+        background: #222222;
+        color-scheme: dark;
+      }
 
-    html.dark {
-      background: #222222;
-      color-scheme: dark;
-    }
+      body {
+        background: inherit;
+      }
+    </style>
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem("theme");
+          var isDark = storedTheme === "dark" ||
+            (storedTheme === null &&
+              window.matchMedia("(prefers-color-scheme: dark)")
+                .matches);
+          var root = document.documentElement;
+          root.classList.add(isDark ? "dark" : "light");
+          root.style.colorScheme = isDark ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="/site-shell.css" />
 
-    body {
-      background: inherit;
-    }
-  </style>
-  <script>
-    (function () {
-      try {
-        var storedTheme = localStorage.getItem("theme");
-        var isDark = storedTheme === "dark"
-          || (storedTheme === null && window.matchMedia("(prefers-color-scheme: dark)").matches);
-        var root = document.documentElement;
-        root.classList.add(isDark ? "dark" : "light");
-        root.style.colorScheme = isDark ? "dark" : "light";
-      } catch (e) { }
-    })();
-  </script>
-  <link rel="stylesheet" href="/site-shell.css" />
+    <!-- ═══ Fonts with display=swap for faster text rendering ═══ -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- ═══ Fonts with display=swap for faster text rendering ═══ -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- ═══ Structured Data (JSON-LD, non-blocking) ═══ -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Vacation Optimizer",
+        "url": "https://longvacation.eu/",
+        "description": "Vacation planning site with practical vacation-day guidance and an interactive planner that helps compare vacation-day options around public holidays and weekends.",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Public holiday calendar for any country",
+          "Vacation-day optimization algorithm",
+          "Maximizing vacation days around weekends",
+          "Interactive calendar view",
+          "Custom vacation day planning"
+        ],
+        "keywords": "holiday optimizer, holidays optimizer, pto optimizer, vacation-day optimization, public holiday calendar, maximizing vacation days, vacation planner, time off planner"
+      }
+    </script>
 
-  <!-- ═══ Structured Data (JSON-LD, non-blocking) ═══ -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Vacation Optimizer",
-    "url": "https://longvacation.eu/",
-    "description": "Vacation planning site with practical vacation-day guidance and an interactive planner that helps compare vacation-day options around public holidays and weekends.",
-    "applicationCategory": "ProductivityApplication",
-    "operatingSystem": "Any",
-    "browserRequirements": "Requires JavaScript",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "featureList": [
-      "Public holiday calendar for any country",
-      "Vacation-day optimization algorithm",
-      "Maximizing vacation days around weekends",
-      "Interactive calendar view",
-      "Custom vacation day planning"
-    ],
-    "keywords": "holiday optimizer, holidays optimizer, pto optimizer, vacation-day optimization, public holiday calendar, maximizing vacation days, vacation planner, time off planner"
-  }
-  </script>
+    <!-- ═══ Google AdSense (async, loads in background) ═══ -->
+    <meta name="google-adsense-account" content="ca-pub-9485445500768000">
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9485445500768000"
+      crossorigin="anonymous"
+    ></script>
 
-  <!-- ═══ Google AdSense (async, loads in background) ═══ -->
-  <meta name="google-adsense-account" content="ca-pub-9485445500768000">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9485445500768000"
-    crossorigin="anonymous"></script>
+    <!-- ═══ App Bootstrap (deferred for fast first paint) ═══ -->
+    <script type="module" src="/src/main.tsx" defer></script>
+  </head>
 
-  <!-- ═══ App Bootstrap (deferred for fast first paint) ═══ -->
-  <script type="module" src="/src/main.tsx" defer></script>
-</head>
+  <body>
+    <div id="root">
+      <main style="max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; font-family: Inter, system-ui, sans-serif; line-height: 1.6; color: var(--color-text, #222)">
+        <h1 style="font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1; margin: 0 0 16px">
+          Vacation Optimizer
+        </h1>
+        <p style="max-width: 720px; font-size: 1.05rem; margin: 0 0 16px">
+          Vacation Optimizer is a vacation-day planning site that helps people
+          compare vacation-day options around public holidays, weekends, and
+          local calendar constraints.
+        </p>
+        <p style="max-width: 720px; font-size: 1.05rem; margin: 0 0 16px">
+          The site includes a planner at <strong>/app</strong> plus public pages
+          for contact, privacy, terms, and product information so visitors can
+          understand how the tool works before using it.
+        </p>
+        <p style="max-width: 720px; font-size: 1.05rem; margin: 0">
+          If JavaScript is disabled, you can still review the site purpose and
+          navigate to the public information pages from the browser address bar.
+        </p>
+      </main>
+      <footer style="max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; font-family: Inter, system-ui, sans-serif; line-height: 1.6; color: var(--color-text, #222)">
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-3 text-[11px] text-text-muted/60">
+          <a
+            href="https://maidensail.com/startup/vacation-optimizer"
+            rel="dofollow"
+          >
+            <img
+              src="https://maidensail.com/badge/vacation-optimizer.svg"
+              alt="Listed on Maidensail"
+              height="36"
+            />
+          </a>
 
-<body>
-  <div id="root">
-    <main style="max-width:960px;margin:0 auto;padding:32px 16px 48px;font-family:Inter,system-ui,sans-serif;line-height:1.6;color:var(--color-text, #222)">
-      <h1 style="font-size:clamp(2rem,4vw,3.5rem);line-height:1.1;margin:0 0 16px">Vacation Optimizer</h1>
-      <p style="max-width:720px;font-size:1.05rem;margin:0 0 16px">
-        Vacation Optimizer is a vacation-day planning site that helps people compare vacation-day options around public holidays, weekends, and local calendar constraints.
-      </p>
-      <p style="max-width:720px;font-size:1.05rem;margin:0 0 16px">
-        The site includes a planner at <strong>/app</strong> plus public pages for contact, privacy, terms, and product information so visitors can understand how the tool works before using it.
-      </p>
-      <p style="max-width:720px;font-size:1.05rem;margin:0">
-        If JavaScript is disabled, you can still review the site purpose and navigate to the public information pages from the browser address bar.
-      </p>
-    </main>
-  </div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
+          <a
+            href="https://www.producthunt.com/products/vacation-optimizer-is-live?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-vacation-optimizer"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              alt="Vacation Optimizer - There is a better way to use your days off | Product Hunt"
+              width="170"
+              height="36"
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1216466&amp;theme=light&amp;t=1786011914042"
+            />
+          </a>
 
+          <a
+            href="https://toolfame.com/item/vacation-optimizer"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://toolfame.com/badge-light.svg"
+              alt="Featured on toolfame.com"
+              style="height: 36px; width: auto"
+            />
+          </a>
+
+          <a
+            href="https://startupbase.io/products/longvacation?utm_source=startupbase&utm_medium=badge&utm_campaign=launch-badge-light"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://statics.startupbase.io/site/badges/launched-on-sb.svg"
+              alt="Launched on StartupBase"
+              style="height: 36px; width: auto"
+            />
+          </a>
+        </div>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
