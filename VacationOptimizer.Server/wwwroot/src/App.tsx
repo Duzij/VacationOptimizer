@@ -17,7 +17,6 @@ import {
   HomePage,
   NotFoundPage,
   PrivacyPage,
-  PublicFooter,
   RouteMeta,
   TermsPage,
 } from "./components/PublicPages";
@@ -42,6 +41,8 @@ import {
   persistConnectedCalendar,
   updateUrlFromRequest,
 } from "./utils/optimizationPersistence";
+import HtmlFragment from "./components/HtmlFragment";
+import footerHtml from "./content/footer.html?raw";
 
 const queryClient = new QueryClient();
 
@@ -164,8 +165,9 @@ function Main() {
           />
         </Routes>
       </main>
-
-      <PublicFooter />
+      
+       <HtmlFragment
+        html={footerHtml}      />
     </div>
   );
 }

@@ -227,6 +227,9 @@ export function PublicFooter() {
               <a href="https://toolfame.com/item/vacation-optimizer" target="_blank" rel="noopener noreferrer">
 <img src="https://toolfame.com/badge-light.svg" alt="Featured on toolfame.com" style={{ height: "36px", width: "auto" }} />
 </a>
+<a href="https://startupbase.io/products/longvacation?utm_source=startupbase&utm_medium=badge&utm_campaign=launch-badge-light" target="_blank" rel="noopener noreferrer">
+  <img src="https://statics.startupbase.io/site/badges/launched-on-sb.svg" alt="Launched on StartupBase" height="36" style={{ height: "36px", width: "auto" }} />
+</a>
         </div>
       </div>
     </footer>
