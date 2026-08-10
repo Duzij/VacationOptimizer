@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { type ApiError, useOptimize } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/models";
-import { getInitialOptimizationState, getYearScopedStorageKey, persistOptimization, readSavedRequest, updateUrlFromRequest, savedResultStorageKey, hasYearScopedStorageData } from "../utils/optimizationPersistence";
+import { getInitialOptimizationState, persistOptimization, readSavedRequest, updateUrlFromRequest } from "../utils/optimizationPersistence";
 import { getOptimizationResultFingerprint } from "../utils/optimizationResult";
 import { ensureMonthlyCapsFitLockedDays, hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
 
