@@ -1,6 +1,7 @@
 import type { OptimizeRequest, OptimizeResult } from "../types/models";
 import {
   buildSearchParamsFromRequest,
+  normalizeOptimizeRequest,
   parseRequestFromSearchParams,
   requestsMatch,
 } from "./optimizationRequest";
@@ -39,6 +40,76 @@ function hasUsablePlannerSeed(result: Partial<OptimizeResult> | null | undefined
   );
 }
 
+export function getYearScopedStorageKey(storageKey: string, year: number) {
+  return `${storageKey}.${year}`;
+}
+
+function getStorageYearFromRequest(request: OptimizeRequest | null | undefined) {
+  if (!request || !Number.isFinite(request.year)) {
+    return null;
+  }
+
+  return normalizeOptimizeRequest(request).year;
+}
+
+function getStorageYearFromUrl() {
+  const rawYear = new URLSearchParams(window.location.search).get("year");
+  if (!rawYear) {
+    return null;
+  }
+
+  const parsedYear = Number(rawYear);
+  return Number.isFinite(parsedYear) ? Math.trunc(parsedYear) : null;
+}
+
+function getCurrentUtcYear() {
+  return new Date().getUTCFullYear();
+}
+
+function getRequestedStorageYear(year?: number | null) {
+  return year ?? getStorageYearFromUrl() ?? getCurrentUtcYear();
+}
+
+function readStorageEntry(storageKey: string, year?: number | null) {
+  if (year !== undefined && year !== null) {
+    const scopedKey = getYearScopedStorageKey(storageKey, year);
+    const scopedRaw = window.localStorage.getItem(scopedKey);
+    if (scopedRaw) {
+      return { key: scopedKey, raw: scopedRaw, scoped: true };
+    }
+  }
+
+  const raw = window.localStorage.getItem(storageKey);
+  return raw ? { key: storageKey, raw, scoped: false } : null;
+}
+
+function removeYearScopedStorage(storageKey: string) {
+  const scopedPrefix = `${storageKey}.`;
+  const keysToRemove: string[] = [];
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (key === storageKey || key?.startsWith(scopedPrefix)) {
+      keysToRemove.push(key);
+    }
+  }
+
+  keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+}
+
+export function hasYearScopedStorageData(storageKey: string) {
+  const scopedPrefix = `${storageKey}.`;
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (key === storageKey || key?.startsWith(scopedPrefix)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function getCanonicalAppPath(isDevelopment = import.meta.env.DEV) {
   return isDevelopment ? "/" : "/app";
 }
@@ -65,29 +136,40 @@ export function parseRequestFromUrl(): OptimizeRequest | null {
   return parseRequestFromSearchParams(new URLSearchParams(window.location.search));
 }
 
-export function readSavedRequest(): OptimizeRequest | null {
+export function readSavedRequest(year?: number | null): OptimizeRequest | null {
   try {
-    const raw = window.localStorage.getItem(savedRequestStorageKey);
-    if (!raw) {
+    const requestedYear = getRequestedStorageYear(year);
+    const entry = readStorageEntry(savedRequestStorageKey, requestedYear);
+    if (!entry) {
       return null;
     }
 
-    return JSON.parse(raw) as OptimizeRequest;
+    const request = normalizeOptimizeRequest(JSON.parse(entry.raw) as OptimizeRequest);
+    if (requestedYear !== null && request.year !== requestedYear) {
+      return null;
+    }
+    // console.log("readSavedRequest", entry.key, request);
+    return request;
   } catch {
     return null;
   }
 }
 
-export function readSavedResult(): OptimizeResult | null {
+export function readSavedResult(year?: number | null): OptimizeResult | null {
   try {
-    const raw = window.localStorage.getItem(savedResultStorageKey);
-    if (!raw) {
+    const requestedYear = getRequestedStorageYear(year);
+    const entry = readStorageEntry(savedResultStorageKey, requestedYear);
+    if (!entry) {
       return null;
     }
 
-    const parsed = JSON.parse(raw) as Partial<OptimizeResult>;
+    const parsed = JSON.parse(entry.raw) as Partial<OptimizeResult>;
     if (!hasUsablePlannerSeed(parsed)) {
-      window.localStorage.removeItem(savedResultStorageKey);
+      window.localStorage.removeItem(entry.key);
+      return null;
+    }
+
+    if (requestedYear !== null && !entry.scoped && !readSavedRequest(requestedYear)) {
       return null;
     }
 
@@ -180,13 +262,22 @@ export function consumeConnectRedirectFlag() {
 }
 
 export function persistOptimization(request: OptimizeRequest, result: OptimizeResult) {
-  window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(request));
-  window.localStorage.setItem(savedResultStorageKey, JSON.stringify(result));
+  const normalizedRequest = normalizeOptimizeRequest(request);
+  const storageYear = getStorageYearFromRequest(normalizedRequest);
+
+  if (storageYear === null) {
+    window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(normalizedRequest));
+    window.localStorage.setItem(savedResultStorageKey, JSON.stringify(result));
+    return;
+  }
+
+  window.localStorage.setItem(getYearScopedStorageKey(savedRequestStorageKey, storageYear), JSON.stringify(normalizedRequest));
+  window.localStorage.setItem(getYearScopedStorageKey(savedResultStorageKey, storageYear), JSON.stringify(result));
 }
 
 export function clearStoredOptimizationData() {
-  window.localStorage.removeItem(savedRequestStorageKey);
-  window.localStorage.removeItem(savedResultStorageKey);
+  removeYearScopedStorage(savedRequestStorageKey);
+  removeYearScopedStorage(savedResultStorageKey);
 }
 
 export function clearAppLocalStorage() {
@@ -199,15 +290,15 @@ export function clearAppLocalStorage() {
 }
 
 export function hasAppLocalStorageData() {
-  return [
-    savedRequestStorageKey,
-    savedResultStorageKey,
-    calendarNameStorageKey,
-    connectedTokenStorageKey,
-    connectedCalendarNameStorageKey,
-    connectedCalendarYearStorageKey,
-    themeStorageKey,
-  ].some((key) => window.localStorage.getItem(key) !== null);
+  return hasYearScopedStorageData(savedRequestStorageKey)
+    || hasYearScopedStorageData(savedResultStorageKey)
+    || [
+      calendarNameStorageKey,
+      connectedTokenStorageKey,
+      connectedCalendarNameStorageKey,
+      connectedCalendarYearStorageKey,
+      themeStorageKey,
+    ].some((key) => window.localStorage.getItem(key) !== null);
 }
 
 export function updateUrlFromRequest(request: OptimizeRequest | null, options: UpdateUrlOptions = {}) {
@@ -220,7 +311,7 @@ export function updateUrlFromRequest(request: OptimizeRequest | null, options: U
     ? normalizeStoredString(options.connectedCalendarName)
     : savedConnectedCalendar.connectedCalendarName;
   const connectedCalendarYear = Object.prototype.hasOwnProperty.call(options, "connectedCalendarYear")
-    ? normalizeStoredString((options as any).connectedCalendarYear)
+    ? normalizeStoredString(options.connectedCalendarYear)
     : savedConnectedCalendar.connectedCalendarYear;
 
   if (connectedToken) {
@@ -244,9 +335,12 @@ export function updateUrlFromRequest(request: OptimizeRequest | null, options: U
 }
 
 export function getInitialOptimizationState() {
-  const initialRequest = parseRequestFromUrl() ?? readSavedRequest();
-  const cachedResult = readSavedResult();
-  const cachedRequest = readSavedRequest();
+  const urlRequest = parseRequestFromUrl();
+  const storageYear = getStorageYearFromRequest(urlRequest) ?? getRequestedStorageYear();
+  const initialRequest = urlRequest ?? readSavedRequest(storageYear);
+  const initialRequestYear = getStorageYearFromRequest(initialRequest) ?? storageYear;
+  const cachedResult = readSavedResult(initialRequestYear);
+  const cachedRequest = readSavedRequest(initialRequestYear);
   const connectedCalendarFromUrl = readConnectedCalendarFromUrl();
   const storedConnectedCalendar = readConnectedCalendar();
   const connectedCalendar = {

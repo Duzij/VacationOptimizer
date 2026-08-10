@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCountries, useStates } from "../api/vacationApi";
 import { type CustomFreeDay, type DetectedCountry, type OptimizeRequest } from "../types/models";
 import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear } from "../optimizerDefaults";
 import { isIndiaOptimizeRequest } from "../features/countrySpecific/models";
+import { readSavedRequest } from "../utils/optimizationPersistence";
 import IndiaCountryOptimizerForm from "../features/countrySpecific/india/IndiaCountryOptimizerForm";
 import SpainCountryOptimizerForm from "../features/countrySpecific/spain/SpainCountryOptimizerForm";
 import SwitzerlandCountryOptimizerForm from "../features/countrySpecific/switzerland/SwitzerlandCountryOptimizerForm";
@@ -72,6 +73,7 @@ export default function OptimizerForm({
     const currentYear = getDefaultYear();
     const [country, setCountry] = useState(initialRequest?.country ?? "");
     const [sharedDraft, setSharedDraft] = useState<SharedDraft>(() => getInitialSharedDraft(initialRequest, currentYear));
+    const previousDraftYearRef = useRef(initialRequest?.year ?? currentYear);
     const { data: countries, isLoading: countriesLoading } = useCountries();
 
     useEffect(() => {
@@ -79,10 +81,24 @@ export default function OptimizerForm({
             return;
         }
 
+        previousDraftYearRef.current = initialRequest.year ?? currentYear;
         setCountry(initialRequest.country);
         setSharedDraft(getInitialSharedDraft(initialRequest, currentYear));
         onCustomFreeDaysChange(initialRequest.customFreeDays ?? []);
     }, [currentYear, initialRequest, onCustomFreeDaysChange]);
+
+    useEffect(() => {
+        if (previousDraftYearRef.current === sharedDraft.year) {
+            return;
+        }
+
+        previousDraftYearRef.current = sharedDraft.year;
+        const savedRequest = readSavedRequest(sharedDraft.year);
+        setSharedDraft((draft) => ({
+            ...draft,
+            maxNumberOfVacationsPerMonth: savedRequest?.maxNumberOfVacationsPerMonth ?? {},
+        }));
+    }, [sharedDraft.year]);
 
     useEffect(() => {
         if (countriesLoading || countries === undefined || detectedCountry === undefined || country) {

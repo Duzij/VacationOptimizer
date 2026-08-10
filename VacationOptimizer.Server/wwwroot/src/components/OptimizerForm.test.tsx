@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import OptimizerForm from "./OptimizerForm";
@@ -194,5 +194,53 @@ describe("OptimizerForm", () => {
     expect(onResult).toHaveBeenCalledWith(expect.objectContaining({
       maxNumberOfVacationsPerMonth: { January: 2 },
     }));
+  });
+
+  it("resets previous yearly monthly caps and loads new year limits when the year changes", async () => {
+    window.localStorage.setItem(
+      "vacationOptimizer.v2.savedRequest.2027",
+      JSON.stringify({
+        country: "DE",
+        year: 2027,
+        vacationDays: 25,
+        minimumDaysPerRange: 4,
+        maximumDaysPerRange: 14,
+        maxNumberOfVacationsPerMonth: { February: 2 },
+      }),
+    );
+
+    const user = userEvent.setup();
+    const onResult = vi.fn();
+
+    render(
+      <OptimizerForm
+        onResult={onResult}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={{
+          country: "DE",
+          year: 2026,
+          vacationDays: 25,
+          minimumDaysPerRange: 4,
+          maximumDaysPerRange: 14,
+          maxNumberOfVacationsPerMonth: { January: 1 },
+        }}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Advanced constraints" }));
+
+    const yearInput = screen.getByLabelText("Year") as HTMLInputElement;
+    await user.clear(yearInput);
+    await user.type(yearInput, "2027");
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /Decrease January/i })).toBeNull();
+    });
+
+    expect(screen.getByRole("button", { name: /Decrease February/i })).toBeTruthy();
+    expect(screen.getByDisplayValue("2")).toBeTruthy();
   });
 });

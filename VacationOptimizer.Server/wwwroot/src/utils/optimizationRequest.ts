@@ -40,6 +40,7 @@ export function uniqueDates(values: string[]) {
   return [...new Set(values.filter(Boolean))].sort();
 }
 
+// the month cap automatically raised to accommodate the locked vacation days
 export function ensureMonthlyCapsFitLockedDays<T extends { lockedVacationDates?: string[]; maxNumberOfVacationsPerMonth?: MonthlyVacationLimits }>(
   request: T,
 ): T {
@@ -272,7 +273,7 @@ export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequ
   }
 
   const normalized = normalizeBaseFields(request);
-
+  console.log("normalizeOptimizeRequest", request, normalized);
   return {
     ...normalized,
     ...(request.state?.trim() ? { state: request.state.trim().toUpperCase() } : {}),

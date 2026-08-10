@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { type ApiError, useOptimize } from "../api/vacationApi";
 import type { CustomFreeDay, OptimizeRequest, OptimizeResult } from "../types/models";
-import { getInitialOptimizationState, persistOptimization, updateUrlFromRequest } from "../utils/optimizationPersistence";
+import { getInitialOptimizationState, getYearScopedStorageKey, persistOptimization, readSavedRequest, updateUrlFromRequest, savedResultStorageKey, hasYearScopedStorageData } from "../utils/optimizationPersistence";
 import { getOptimizationResultFingerprint } from "../utils/optimizationResult";
 import { ensureMonthlyCapsFitLockedDays, hasSameHolidayScope, normalizeOptimizeRequest, requestsMatch, withIgnoredHolidayDates } from "../utils/optimizationRequest";
 
@@ -15,7 +15,7 @@ export interface OptimizationRunOptions {
 
 export interface RunOptimization {
   (
-    req: OptimizeRequest,
+    request: OptimizeRequest,
     overrideIgnoredHolidayDates?: string[],
     options?: OptimizationRunOptions,
   ): Promise<{ data: OptimizeResult; request: OptimizeRequest }>;
@@ -178,27 +178,47 @@ export function useOptimizationSession() {
     options?: OptimizationRunOptions,
   ) => {
     const normalizedRequest = normalizeOptimizeRequest(req);
-    // Locked vacation days always take priority over monthly caps. If a request
-    // would fail because a cap is lower than the number of locked days in that
-    // month, raise the cap automatically rather than showing an error.
-    const adjustedRequest = ensureMonthlyCapsFitLockedDays(normalizedRequest);
-    const nextIgnoredHolidayDates = hasSameHolidayScope(activeRequest, adjustedRequest) ? ignoredHolidayDates : [];
+    const isYearChange = Boolean(activeRequest && activeRequest.year !== normalizedRequest.year);
+    const requestForYear = (() => {
+      if (!isYearChange) {
+        return normalizedRequest;
+      }
+
+      const savedYearRequest = readSavedRequest(normalizedRequest.year);
+      const hasExplicitMonthlyCaps = normalizedRequest.maxNumberOfVacationsPerMonth
+        && Object.keys(normalizedRequest.maxNumberOfVacationsPerMonth).length > 0;
+
+      if (hasExplicitMonthlyCaps) {
+        return normalizedRequest;
+      }
+
+      return {
+        ...normalizedRequest,
+        maxNumberOfVacationsPerMonth: savedYearRequest?.maxNumberOfVacationsPerMonth,
+      };
+    })();
+
+    // the month cap automatically raised to accommodate the locked vacation days
+    const adjustedRequest = ensureMonthlyCapsFitLockedDays(requestForYear);
+    const keepsHolidayScope = hasSameHolidayScope(activeRequest, adjustedRequest);
+    const shouldClearScopedHolidayDates = !keepsHolidayScope;
+    const nextIgnoredHolidayDates = keepsHolidayScope ? ignoredHolidayDates : [];
     const nextNeverHolidayDates = adjustedRequest.neverHolidayDates
-      ?? (hasSameHolidayScope(activeRequest, adjustedRequest) ? neverHolidayDates : []);
+      ?? (keepsHolidayScope ? neverHolidayDates : []);
     const nextLockedVacationDates = adjustedRequest.lockedVacationDates
-      ?? (hasSameHolidayScope(activeRequest, adjustedRequest) ? lockedVacationDates : []);
+      ?? (keepsHolidayScope ? lockedVacationDates : []);
     const effectiveIgnoredHolidayDates = overrideIgnoredHolidayDates ?? nextIgnoredHolidayDates;
     const showLoading = options?.showLoading ?? true;
 
-    if (!hasSameHolidayScope(activeRequest, adjustedRequest) && ignoredHolidayDates.length > 0 && !overrideIgnoredHolidayDates) {
+    if (shouldClearScopedHolidayDates && ignoredHolidayDates.length > 0 && !overrideIgnoredHolidayDates) {
       setIgnoredHolidayDates([]);
     }
 
-    if (!hasSameHolidayScope(activeRequest, adjustedRequest) && neverHolidayDates.length > 0) {
+    if (shouldClearScopedHolidayDates && neverHolidayDates.length > 0) {
       setNeverHolidayDates([]);
     }
 
-    if (!hasSameHolidayScope(activeRequest, adjustedRequest) && lockedVacationDates.length > 0) {
+    if (shouldClearScopedHolidayDates && lockedVacationDates.length > 0) {
       setLockedVacationDates([]);
     }
 

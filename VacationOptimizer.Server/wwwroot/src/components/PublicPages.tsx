@@ -112,11 +112,12 @@ export function PrivacyPage() {
               setup and result when you return.
             </p>
             <p>
-              The current keys used by the app are{" "}
-              <code>{savedRequestStorageKey}</code> for the saved form request,
-              {" "}
+              The current keys used by the app include{" "}
+              <code>{savedRequestStorageKey}</code> for the latest saved form
+              request, year-specific variants of that key for saved planner
+              settings from different years,{" "}
               <code>{savedResultStorageKey}</code>{" "}
-              for the saved optimization result, and{" "}
+              and year-specific variants for saved optimization results, and{" "}
               <code>{themeStorageKey}</code> for the theme preference.
             </p>
             <p>
