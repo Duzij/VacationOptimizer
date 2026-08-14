@@ -1,33 +1,19 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
 
-const projectRoot = process.cwd();
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(scriptDir, "..");
 const isDev = process.env.npm_lifecycle_event === "predev" || process.env.NODE_ENV === "development";
-let mainCssAsset = null;
-
-try {
-  const manifestPath = path.join(projectRoot, "dist", ".vite", "manifest.json");
-  const manifestExists = await fs.access(manifestPath).then(() => true).catch(() => false);
-
-  if (manifestExists && !isDev) {
-    const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
-    const values = Object.values(manifest);
-    const mainEntry = values.find((entry) => entry?.isEntry) ?? values[0];
-    mainCssAsset = mainEntry?.css?.[0] ?? null;
-  }
-} catch (error) {
-  if (!isDev) {
-    console.warn("Vite manifest not available; skipping generated stylesheet link.", error.message);
-  }
-}
 
 const sourceDir = path.join(projectRoot, "content", "blog");
 const outputDir = path.join(projectRoot, "public", "blog");
 const distOutputDir = path.join(projectRoot, "dist", "blog");
 const indexHtmlPath = path.join(projectRoot, "index.html");
 const siteDataPath = path.join(projectRoot, "src", "site-shell-data.json");
+const footerHtmlPath = path.join(projectRoot, "src", "content", "footer.html");
 const siteUrl = process.env.SITE_URL || "https://longvacation.eu";
 const seoKeywords = [
   "holiday optimizer",
@@ -49,6 +35,7 @@ await generateStaticBlog();
 
 async function generateStaticBlog() {
   const siteData = JSON.parse(await fs.readFile(siteDataPath, "utf8"));
+  const footerHtml = await fs.readFile(footerHtmlPath, "utf8");
   const posts = await loadBlogPosts();
   const appIndexHtml = await fs.readFile(indexHtmlPath, "utf8");
 
@@ -57,7 +44,7 @@ async function generateStaticBlog() {
 
   await fs.writeFile(
     path.join(outputDir, "index.html"),
-    renderBlogIndexPage(posts, appIndexHtml, siteData),
+    renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml),
     "utf8",
   );
   await fs.writeFile(
@@ -74,7 +61,7 @@ async function generateStaticBlog() {
       await fs.mkdir(postDir, { recursive: true });
       await fs.writeFile(
         path.join(postDir, "index.html"),
-        renderBlogPostPage(post, appIndexHtml, siteData),
+        renderBlogPostPage(post, appIndexHtml, siteData, footerHtml),
         "utf8",
       );
     }),
@@ -155,7 +142,7 @@ function requireStringArray(value, fieldName, fileName) {
   return value.map((entry) => entry.trim());
 }
 
-function renderBlogIndexPage(posts, appIndexHtml, siteData) {
+function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
   const cards = posts.map((post) => `
     <article class="blog-card">
       <div class="blog-meta">
@@ -196,7 +183,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData) {
             <div class="blog-post-grid">${cards}</div>
           </section>
         </main>
-        ${renderSiteFooter(siteData)}
+        ${footerHtml}
       </div>
       <script>
         // Theme toggle
@@ -221,7 +208,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData) {
   });
 }
 
-function renderBlogPostPage(post, appIndexHtml, siteData) {
+function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
   return renderDocument({
     appIndexHtml,
     title: `${post.title} | Vacation Optimizer`,
@@ -257,7 +244,7 @@ function renderBlogPostPage(post, appIndexHtml, siteData) {
             </article>
           </section>
         </main>
-        ${renderSiteFooter(siteData)}
+        ${footerHtml}
       </div>
       <script>
         // Theme toggle
@@ -347,23 +334,6 @@ function renderSiteHeader(siteData) {
   `;
 }
 
-function renderSiteFooter(siteData) {
-  const links = siteData.footerLinks.map((link) => {
-    return `<a class="site-nav-pill text-text-muted" href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a>`;
-  }).join("\n          ");
-
-  return `
-    <footer class="site-footer-shell">
-      <div class="site-footer-shell__inner">
-        <span>${escapeHtml(siteData.brandName)} · ${new Date().getFullYear()}</span>
-        <nav class="site-footer-nav-shell" aria-label="Footer">
-          ${links}
-        </nav>
-      </div>
-    </footer>
-  `;
-}
-
 function renderTag(tag) {
   return `<span class="blog-tag">${escapeHtml(tag)}</span>`;
 }
@@ -418,7 +388,7 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl 
       .replace(/<meta name="twitter:title"[\s\S]*?\/>/i, `<meta name="twitter:title" content="${escapeHtml(title)}" />`)
       .replace(/<meta name="twitter:description"[\s\S]*?\/>/i, `<meta name="twitter:description" content="${escapeHtml(description)}" />`)
       .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i, `<script type="application/ld+json">\n${structuredData}\n  </script>`)
-      .replace(/\s*<script type="module" src="\/src\/main\.tsx" defer><\/script>/i, "") + (mainCssAsset ? `\n  <link rel="stylesheet" href="/${mainCssAsset}">` : "")
+      .replace(/\s*<script type="module" src="\/src\/main\.tsx" defer><\/script>/i, "")
       .trim()
       .split("\n")
       .map((line) => `  ${line}`)

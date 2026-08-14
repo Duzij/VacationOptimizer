@@ -31,12 +31,24 @@ export default defineConfig(({ command }) => {
       clearMocks: true,
     },
     plugins: [
+      injectStaticFooter(),
       react(),
       serveStaticBlogPages(),
       tailwindcss(),
     ],
   };
 });
+
+function injectStaticFooter() {
+  return {
+    name: "inject-static-footer",
+    transformIndexHtml(html: string) {
+      const footerPath = path.resolve(process.cwd(), "src", "content", "footer.html");
+      const footerHtml = fs.readFileSync(footerPath, "utf8");
+      return html.replace("<!-- static-footer -->", footerHtml);
+    },
+  };
+}
 
 function serveStaticBlogPages() {
   return {

@@ -249,6 +249,65 @@ html, body {
   font-size: 11px;
 }
 
+.site-footer-nav-shell {
+  justify-content: center;
+}
+
+.site-footer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.site-footer-badge {
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-footer-badge img {
+  display: block;
+  width: auto;
+  height: 36px;
+}
+
+.site-footer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.site-footer-product {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.site-footer-github-link,
+.site-footer-author-link {
+  color: var(--color-text-muted, #666666);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer-github-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-footer-github-link:hover,
+.site-footer-author-link:hover {
+  color: var(--color-text, #222222);
+}
+
+.site-footer-github-link svg {
+  width: 1rem;
+  height: 1rem;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Blog page styles (used by static blog HTML and SPA blog pages)

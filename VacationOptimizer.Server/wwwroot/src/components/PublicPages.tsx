@@ -14,7 +14,6 @@ import aboutPageHtml from "../content/about-page.html?raw";
 import contactPageHtml from "../content/contact-page.html?raw";
 import privacyPageHtml from "../content/privacy-page.html?raw";
 import termsPageHtml from "../content/terms-page.html?raw";
-import siteShellData from "../site-shell-data.json";
 
 function PageSection({
   title,
@@ -198,42 +197,6 @@ export function NotFoundPage() {
         </Link>
       </div>
     </PageSection>
-  );
-}
-
-export function PublicFooter() {
-  const footerLinkClass =
-    "site-nav-pill text-text-muted";
-
-  return (
-    <footer className="site-footer-shell border-t border-border px-4">
-      <div className="site-footer-shell__inner max-w-6xl mx-auto">
-        {/* Mobile layout: centered, links horizontal */}
-        <div className="flex flex-col items-center gap-3 text-[11px] text-text-muted/60">
-          <span>Vacation Optimizer · {new Date().getFullYear()}</span>
-          <div className="site-footer-nav-shell flex flex-wrap items-center justify-center gap-2">
-            {siteShellData.footerLinks.map((link) => (
-              link.isDocument ? (
-                <a key={link.href} href={link.href} className={footerLinkClass}>{link.label}</a>
-              ) : (
-                <Link key={link.href} to={link.href} className={footerLinkClass}>{link.label}</Link>
-              )
-            ))}
-          </div>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[11px] text-text-muted/60">
-              <a href="https://maidensail.com/startup/vacation-optimizer" rel="dofollow">
-              <img src="https://maidensail.com/badge/vacation-optimizer.svg" alt="Listed on Maidensail" height="36" /></a>
-              <a href="https://www.producthunt.com/products/vacation-optimizer-is-live?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-vacation-optimizer" target="_blank" rel="noopener noreferrer"><img alt="Vacation Optimizer - There is a better way to use your days off | Product Hunt" width="170" height="36" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1216466&amp;theme=light&amp;t=1786011914042" /></a>
-              <a href="https://toolfame.com/item/vacation-optimizer" target="_blank" rel="noopener noreferrer">
-<img src="https://toolfame.com/badge-light.svg" alt="Featured on toolfame.com" style={{ height: "36px", width: "auto" }} />
-</a>
-<a href="https://startupbase.io/products/longvacation?utm_source=startupbase&utm_medium=badge&utm_campaign=launch-badge-light" target="_blank" rel="noopener noreferrer">
-  <img src="https://statics.startupbase.io/site/badges/launched-on-sb.svg" alt="Launched on StartupBase" height="36" style={{ height: "36px", width: "auto" }} />
-</a>
-        </div>
-      </div>
-    </footer>
   );
 }
 
