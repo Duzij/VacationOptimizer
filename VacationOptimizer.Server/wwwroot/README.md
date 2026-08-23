@@ -2,6 +2,20 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## site-shell.css cache busting
+
+`public/site-shell.css` is served outside the Vite bundle (it has no content hash), so browsers/CDNs would otherwise keep serving a stale copy for up to 5 minutes. To avoid that, every reference to it in HTML carries a version postfix:
+
+```html
+<link rel="stylesheet" href="/site-shell.css?v=a1b2c3d4" />
+```
+
+The postfix is an 8-character hash of the CSS file content, so the URL changes whenever the stylesheet actually changes.
+
+Run `npm run bump:shell-css` after editing `public/site-shell.css`. It recalculates the hash and rewrites all references (`index.html` plus generated files under `public/blog/`). It is idempotent — running it again without CSS changes does nothing.
+
+The script also runs automatically at the start of `npm run build` / `npm run build_prod`, so production deployments always get a fresh postfix.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
