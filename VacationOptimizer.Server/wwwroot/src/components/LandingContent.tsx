@@ -9,7 +9,7 @@ export default function LandingContent() {
     <section className="mx-auto max-w-6xl">
       <div className="overflow-hidden rounded-[2rem] bg-surface/55">
         <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
-          <div className="px-4 py-4 md:px-8 md:py-10">
+          <div className="py-4 md:py-10">
             <div className="space-y-6">
               <div className="max-w-2xl space-y-4">
                 <h1 className="text-5xl font-semibold leading-[0.95] tracking-tight text-text md:text-7xl">
@@ -45,7 +45,7 @@ export default function LandingContent() {
             </div>
           </div>
 
-          <aside className="border-border bg-background/65 px-4 py-4 md:px-8 md:py-8">
+          <aside className="border-border bg-background/65 py-4 md:py-8">
             <div className="space-y-4">
               <div className="relative overflow-hidden rounded-[1.5rem] bg-[var(--landing-accent-soft)] p-5">
                 <div className="pointer-events-none absolute -bottom-4 -right-4 text-[color-mix(in_srgb,var(--landing-accent)_20%,transparent)]">

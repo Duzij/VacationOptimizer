@@ -81,7 +81,7 @@ export default function CountryShowcase() {
                         className={`showcase-flag fi fi-${selectedCode.toLowerCase()} text-6xl md:text-7xl`}
                     />
                     <div className="space-y-1">
-                        <p className="text-sm font-medium uppercase tracking-[0.18em] text-text-muted">
+                        <p className="landing-box__eyebrow">
                             {selectedName}
                         </p>
                         <p className="text-2xl font-semibold tracking-tight text-text md:text-3xl">
@@ -104,10 +104,10 @@ export default function CountryShowcase() {
                 </div>
 
                 <div className="space-y-4">
-                    <div>
+                    <div className="space-y-1.5">
                         <label
                             htmlFor="showcase-country"
-                            className="text-sm font-medium text-text"
+                            className="text-sm font-medium text-text-muted"
                         >
                             Pick your country
                         </label>
@@ -118,10 +118,7 @@ export default function CountryShowcase() {
                                 setSelectedCode(event.target.value);
                                 setIsPaused(true);
                             }}
-                            className="
-                            w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm
-focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus-visible:outline-[var(--landing-accent)] transition-all appearance-none cursor-pointer text-text
-                            "
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none cursor-pointer"
                         >
                             {(countries ?? []).map((country) => (
                                 <option key={country.code} value={country.code.toUpperCase()}>
