@@ -34,9 +34,9 @@ export default function AppHeader({ isDark, onToggleTheme }: AppHeaderProps) {
         <div className="site-header__row">
           <Link to="/" className="site-brand">
             <TreePalm className="site-brand__mark text-primary" />
-            <h1 className="site-brand__label bg-gradient-to-r bg-clip-text">
+            <span className="site-brand__label bg-gradient-to-r bg-clip-text">
               Vacation Optimizer
-            </h1>
+            </span>
           </Link>
 
           {/* Desktop nav — hidden below md */}

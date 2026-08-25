@@ -1,35 +1,53 @@
-<article class="landing-box col-span-12 xl:col-span-4 md:col-span-6">
-  <p class="landing-box__eyebrow">Optimization Logic</p>
-  <h2 class="text-2xl font-semibold tracking-tight text-text">Greedy bridge-filling, not random date picking.</h2>
-  <p class="text-sm leading-6 text-text-muted">The service builds a full-year calendar, finds contiguous workday bridges between non-working clusters, scores them by days off gained per vacation day used, and applies the best options until the budget runs out.</p>
+<article class="landing-box">
+  <span class="landing-box__icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+  </span>
+  <p class="landing-box__eyebrow">Smart bridging</p>
+  <h3 class="landing-box__title">Turn scattered holidays into long breaks.</h3>
+  <p class="landing-box__text">Vacation Optimizer scans the whole year, finds public holidays that sit next to weekends, and shows exactly which days to book for the longest possible break.</p>
 </article>
 
-<article class="landing-box landing-box--alt col-span-12 xl:col-span-4 md:col-span-6">
-  <p class="landing-box__eyebrow">Holiday Scope</p>
-  <h2 class="text-2xl font-semibold tracking-tight text-text">Country, region, state, and city-aware inputs.</h2>
-  <p class="text-sm leading-6 text-text-muted">The frontend can call the general optimizer, or use country-specific optimize endpoints and schemas for India and Spain where holiday scope is more detailed.</p>
+<article class="landing-box landing-box--alt">
+  <span class="landing-box__icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+  </span>
+  <p class="landing-box__eyebrow">Holiday coverage</p>
+  <h3 class="landing-box__title">Local holidays, down to state and region.</h3>
+  <p class="landing-box__text">State-level calendars in India, regional holidays in Spain, nationwide coverage in Indonesia — so suggestions match the holidays you actually observe.</p>
 </article>
 
-<article class="landing-box col-span-12 xl:col-span-4 md:col-span-6">
-  <p class="landing-box__eyebrow">Custom Overrides</p>
-  <h2 class="text-2xl font-semibold tracking-tight text-text">Add office closures and ignore holidays that do not apply.</h2>
-  <p class="text-sm leading-6 text-text-muted">Requests support custom free days and ignored holiday dates, so the optimizer can account for company shutdowns, school schedules, or local exceptions.</p>
+<article class="landing-box">
+  <span class="landing-box__icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+  </span>
+  <p class="landing-box__eyebrow">Custom overrides</p>
+  <h3 class="landing-box__title">Your office closures and exceptions included.</h3>
+  <p class="landing-box__text">Add custom free days and ignore public holidays that do not apply to you; every suggestion respects your real calendar, from company shutdowns to school schedules.</p>
 </article>
 
-<article class="landing-box col-span-12 xl:col-span-3 md:col-span-6">
-  <p class="landing-box__eyebrow">Range Controls</p>
-  <h2 class="text-2xl font-semibold tracking-tight text-text">Tune for short breaks or longer blocks.</h2>
-  <p class="text-sm leading-6 text-text-muted">Each request can constrain the minimum and maximum days per vacation range before a suggestion is accepted.</p>
+<article class="landing-box">
+  <span class="landing-box__icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+  </span>
+  <p class="landing-box__eyebrow">Range controls</p>
+  <h3 class="landing-box__title">Short breaks or one long block — you decide.</h3>
+  <p class="landing-box__text">Set minimum and maximum trip lengths plus monthly caps, and the planner only proposes time-off ranges that fit your rules.</p>
 </article>
 
-<article class="landing-box landing-box--alt col-span-12 xl:col-span-5 md:col-span-6">
-  <p class="landing-box__eyebrow">Planner Output</p>
-  <h2 class="text-2xl font-semibold tracking-tight text-text">You get a full calendar plus ranked time-off ranges.</h2>
-  <p class="text-sm leading-6 text-text-muted">The API returns selected vacation days, grouped ranges, total days off, vacation days used, public holiday counts, and the full annotated calendar used to render the UI.</p>
+<article class="landing-box landing-box--alt">
+  <span class="landing-box__icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+  </span>
+  <p class="landing-box__eyebrow">Planner output</p>
+  <h3 class="landing-box__title">A ranked plan, not just a list of dates.</h3>
+  <p class="landing-box__text">Every suggestion is scored by days off gained per vacation day used, alongside a full color-coded calendar of the entire year.</p>
 </article>
 
-<article class="landing-box col-span-12 xl:col-span-4 md:col-span-6">
-  <p class="landing-box__eyebrow">Saved State</p>
-  <h2 class="text-2xl font-semibold tracking-tight text-text">Planner settings are normalized and shareable.</h2>
-  <p class="text-sm leading-6 text-text-muted">Requests are clamped, normalized, persisted locally, and can be represented in URL search params for returning to the same planning setup.</p>
+<article class="landing-box">
+  <span class="landing-box__icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+  </span>
+  <p class="landing-box__eyebrow">Saved &amp; shareable</p>
+  <h3 class="landing-box__title">Plans stay in your browser and travel by link.</h3>
+  <p class="landing-box__text">Your setup is stored locally, restored when you return, and encoded into a shareable URL for friends, family, and colleagues.</p>
 </article>

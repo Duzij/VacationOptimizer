@@ -6,8 +6,6 @@ slug: "maximize-your-vacation-in-the-us-in-2027"
 summary: "A practical 2027 US vacation-planning guide that shows how to stretch limited PTO around federal holidays and long weekends."
 tags: [us, vacation-planning, pto, long-weekends]
 content: |
-  # Maximize Your Vacation in the US in 2027
-
   Americans, hear me out! Statistically, you are among the world's worst vacation-takers. Not because you don't enjoy vacations, but because many of you leave unused PTO days on the table.
 
   The good news is that the **US** and the **UK** are among the few countries that adjust the date of a public holiday if it falls on a weekend. For example, if a public holiday falls on a Saturday, it is usually moved to Friday. That's not common around the world.
