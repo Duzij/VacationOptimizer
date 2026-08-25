@@ -75,8 +75,50 @@ async function generateStaticBlog() {
   }
 
   // Generate sitemap
-  // const publicDir = path.join(projectRoot, "public");
-  // await generateSitemap(posts, publicDir);
+  const publicDir = path.join(projectRoot, "public");
+  await generateSitemap(posts, publicDir);
+}
+
+async function generateSitemap(posts, publicDir) {
+  const staticEntries = [
+    { loc: `${siteUrl}/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "1.0" },
+    { loc: `${siteUrl}/about/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.8" },
+    { loc: `${siteUrl}/contact/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.7" },
+    { loc: `${siteUrl}/privacy/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/terms/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/app/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "0.9" },
+    { loc: `${siteUrl}/blog/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "weekly", priority: "0.8" },
+  ];
+
+  const postEntries = posts.map((post) => ({
+    loc: `${siteUrl}/blog/${encodeURIComponent(post.slug)}/`,
+    lastmod: post.date,
+    changefreq: "monthly",
+    priority: "0.7",
+  }));
+
+  const allEntries = [...staticEntries, ...postEntries];
+
+  const sitemapXml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...allEntries.flatMap((entry) => [
+      "<url>",
+      `<loc>${entry.loc}</loc>`,
+      `<lastmod>${entry.lastmod}</lastmod>`,
+      `<changefreq>${entry.changefreq}</changefreq>`,
+      `<priority>${entry.priority}</priority>`,
+      "</url>",
+    ]),
+    "</urlset>",
+    "",
+  ].join("\n");
+
+  await fs.writeFile(path.join(publicDir, "sitemap.xml"), sitemapXml, "utf8");
+
+  if (!isDev && await pathExists(path.join(projectRoot, "dist"))) {
+    await fs.writeFile(path.join(projectRoot, "dist", "sitemap.xml"), sitemapXml, "utf8");
+  }
 }
 
 async function pathExists(targetPath) {
