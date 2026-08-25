@@ -111,7 +111,7 @@ export function BlogListPage() {
             </div>
             <div className="space-y-3">
               <h2 className="text-2xl font-semibold tracking-tight text-text">
-                <Link to={`/blog/${post.slug}`} className="hover:underline">
+                <Link to={`/blog/${post.slug}/`} className="hover:underline">
                   {post.title}
                 </Link>
               </h2>
@@ -122,7 +122,7 @@ export function BlogListPage() {
             <BlogTags tags={post.tags} />
             <div className="flex justify-end">
               <Link
-                to={`/blog/${post.slug}`}
+                to={`/blog/${post.slug}/`}
                 className="action-btn action-btn-primary"
               >
                 Read more
@@ -152,14 +152,14 @@ export function BlogSamplePostPage() {
     descriptionTag?.setAttribute("content", post.summary);
 
     const canonicalTag = document.querySelector('link[rel="canonical"]');
-    canonicalTag?.setAttribute("href", `${window.location.origin}/blog/${post.slug}`);
+    canonicalTag?.setAttribute("href", `${window.location.origin}/blog/${post.slug}/`);
   }, [post]);
 
   if (!post) {
     return (
       <section className="max-w-4xl mx-auto px-4 py-4 lg:py-0 space-y-6">
         <div className="flex flex-wrap gap-3">
-          <Link to="/blog" className="action-btn action-btn-secondary">
+          <Link to="/blog/" className="action-btn action-btn-secondary">
             <ChevronLeft className="h-4 w-4" />
             Back to blog
           </Link>
@@ -199,7 +199,7 @@ export function BlogSamplePostPage() {
     <section className="max-w-4xl mx-auto px-4 py-4 lg:py-0 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
-          to="/blog"
+          to="/blog/"
           className="action-btn action-btn-secondary"
         >
           <ChevronLeft className="h-4 w-4" />

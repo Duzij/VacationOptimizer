@@ -66,7 +66,7 @@ describe("Blog pages", () => {
     expect(screen.getByText("Stretch limited PTO around US federal holidays in 2027.")).toBeTruthy();
     expect(window.fetch).toHaveBeenCalledWith("/api/blog");
     expect(screen.getByRole("link", { name: /Read more/i }).getAttribute("href"))
-      .toBe("/blog/maximize-your-vacation-in-the-us-in-2027");
+      .toBe("/blog/maximize-your-vacation-in-the-us-in-2027/");
   });
 
   it("renders the blog detail for a slug route", () => {
@@ -76,7 +76,7 @@ describe("Blog pages", () => {
     `;
 
     render(
-      <MemoryRouter initialEntries={["/blog/maximize-your-vacation-in-the-us-in-2027"]}>
+      <MemoryRouter initialEntries={["/blog/maximize-your-vacation-in-the-us-in-2027/"]}>
         <Routes>
           <Route path="/blog/:slug" element={<BlogSamplePostPage />} />
         </Routes>
@@ -86,7 +86,7 @@ describe("Blog pages", () => {
     expect(screen.getByRole("heading", { name: "Maximize Your Vacation in the US in 2027" })).toBeTruthy();
     expect(screen.getByText("Bridge days")).toBeTruthy();
     expect(screen.getByRole("button", { name: /Share/i })).toBeTruthy();
-    expect(screen.getByRole("link", { name: /Back to blog/i }).getAttribute("href")).toBe("/blog");
+    expect(screen.getByRole("link", { name: /Back to blog/i }).getAttribute("href")).toBe("/blog/");
   });
 
   it("updates document metadata from the resolved post", () => {
@@ -95,10 +95,10 @@ describe("Blog pages", () => {
       <meta name="description" content="" />
       <link rel="canonical" href="" />
     `;
-    window.history.replaceState({}, "", "/blog/maximize-your-vacation-in-the-us-in-2027");
+    window.history.replaceState({}, "", "/blog/maximize-your-vacation-in-the-us-in-2027/");
 
     render(
-      <MemoryRouter initialEntries={["/blog/maximize-your-vacation-in-the-us-in-2027"]}>
+      <MemoryRouter initialEntries={["/blog/maximize-your-vacation-in-the-us-in-2027/"]}>
         <Routes>
           <Route path="/blog/:slug" element={<BlogSamplePostPage />} />
         </Routes>
@@ -109,6 +109,6 @@ describe("Blog pages", () => {
     expect(document.querySelector('meta[name="description"]')?.getAttribute("content"))
       .toBe("Stretch limited PTO around US federal holidays in 2027.");
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href"))
-      .toBe("http://localhost:3000/blog/maximize-your-vacation-in-the-us-in-2027");
+      .toBe("http://localhost:3000/blog/maximize-your-vacation-in-the-us-in-2027/");
   });
 });
