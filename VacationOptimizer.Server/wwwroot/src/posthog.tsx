@@ -1,6 +1,5 @@
 import { useCallback, useEffect, type ReactNode } from "react";
 import { PostHogProvider, usePostHog } from "@posthog/react";
-import type { CaptureResult } from "posthog-js";
 
 const consentStorageKey = "vacationOptimizer.cookieConsent.v1";
 const consentChangeEvent = "vacationOptimizer:cookie-consent-change";
@@ -25,35 +24,6 @@ function hasSavedAnalyticsConsent() {
     return false;
   }
 }
-
-function sanitizeUrl(url: unknown) {
-  if (typeof url !== "string") {
-    return url;
-  }
-
-  try {
-    const parsedUrl = new URL(url, window.location.origin);
-    return `${parsedUrl.origin}${parsedUrl.pathname}`;
-  } catch {
-    return undefined;
-  }
-}
-
-// function minimizeEventData(event: CaptureResult | null) {
-//   if (!event) {
-//     return event;
-//   }
-
-//   const currentUrl = sanitizeUrl(event.properties.$current_url);
-//   if (typeof currentUrl === "string") {
-//     event.properties.$current_url = currentUrl;
-//   } else {
-//     delete event.properties.$current_url;
-//   }
-
-//   delete event.properties.$referrer;
-//   return event;
-// }
 
 function setAnalyticsConsent(posthog: ReturnType<typeof usePostHog>, hasConsent: boolean) {
   if (!hasConsent) {
