@@ -10,7 +10,7 @@ import {
   getOptimizeRequestScopeCode,
   isIndiaOptimizeRequest,
 } from "../features/countrySpecific/models";
-import posthog from "../posthog";
+import { useAnalytics } from "../posthog";
 
 export interface FeedbackDraft {
   title: string;
@@ -82,6 +82,7 @@ export function useCalendarInteractions({
 }) {
   const [feedbackDraft, setFeedbackDraft] = useState<FeedbackDraft | null>(null);
   const [confirmDay, setConfirmDay] = useState<ConfirmDayState | null>(null);
+  const { capture } = useAnalytics();
 
   useEffect(() => {
     if (!feedbackDraft) {
@@ -160,7 +161,7 @@ export function useCalendarInteractions({
     const updatedNeverHolidayDates = neverHolidayDates.filter((date) => date !== confirmDay.date);
     const updatedLockedVacationDates = lockedVacationDates.filter((date) => date !== confirmDay.date);
 
-    posthog.capture("calendar_day_marked", {
+    capture("calendar_day_marked", {
       action: confirmDay.mode === "remove" ? "custom_free_day_removed" : "custom_free_day_added",
     });
     setCustomFreeDays(updatedDays);
@@ -189,7 +190,7 @@ export function useCalendarInteractions({
     const updatedCustomFreeDays = customFreeDays.filter((day) => day.date !== confirmDay.date);
     const updatedLockedVacationDates = lockedVacationDates.filter((date) => date !== confirmDay.date);
 
-    posthog.capture("calendar_day_marked", {
+    capture("calendar_day_marked", {
       action: confirmDay.mode === "removeNeverHoliday" ? "never_holiday_removed" : "never_holiday_added",
     });
     setNeverHolidayDates(updatedNeverHolidayDates);
@@ -220,7 +221,7 @@ export function useCalendarInteractions({
       ? lockedVacationDates.filter((date) => date !== confirmDay.date)
       : [...new Set([...lockedVacationDates, confirmDay.date])].sort();
 
-    posthog.capture("calendar_day_marked", {
+    capture("calendar_day_marked", {
       action: confirmDay.isLockedVacationDay ? "vacation_day_unlocked" : "vacation_day_locked",
     });
     setLockedVacationDates(updatedLockedVacationDates);
@@ -257,7 +258,7 @@ export function useCalendarInteractions({
       }
     }
 
-    posthog.capture("holiday_ignored", { reported_as_incorrect: reportAsIncorrect });
+    capture("holiday_ignored", { reported_as_incorrect: reportAsIncorrect });
     setIgnoredHolidayDates(updatedIgnoredHolidayDates);
     setConfirmDay(null);
     void runOptimization(activeRequest, updatedIgnoredHolidayDates);

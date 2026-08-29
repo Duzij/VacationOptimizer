@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Clipboard, X } from "lucide-react";
 import Button from "./Button";
-import posthog from "../posthog";
+import { useAnalytics } from "../posthog";
 
 interface Props {
   plannerSeed?: string | null;
@@ -39,6 +39,7 @@ export default function ShareCalendarModal({
 }: Props) {
   const [calendarName, setCalendarName] = useState(initialCalendarName);
   const [copiedField, setCopiedField] = useState<"connect" | null>(null);
+  const { capture } = useAnalytics();
   const trimmedCalendarName = calendarName.trim();
   const normalizedPlannerSeed = normalizePlannerSeed(plannerSeed);
   const isValidCalendarName = calendarNamePattern.test(trimmedCalendarName);
@@ -93,10 +94,10 @@ export default function ShareCalendarModal({
       document.body.removeChild(textarea);
     }
 
-    posthog.capture("share_link_copied");
+    capture("share_link_copied");
     setCopiedField(field);
     window.setTimeout(() => setCopiedField(null), 1600);
-  }, []);
+  }, [capture]);
 
   return (
     <div

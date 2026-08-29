@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import Button from "./Button";
-import posthog from "../posthog";
+import { useAnalytics } from "../posthog";
 
 export interface FeedbackDraft {
   title: string;
@@ -22,6 +22,7 @@ export default function FeedbackForm({
   successMessage = "We'll read every message.",
 }: FeedbackFormProps) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const { capture } = useAnalytics();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,7 +38,7 @@ export default function FeedbackForm({
       });
 
       if (res.ok) {
-        posthog.capture("feedback_submitted");
+        capture("feedback_submitted");
         setStatus("sent");
         form.reset();
         onSuccess?.();

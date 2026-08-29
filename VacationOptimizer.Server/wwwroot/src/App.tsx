@@ -43,7 +43,7 @@ import {
 } from "./utils/optimizationPersistence";
 import HtmlFragment from "./components/HtmlFragment";
 import footerHtml from "./content/footer.html?raw";
-import posthog from "./posthog";
+import { useAnalytics } from "./posthog";
 
 const queryClient = new QueryClient();
 
@@ -176,6 +176,7 @@ function Main() {
 function PlannerPage() {
   const location = useLocation();
   const currentYear = getDefaultYear();
+  const { capture } = useAnalytics();
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
   const [selectedDayDetails, setSelectedDayDetails] = useState<DayLipDetails | null>(null);
@@ -266,7 +267,7 @@ function PlannerPage() {
   });
 
   const handleRunOptimization = useCallback((req: OptimizeRequest) => {
-    posthog.capture("optimization_requested", {
+    capture("optimization_requested", {
       country: req.country,
       year: req.year,
       vacation_days: req.vacationDays,
@@ -278,24 +279,24 @@ function PlannerPage() {
   }, [runOptimization]);
 
   const handleShuffleOptimization = useCallback(() => {
-    posthog.capture("optimization_shuffled");
+    capture("optimization_shuffled");
     setShouldScrollResults(false);
     setSelectedDayDetails(null);
     void shuffleOptimization();
   }, [shuffleOptimization]);
 
   const handleNavigatePreviousResult = useCallback(() => {
-    posthog.capture("optimization_result_navigated", { direction: "previous" });
+    capture("optimization_result_navigated", { direction: "previous" });
     navigatePreviousResult();
   }, [navigatePreviousResult]);
 
   const handleNavigateNextResult = useCallback(() => {
-    posthog.capture("optimization_result_navigated", { direction: "next" });
+    capture("optimization_result_navigated", { direction: "next" });
     navigateNextResult();
   }, [navigateNextResult]);
 
   const handleResetLockedDays = useCallback(() => {
-    posthog.capture("locked_vacation_days_reset", { locked_day_count: lockedVacationDates.length });
+    capture("locked_vacation_days_reset", { locked_day_count: lockedVacationDates.length });
     setLockedVacationDates([]);
     if (activeRequest) {
       void runOptimization({
@@ -609,7 +610,7 @@ function PlannerPage() {
               isConnected={isConnectedCalendarApplied}
               canShare={Boolean(normalizedPlannerSeed)}
               onDisconnect={() => {
-                posthog.capture("shared_calendar_disconnected");
+                capture("shared_calendar_disconnected");
                 handleDisconnectConnectedCalendar();
               }}
               onOpenShareModal={() => {

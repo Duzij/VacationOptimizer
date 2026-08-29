@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@posthog/react": "^1.10.5",
     "@tailwindcss/vite": "^4.2.0",
     "@tanstack/react-query": "^5.90.21",
     "class-variance-authority": "^0.7.1",
