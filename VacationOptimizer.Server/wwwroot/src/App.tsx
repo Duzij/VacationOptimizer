@@ -43,6 +43,7 @@ import {
 } from "./utils/optimizationPersistence";
 import HtmlFragment from "./components/HtmlFragment";
 import footerHtml from "./content/footer.html?raw";
+import posthog from "./posthog";
 
 const queryClient = new QueryClient();
 
@@ -128,7 +129,7 @@ function Main() {
               <>
                 <RouteMeta
                   title="Privacy Policy | Vacation Optimizer"
-                  description="Read the Vacation Optimizer privacy overview and understand the expectations around data minimization, consent, and deployment accuracy."
+                  description="Read how Vacation Optimizer uses browser storage, PostHog analytics, cookies, and consent choices."
                   canonicalPath="/privacy"
                 />
                 <PrivacyPage />
@@ -265,18 +266,36 @@ function PlannerPage() {
   });
 
   const handleRunOptimization = useCallback((req: OptimizeRequest) => {
+    posthog.capture("optimization_requested", {
+      country: req.country,
+      year: req.year,
+      vacation_days: req.vacationDays,
+      custom_free_day_count: req.customFreeDays?.length ?? 0,
+    });
     setShouldScrollResults(true);
     setSelectedDayDetails(null);
     runOptimization(req);
   }, [runOptimization]);
 
   const handleShuffleOptimization = useCallback(() => {
+    posthog.capture("optimization_shuffled");
     setShouldScrollResults(false);
     setSelectedDayDetails(null);
     void shuffleOptimization();
   }, [shuffleOptimization]);
 
+  const handleNavigatePreviousResult = useCallback(() => {
+    posthog.capture("optimization_result_navigated", { direction: "previous" });
+    navigatePreviousResult();
+  }, [navigatePreviousResult]);
+
+  const handleNavigateNextResult = useCallback(() => {
+    posthog.capture("optimization_result_navigated", { direction: "next" });
+    navigateNextResult();
+  }, [navigateNextResult]);
+
   const handleResetLockedDays = useCallback(() => {
+    posthog.capture("locked_vacation_days_reset", { locked_day_count: lockedVacationDates.length });
     setLockedVacationDates([]);
     if (activeRequest) {
       void runOptimization({
@@ -284,7 +303,7 @@ function PlannerPage() {
         lockedVacationDates: [],
       });
     }
-  }, [activeRequest, runOptimization, setLockedVacationDates]);
+  }, [activeRequest, lockedVacationDates.length, runOptimization, setLockedVacationDates]);
 
   const handleDaySelect = useCallback((day: CalendarDay) => {
     setSelectedDayDetails(getDayLipDetails(day));
@@ -550,7 +569,7 @@ function PlannerPage() {
                   id="previous-optimization-desktop"
                   type="button"
                   disabled={!canNavigatePrevious || isUserOptimizing}
-                  onClick={navigatePreviousResult}
+                  onClick={handleNavigatePreviousResult}
                   className="action-btn action-btn-secondary"
                   aria-label="Previous result"
                   title="Previous result"
@@ -561,7 +580,7 @@ function PlannerPage() {
                   id="next-optimization-desktop"
                   type="button"
                   disabled={!canNavigateNext || isUserOptimizing}
-                  onClick={navigateNextResult}
+                  onClick={handleNavigateNextResult}
                   className="action-btn action-btn-secondary"
                   aria-label="Next result"
                   title="Next result"
@@ -589,7 +608,10 @@ function PlannerPage() {
               connectedCalendarName={connectedCalendarName}
               isConnected={isConnectedCalendarApplied}
               canShare={Boolean(normalizedPlannerSeed)}
-              onDisconnect={handleDisconnectConnectedCalendar}
+              onDisconnect={() => {
+                posthog.capture("shared_calendar_disconnected");
+                handleDisconnectConnectedCalendar();
+              }}
               onOpenShareModal={() => {
                 if (!normalizedPlannerSeed) {
                   return;
@@ -620,8 +642,8 @@ function PlannerPage() {
         <DetailsLipMobile
           isLoading={isUserOptimizing}
           onShuffle={handleShuffleOptimization}
-          onPrevious={navigatePreviousResult}
-          onNext={navigateNextResult}
+          onPrevious={handleNavigatePreviousResult}
+          onNext={handleNavigateNextResult}
           canNavigatePrevious={canNavigatePrevious}
           canNavigateNext={canNavigateNext}
           dayDetails={selectedDayDetails}

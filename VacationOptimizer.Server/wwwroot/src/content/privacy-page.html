@@ -1,31 +1,65 @@
 <article class="content-panel">
-  <h2 class="text-xl font-semibold text-text">Cloudflare</h2>
+  <h2 class="text-xl font-semibold text-text">Privacy policy at a glance</h2>
   <div class="space-y-3 text-sm leading-6 text-text-muted">
-    <p>We use Cloudflare, Inc. to protect and optimize the website. In that role, Cloudflare may process visitor traffic data such as IP address, browser details, device information, and security-related request metadata on our behalf.</p>
-    <p>We also use Cloudflare Web Analytics. Cloudflare describes this service as privacy-friendly, cookie-free, and not using local storage, and states that it does not collect or use visitors' personal data.</p>
-    <p>Because Cloudflare Web Analytics does not rely on storing or accessing information on your device, typical EU and UK cookie-consent rules generally do not require a consent pop-up for that analytics product. For transparency, we disclose its use here instead of presenting an opt-in banner for it.</p>
-    <p>Cloudflare does not provide a built-in end-user opt-out for this analytics product. If you want to opt out, you can ask us to remove or disable the Cloudflare analytics snippet for your use, and you may also contact Cloudflare about data-rights requests, although Cloudflare states that this product does not collect personal information.</p>
-    <p>Any transfer of personal data to Cloudflare should be covered by appropriate safeguards, including the EU-US Data Privacy Framework and standard contractual clauses where applicable. You can review Cloudflare's privacy information here: <a class="underline underline-offset-2" href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noreferrer">Cloudflare Privacy Policy</a>.</p>
+    <p><strong>Last updated:</strong> 29 August 2026.</p>
+    <p>Vacation Optimizer is designed to work without optional tracking. We use only the browser storage needed for the planner by default. Optional product analytics and advertising technologies are disabled until you make an affirmative choice in the cookie banner.</p>
+    <p>Vacation Optimizer is the controller for the personal data described in this policy. To contact us about privacy, use the <a class="underline underline-offset-2" href="/contact">contact page</a>.</p>
+    <p>This policy applies to the Vacation Optimizer website and planner. It does not replace the privacy information of third-party sites you choose to visit through external links.</p>
   </div>
 </article>
+
 <article class="content-panel">
-  <h2 class="text-xl font-semibold text-text">What this means in practice</h2>
+  <h2 class="text-xl font-semibold text-text">PostHog product analytics</h2>
   <div class="space-y-3 text-sm leading-6 text-text-muted">
-    <p>The planner is designed to work with a small amount of browser-stored state and URL state so returning visitors can continue where they left off. Saved planner links may include a signed planner seed that reproduces the same generated calendar result for the same settings. The site should not be used to submit sensitive personal or employment information that is unnecessary for vacation planning.</p>
+    <p>With your analytics consent, we use PostHog to understand how visitors use the site and improve the planner. Our PostHog endpoint is <a class="underline underline-offset-2" href="https://us.i.posthog.com" target="_blank" rel="noreferrer">https://us.i.posthog.com</a>, which is hosted in the United States.</p>
+    <p>We record limited product events, such as a page visit and planner actions (for example, creating or shuffling an optimisation, marking a calendar day, copying a share link, or sending feedback). Event properties are limited to planner settings and counts needed to understand the feature, such as country, year, number of vacation days, and action direction.</p>
+    <p>We configure PostHog with autocapture, session recording, error capture, and person profiles disabled. We do not intentionally send email addresses, feedback text, full URL query strings, planner seeds, or direct identifiers to PostHog. We remove query strings and referrer URLs before analytics events are sent.</p>
+    <p>PostHog may still receive technical information needed to operate the service, such as browser and device information, timestamps, and network information including an IP address at the point of connection. We do not use PostHog to identify people or include IP addresses as event properties.</p>
+    <p>Our lawful basis for this optional analytics is your consent. No PostHog events are captured until you opt in, and withdrawing consent stops future capture on this device.</p>
   </div>
 </article>
+
 <article class="content-panel">
-  <h2 class="text-xl font-semibold text-text">Country Detection Headers</h2>
+  <h2 class="text-xl font-semibold text-text">Cookies and browser storage</h2>
   <div class="space-y-3 text-sm leading-6 text-text-muted">
-    <p>To provide a better user experience, the system analyzes HTTP headers from your request to detect your country location. This analysis uses headers such as <code>CF-IPCountry</code>, <code>X-Country-Code</code>, <code>x-vercel-ip-country</code>, and <code>Fastly-Client-Country</code> that may be provided by CDN and infrastructure providers.</p>
-    <p>The detected country code is used only to suggest relevant vacation planning options and is not stored in any database, tied to your session, or used for tracking purposes. The detection happens in real-time on each request and no country information is persisted beyond the immediate response.</p>
+    <p>Cookies and local storage are small pieces of data stored on or accessed from your device. We separate necessary storage from optional analytics and advertising storage.</p>
+    <table>
+      <thead>
+        <tr><th>Purpose</th><th>Provider</th><th>When used</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Necessary planner and preference storage</td><td>Vacation Optimizer</td><td>Always on. This stores planner state, theme choice, and your cookie preference so the service works and remembers that preference.</td></tr>
+        <tr><td>Product analytics</td><td>PostHog</td><td>Only after analytics consent. PostHog uses local storage to retain its anonymous analytics state.</td></tr>
+        <tr><td>Advertising</td><td>Google AdSense</td><td>Only after advertising consent. Google may use cookies or similar technologies to provide and measure ads.</td></tr>
+        <tr><td>Security and delivery</td><td>Cloudflare</td><td>May be used where necessary to protect the site, deliver content, and prevent abuse.</td></tr>
+      </tbody>
+    </table>
+    <p>You can accept, reject, or select optional purposes in the cookie banner. You can reopen the settings from the footer or the control above at any time. Rejecting optional technologies does not restrict use of the planner.</p>
   </div>
 </article>
+
 <article class="content-panel">
-  <h2 class="text-xl font-semibold text-text">Session Tokens and History</h2>
+  <h2 class="text-xl font-semibold text-text">Advertising and other service providers</h2>
   <div class="space-y-3 text-sm leading-6 text-text-muted">
-    <p>When you generate alternative vacation scenarios, the application uses cryptographic tokens to keep track of which results you have already seen in your current session. These tokens ensure the system provides fresh suggestions rather than repeating previous ones.</p>
-    <p>The same token may also be saved as a planner seed in local storage and the page URL so the planner can reproduce the same result when you return to or share that exact set of settings.</p>
-    <p>These tokens contain only an anonymized fingerprint of your request settings, an output seed, and a signature to prevent tampering. They do not contain personally identifiable information, are not used for tracking your identity across visits, and only serve to manage planner result state.</p>
+    <p>If you opt in to advertising, we load Google AdSense. Google may process online identifiers, device and browser data, IP address, and advertising interaction data under its own terms and privacy policy. You can read <a class="underline underline-offset-2" href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Google's Privacy Policy</a>.</p>
+    <p>We use Cloudflare, Inc. to protect and deliver the website. Cloudflare may process visitor traffic data such as IP address, browser details, device information, and security-related request metadata on our behalf. Its security controls may use strictly necessary cookies. See the <a class="underline underline-offset-2" href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noreferrer">Cloudflare Privacy Policy</a>.</p>
+    <p>If you use the contact or feedback form, the email address and message you submit are sent to Formspree so that we can receive and respond to your request. Do not include sensitive personal or employment information that is unnecessary for your query.</p>
+  </div>
+</article>
+
+<article class="content-panel">
+  <h2 class="text-xl font-semibold text-text">International transfers and retention</h2>
+  <div class="space-y-3 text-sm leading-6 text-text-muted">
+    <p>PostHog analytics data is sent to a United States endpoint. Transfers of personal data outside the EEA or UK may involve a country with different data-protection laws. We use the safeguards made available by our service providers, including data-processing terms and appropriate transfer mechanisms where required. You can review <a class="underline underline-offset-2" href="https://posthog.com/docs/privacy/gdpr-compliance" target="_blank" rel="noreferrer">PostHog's GDPR information</a>.</p>
+    <p>Planner data stays in your browser unless you share a link or submit a form. Optional analytics data is retained only for the period configured in our PostHog project and no longer than needed for product analysis. Feedback is retained only as long as needed to handle and follow up on the request, subject to legal obligations.</p>
+  </div>
+</article>
+
+<article class="content-panel">
+  <h2 class="text-xl font-semibold text-text">Country detection, tokens, and your choices</h2>
+  <div class="space-y-3 text-sm leading-6 text-text-muted">
+    <p>To suggest relevant vacation planning options, the server may read country headers supplied by infrastructure providers, such as <code>CF-IPCountry</code>, <code>X-Country-Code</code>, <code>x-vercel-ip-country</code>, and <code>Fastly-Client-Country</code>. The detected country code is used for the immediate response and is not stored in our database or linked to analytics by this feature.</p>
+    <p>When you generate alternative scenarios, the application uses signed tokens and planner seeds to reproduce results and avoid repeating them. They represent planner settings and output state, not your real-world identity. A share link can expose its planner settings to anyone you send it to, so share it carefully.</p>
+    <p>Depending on where you live, you may have rights to access, correct, erase, restrict, object to, or receive a copy of personal data, and to withdraw consent at any time. To make a request or ask about this policy, use the <a class="underline underline-offset-2" href="/contact">contact page</a>. You may also complain to your local data-protection authority.</p>
   </div>
 </article>

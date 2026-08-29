@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Clipboard, X } from "lucide-react";
 import Button from "./Button";
+import posthog from "../posthog";
 
 interface Props {
   plannerSeed?: string | null;
@@ -92,6 +93,7 @@ export default function ShareCalendarModal({
       document.body.removeChild(textarea);
     }
 
+    posthog.capture("share_link_copied");
     setCopiedField(field);
     window.setTimeout(() => setCopiedField(null), 1600);
   }, []);

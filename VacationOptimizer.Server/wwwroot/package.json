@@ -21,6 +21,7 @@
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.575.0",
     "markdown-it": "^14.3.0",
+    "posthog-js": "^1.422.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.14.0",
