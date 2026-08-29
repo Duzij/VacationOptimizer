@@ -97,6 +97,7 @@ export function PostHogAnalytics({ children }: { children: ReactNode }) {
         opt_out_capturing_persistence_type: "localStorage",
         persistence: "localStorage",
         person_profiles: "never",
+        advanced_disable_flags: true,
         autocapture: false,
         capture_pageview: "history_change",
         capture_pageleave: false,
