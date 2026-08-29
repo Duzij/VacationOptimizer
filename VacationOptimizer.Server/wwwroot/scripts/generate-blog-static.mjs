@@ -17,6 +17,9 @@ const footerHtmlPath = path.join(projectRoot, "src", "content", "footer.html");
 const siteUrl = process.env.SITE_URL || "https://longvacation.eu";
 const seoKeywords = [
   "holiday optimizer",
+  "how to maximize vacation days 2027",
+  "day-off planning",
+  "longer vacations",
   "holidays optimizer",
   "pto optimizer",
   "vacation-day optimization",
@@ -210,8 +213,8 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
 
   return renderDocument({
     appIndexHtml,
-    title: "Holiday Optimizer & PTO Optimizer Blog | Vacation Optimizer",
-    description: "Read holiday optimizer and PTO optimizer planning tips, product notes, and country-aware vacation guidance from Vacation Optimizer.",
+    title: "Holiday Optimizer & PTO Optimizer Blog | How to Maximize Vacation Days",
+    description: "Learn how to maximize vacation days in 2027 with day-off planning and bridge-day tips that turn public holidays into longer vacations. Holiday optimizer and PTO optimizer guidance from Vacation Optimizer.",
     canonicalPath: "/blog/",
     body: `
       <div class="blog-shell">
@@ -219,8 +222,8 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
         <main class="blog-page">
           <section class="stack-lg">
             <div class="blog-hero stack-sm">
-              <h1>Holiday Optimizer and PTO Optimizer Blog</h1>
-              <p>Planning tips and country-aware guidance for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
+              <h1>How to Maximize Vacation Days with a Holiday Optimizer</h1>
+              <p>Day-off planning and country-aware guidance to turn public holidays into longer vacations — for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
             </div>
             <div class="blog-post-grid">${cards}</div>
           </section>
@@ -422,14 +425,14 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl 
 
   var allHeadContent = headMatch[1]
       .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
-      .replace(/<meta name="description"[\s\S]*?\/>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
-      .replace(/<meta name="keywords"[\s\S]*?\/>/i, `<meta name="keywords" content="${escapeHtml(seoKeywords.join(", "))}" />`)
-      .replace(/<link rel="canonical"[\s\S]*?\/>/i, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />`)
-      .replace(/<meta property="og:url"[\s\S]*?\/>/i, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`)
-      .replace(/<meta property="og:title"[\s\S]*?\/>/i, `<meta property="og:title" content="${escapeHtml(title)}" />`)
-      .replace(/<meta property="og:description"[\s\S]*?\/>/i, `<meta property="og:description" content="${escapeHtml(description)}" />`)
-      .replace(/<meta name="twitter:title"[\s\S]*?\/>/i, `<meta name="twitter:title" content="${escapeHtml(title)}" />`)
-      .replace(/<meta name="twitter:description"[\s\S]*?\/>/i, `<meta name="twitter:description" content="${escapeHtml(description)}" />`)
+      .replace(/<meta\s+name="description"[\s\S]*?\/>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
+      .replace(/<meta\s+name="keywords"[\s\S]*?\/>/i, `<meta name="keywords" content="${escapeHtml(seoKeywords.join(", "))}" />`)
+      .replace(/<link\s+rel="canonical"[\s\S]*?\/>/i, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />`)
+      .replace(/<meta\s+property="og:url"[\s\S]*?\/>/i, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`)
+      .replace(/<meta\s+property="og:title"[\s\S]*?\/>/i, `<meta property="og:title" content="${escapeHtml(title)}" />`)
+      .replace(/<meta\s+property="og:description"[\s\S]*?\/>/i, `<meta property="og:description" content="${escapeHtml(description)}" />`)
+      .replace(/<meta\s+name="twitter:title"[\s\S]*?\/>/i, `<meta name="twitter:title" content="${escapeHtml(title)}" />`)
+      .replace(/<meta\s+name="twitter:description"[\s\S]*?\/>/i, `<meta name="twitter:description" content="${escapeHtml(description)}" />`)
       .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i, `<script type="application/ld+json">\n${structuredData}\n  </script>`)
       .replace(/\s*<script type="module" src="\/src\/main\.tsx" defer><\/script>/i, "")
       .trim()

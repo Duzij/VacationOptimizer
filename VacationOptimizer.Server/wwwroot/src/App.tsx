@@ -90,7 +90,7 @@ function Main() {
               <>
                 <RouteMeta
                   title="Holiday Optimizer & PTO Optimizer | Vacation Optimizer"
-                  description="Use Vacation Optimizer, a holiday optimizer and PTO optimizer, to plan vacation days around public holidays, weekends, and local calendar rules."
+                  description="Use Vacation Optimizer, a holiday optimizer and PTO optimizer, to learn how to maximize vacation days in 2027 and turn day-off planning into longer vacations around public holidays and weekends."
                   canonicalPath="/"
                 />
                 <HomePage />
