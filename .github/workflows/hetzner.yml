@@ -92,6 +92,8 @@ jobs:
             log_info "Deploying with docker compose..."
             docker compose pull || true
             docker compose up -d --build --remove-orphans --wait
+            docker builder prune -af
+            docker image prune -af
 
             # After docker compose up -d
 
