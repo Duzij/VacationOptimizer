@@ -106,18 +106,7 @@ export function PostHogAnalytics({ children }: { children: ReactNode }) {
       apiKey={apiKey}
       options={{
         api_host: apiHost,
-        defaults: "2026-05-30",
-        opt_out_capturing_by_default: true,
-        opt_out_capturing_persistence_type: "localStorage",
-        persistence: "localStorage",
-        person_profiles: "never",
-        advanced_disable_flags: true,
-        autocapture: false,
-        capture_pageview: "history_change",
-        capture_pageleave: false,
-        capture_exceptions: false,
-        disable_session_recording: true,
-        before_send: minimizeEventData,
+        defaults: "2026-05-30"
       }}
     >
       <PostHogConsentGate>{children}</PostHogConsentGate>
