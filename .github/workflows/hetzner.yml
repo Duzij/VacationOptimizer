@@ -49,11 +49,14 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           CF_ORIGIN_CERT: ${{ secrets.CF_ORIGIN_CERT }}
           CF_ORIGIN_KEY: ${{ secrets.CF_ORIGIN_KEY }}
+VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
+
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: TOKEN,RESULT_TOKEN_SIGNING_KEY,DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN,SERVER_IP,CF_ORIGIN_CERT,CF_ORIGIN_KEY
+          envs: TOKEN,RESULT_TOKEN_SIGNING_KEY,DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN,SERVER_IP,CF_ORIGIN_CERT,CF_ORIGIN_KEY,VITE_POSTHOG_KEY,VITE_POSTHOG_HOST
           script: |
             set -e
 
@@ -77,6 +80,8 @@ jobs:
             cat > .env <<EOF
             Optimization__ResultTokenSigningKey=${RESULT_TOKEN_SIGNING_KEY}
             DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN=${DATABASE_SECURITY_HEALTHCHECK_ACCESS_TOKEN}
+            VITE_POSTHOG_KEY=${VITE_POSTHOG_KEY}
+            VITE_POSTHOG_HOST=${VITE_POSTHOG_HOST}
             ASPNETCORE_ENVIRONMENT=Production
             EOF
 
