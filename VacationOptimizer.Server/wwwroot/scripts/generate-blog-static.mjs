@@ -393,6 +393,7 @@ ${head}
     <div id="root">
 ${body}
     </div>
+    <script src="/blog-analytics.js" defer></script>
   </body>
 </html>`;
 }

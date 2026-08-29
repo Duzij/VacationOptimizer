@@ -39,21 +39,21 @@ function sanitizeUrl(url: unknown) {
   }
 }
 
-function minimizeEventData(event: CaptureResult | null) {
-  if (!event) {
-    return event;
-  }
+// function minimizeEventData(event: CaptureResult | null) {
+//   if (!event) {
+//     return event;
+//   }
 
-  const currentUrl = sanitizeUrl(event.properties.$current_url);
-  if (typeof currentUrl === "string") {
-    event.properties.$current_url = currentUrl;
-  } else {
-    delete event.properties.$current_url;
-  }
+//   const currentUrl = sanitizeUrl(event.properties.$current_url);
+//   if (typeof currentUrl === "string") {
+//     event.properties.$current_url = currentUrl;
+//   } else {
+//     delete event.properties.$current_url;
+//   }
 
-  delete event.properties.$referrer;
-  return event;
-}
+//   delete event.properties.$referrer;
+//   return event;
+// }
 
 function setAnalyticsConsent(posthog: ReturnType<typeof usePostHog>, hasConsent: boolean) {
   if (!hasConsent) {
