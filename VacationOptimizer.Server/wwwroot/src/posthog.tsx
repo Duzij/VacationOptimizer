@@ -83,6 +83,7 @@ export function PostHogAnalytics({ children }: { children: ReactNode }) {
   const apiHost = import.meta.env.VITE_POSTHOG_HOST;
 
   if (!apiKey || !apiHost) {
+    console.warn("PostHog API key or host is not set. Analytics will be disabled.");
     return <>{children}</>;
   }
 
