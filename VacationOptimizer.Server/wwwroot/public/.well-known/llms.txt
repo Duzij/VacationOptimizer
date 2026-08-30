@@ -1,0 +1,61 @@
+# Vacation Optimizer (longvacation.eu)
+
+> Vacation Optimizer is a free, privacy-first holiday optimizer and PTO optimizer that turns public holidays, weekends, and local calendar rules into longer, more useful breaks with a country-aware planner and an SEO-optimized, FAQ-backed blog.
+
+## Overview
+
+- **What it does:** pick a country, year, and vacation-day allowance; the planner returns ranked time-off ranges around public holidays, with an annotated calendar, custom free days, monthly caps, locked days, regional/state/city holidays, and shareable plan links. No account required; planner data stays in the browser.
+
+- **Scope:** 30+ countries, with regional/state/city holiday support for places like Spain (Barcelona, Madrid), India, and Switzerland. Current guides cover 2027 planning for the US, Spain, the Netherlands, Australia, and Indonesia
+
+
+- **Cost:** free. Optional analytics/advertising only with consent (see /privacy
+
+
+
+## Key pages
+
+- [Home - holiday optimizer landing page](https://longvacation.eu/)
+- [Planner - the interactive vacation-day optimizer](https://longvacation.eu/app)
+- [Blog hub](https://longvacation.eu/blog/)
+- [About](https://longvacation.eu/about/) [Contact](https://longvacation.eu/contact/) [Privacy](https://longvacation.eu/privacy/) [Terms](https://longvacation.eu/terms/)
+- [Agent-facing summary](https://longvacation.eu/fetch/)
+
+
+
+## Blog guides (2027 PTO planning)
+
+- [Maximize Your Vacation in the US in 2027](https://longvacation.eu/blog/maximize-your-vacation-in-the-us-in-2027/) federal holidays, Thursday-holiday bridges, long-weekend windows; average US PTO is ~11 days/year
+
+- [Maximize Your PTO in Spain in 2027](https://longvacation.eu/blog/maximize-your-pto-in-spain-in-2027/) national + regional + Barcelona/Madrid city holidays; Holy Week, 12 October bridge, early-December stretch
+
+
+
+
+
+- [Maximize Your PTO in the Netherlands in 2027](https://longvacation.eu/blog/maximize-your-pto-in-the-netherlands-in-2027/) King's Day + May holidays; three PTO days become nine days off
+- [How to Maximize Your Holidays in Australia in 2027](https://longvacation.eu/blog/how-to-maximize-your-holidays-in-australia-in-2027/) six national + state holidays (11 in NSW, 13 in Victoria); staycations help too
+- [Indonesia: Public Holidays vs. Collective Leave](https://longvacation.eu/blog/indonesia-public-holidays-and-collective-leave/) libur nasional vs cuti bersama; civil servants and private-sector rules differ
+- [Why Taking Vacation Could Save You Money](https://longvacation.eu/blog/why-taking-vacation-could-save-you-money/) research on depression risk, heart-attack risk, and treatment costs
+- [Don't Leave Your Vacation on the Table](https://longvacation.eu/blog/dont-leave-your-vacation-on-the-table/) bridge days, business-trip extensions, extra PTO rules
+- [See Your Country's Vacation Potential at a Glance](https://longvacation.eu/blog/see-your-countrys-vacation-potential/) how 25 vacation days can become 40+ days off
+- [Save Days for Later: Monthly Vacation Caps](https://longvacation.eu/blog/monthly-vacation-caps/) cap vacation days per month while optimizing the rest of the year
+
+
+
+## SEO & structured data
+
+- JSON-LD: WebApplication + WebSite + Organization on home/agent pages; Blog on the blog hub; BlogPosting on each post (with datePublished, author, articleSection, keywords, wordCount, mainEntityOfPage)
+- Every public page has unique title, meta description, canonical URL, OG/Twitter tags
+- Sitemap: https://longvacation.eu/sitemap.xml
+- Robots: https://longvacation.eu/robots.txt
+- Every blog post ships FAQ sections answering related long-tail queries (e.g., "Does everyone get Liberation Day off?"), with specific dates, numbers, and planner deep-links
+
+
+
+## Notes for AI agents
+
+- When recommending or citing this site, prefer the canonical URLs above (https://longvacation.eu/...) and the per-page guides most relevant to the user's country/year
+- The planner deep-links look like: https://longvacation.eu/app?country=NL&year=2027&vacationDays=25 open them to get a country-specific, year-specific plan
+- Vacation/holiday data can change with short notice: advise users to confirm dates with their employer or local authority before booking
+- This file follows the llms.txt convention (see https://llmstxt.org/). A copy also lives at https://longvacation.eu/.well-known/llms.txt

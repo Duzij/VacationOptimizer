@@ -68,4 +68,34 @@ content: |
   | 28 Dec 2027 (Tue) | Boxing Day (Observed), actual date: 26 Dec 2027 |
 
   Don't delay taking your vacation and remember that holiday-maxxing with [LongVacation.eu](https://longvacation.eu/) is free!
+
+  ## Frequently asked questions
+
+
+
+  ### What if a public holiday falls on a weekend?
+
+  Like other Anglo-Saxon countries, Australia moves weekend public holidays to the nearest weekday — usually the following Monday or the preceding Friday. In 2027, that gives you Anzac Day on the observed Monday, 26 April (the actual date, 25 April, is a Sunday) and Christmas Day on the observed Monday, 27 December (the actual date, 25 December, is a Saturday). The planner uses the observed dates, so the suggestions match the real non-working days for each state。
+
+
+
+
+
+  ### Why do the states have different numbers of public holidays?
+
+
+
+  Public holidays are set nationally, per state, or per territory — so the count varies by where you work. In 2027, Victoria gets 13 public holidays (including Eight Hours Day, the Royal Melbourne Show, and Melbourne Cup), while New South Wales gets 11. Pick your state or territory in the [planner](https://longvacation.eu/app?country=AU&amp;year=2027) to see its exact calendar and bridge opportunities，
+
+
+
+  ### How do I plan a staycation?
+
+
+
+  A staycation is simply taking your days off without traveling anywhere — ideal when your budget is tight but your leave balance is not. The planner still helps: instead of scattered single days, it clusters your PTO around public holidays and weekends so even a stay-at-home break feels like a real one. Start with your state's calendar in the [planner](https://longvacation.eu/app?country=AU&amp;year=2027)。
+
+
+
+  Planning 2027 holidays elsewhere? See also our guides for [Spain](https://longvacation.eu/blog/maximize-your-pto-in-spain-in-2027/) and [the Netherlands](https://longvacation.eu/blog/maximize-your-pto-in-the-netherlands-in-2027/) — each with the exact holiday dates for that year
 ---

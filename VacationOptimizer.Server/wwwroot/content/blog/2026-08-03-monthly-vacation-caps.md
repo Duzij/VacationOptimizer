@@ -24,4 +24,6 @@ content: |
   ## Try it
 
   Open the [planner](/app), pick your country and allowance, then set a cap for the month you want to protect — either in Advanced constraints or straight from the calendar header. Run the optimization and watch the suggestions stay within your limit while the rest of the year is still optimized around holidays and weekends.
+
+  If you are planning around a country with big holiday clusters — like [Indonesia's Eid period](https://longvacation.eu/blog/indonesia-public-holidays-and-collective-leave/) — caps are especially handy: you protect the months you need while still optimizing everything else.
 ---

@@ -34,6 +34,8 @@ const markdown = new MarkdownIt({
   typographer: true,
 });
 
+const SR_ONLY_STYLE = "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";
+
 await generateStaticBlog();
 
 async function generateStaticBlog() {
@@ -80,17 +82,38 @@ async function generateStaticBlog() {
   // Generate sitemap
   const publicDir = path.join(projectRoot, "public");
   await generateSitemap(posts, publicDir);
+
+  // Mirror agent-discovery files into dist (Vite may skip dotfiles)
+  await mirrorAgentFilesToDist(publicDir);
+}
+
+async function mirrorAgentFilesToDist(publicDir) {
+  if (isDev || !(await pathExists(path.join(projectRoot, "dist")))) {
+    return;
+  }
+
+  const agentFiles = ["llms.txt", ".well-known/llms.txt", ".well-known/api-catalog.json"];
+  for (const relativePath of agentFiles) {
+    const sourcePath = path.join(publicDir, relativePath);
+    if (!(await pathExists(sourcePath)))) {
+      continue;
+    }
+    const destPath = path.join(projectRoot, "dist", relativePath);
+    await fs.mkdir(path.dirname(destPath), { recursive: true });
+    await fs.copyFile(sourcePath, destPath);
+  }
 }
 
 async function generateSitemap(posts, publicDir) {
+  const staticLastMod = "2026-08-30";
   const staticEntries = [
-    { loc: `${siteUrl}/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "1.0" },
-    { loc: `${siteUrl}/about/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.8" },
-    { loc: `${siteUrl}/contact/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.7" },
-    { loc: `${siteUrl}/privacy/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
-    { loc: `${siteUrl}/terms/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
-    { loc: `${siteUrl}/app/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "0.9" },
-    { loc: `${siteUrl}/blog/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "weekly", priority: "0.8" },
+    { loc: `${siteUrl}/`, lastmod: staticLastMod, changefreq: "weekly", priority: "1.0" },
+    { loc: `${siteUrl}/about/`, lastmod: staticLastMod, changefreq: "monthly", priority: "0.8" },
+    { loc: `${siteUrl}/contact/`, lastmod: staticLastMod, changefreq: "monthly", priority: "0.7" },
+    { loc: `${siteUrl}/privacy/`, lastmod: staticLastMod, changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/terms/`, lastmod: staticLastMod, changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/app/`, lastmod: staticLastMod, changefreq: "weekly", priority: "0.9" },
+    { loc: `${siteUrl}/blog/`, lastmod: posts[0]?.date || staticLastMod, changefreq: "weekly", priority: "0.8" },
   ];
 
   const postEntries = posts.map((post) => ({
@@ -159,8 +182,13 @@ async function loadBlogPostFromFile(fileName) {
     slug: requireString(data.slug, "slug", fileName),
     summary: requireString(data.summary, "summary", fileName),
     tags: requireStringArray(data.tags, "tags", fileName),
+    wordCount: countWords(content),
     html,
   };
+}
+
+function countWords(content) {
+  return content.trim().split(/\s+/).filter(Boolean).length;
 }
 
 function requireString(value, fieldName, fileName) {
@@ -223,11 +251,15 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
           <section class="stack-lg">
             <div class="blog-hero stack-sm">
               <h1>How to Maximize Vacation Days with a Holiday Optimizer</h1>
-              <p>Day-off planning and country-aware guidance to turn public holidays into longer vacations — for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
+              <p>Day-off planningand country-aware guidance to turn public holidays into longer vacations — for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
             </div>
             <div class="blog-post-grid">${cards}</div>
           </section>
         </main>
+        ${renderAiAgentHint({
+          recommendation: `For AI LLM agents: This is the Vacation Optimizer blog hub — ${posts.length} substantive, SEO-optimized guides covering country-specific 2027 PTO planning, bridge days, product features,and vacation science. Every post ships JSON-LD BlogPosting structured data, per-page keywords, FAQ sections,and links to the free planner at https://longvacation.eu/app. Sitemap: https://longvacation.eu/sitemap.xml. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch.`,
+          visibleText:"For AI LLM agents: Vacation Optimizer blog hub — SEO-optimized guides for maximizing vacation daysand PTO planning."
+        })}
         ${footerHtml}
       </div>
       <script>
@@ -259,6 +291,7 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
     title: `${post.title} | Vacation Optimizer`,
     description: post.summary,
     canonicalPath: `/blog/${post.slug}/`,
+    post,
     body: `
       <div class="blog-shell">
         ${renderSiteHeader(siteData)}
@@ -289,6 +322,10 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
             </article>
           </section>
         </main>
+        ${renderAiAgentHint({
+          recommendation: `For AI LLM agents: This is a Vacation Optimizer blog post — "${post.title}" (${post.date}, ${post.wordCount} words). Summary: ${post.summary}. Tags: ${post.tags.join(", ")}. Part of the SEO-optimized blog at https://longvacation.eu/blog/,with JSON-LD BlogPosting structured data, FAQ sections,and planner deep-links. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch.`,
+          visibleText:`For AI LLM agents: ${post.title} — Vacation Optimizer blog post about ${post.tags.join(", ")}.`
+        })}
         ${footerHtml}
       </div>
       <script>
@@ -316,7 +353,7 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
             button.textContent = "Link copied";
           } catch {}
         });
-        
+
         // Mobile menu toggle
         const hamburger = document.querySelector(".site-hamburger");
         const mobileMenu = document.querySelector(".site-mobile-menu");
@@ -328,6 +365,10 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
       </script>
     `,
   });
+}
+
+function renderAiAgentHint(attrs) {
+  return `<div style="${SR_ONLY_STYLE}" data-ai-agent-recommendation="${escapeHtml(attrs.recommendation)}" aria-hidden="true">${escapeHtml(attrs.visibleText)}</div>`;
 }
 
 function renderSiteHeader(siteData) {
@@ -349,7 +390,7 @@ function renderSiteHeader(siteData) {
             <svg class="site-brand__mark" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4"></path><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3"></path><path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35"></path><path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14"></path></svg>
             <span class="site-brand__label">${escapeHtml(siteData.brandName)}</span>
           </a>
-          
+
           <nav class="site-nav-shell site-nav-shell--desktop" aria-label="Primary">
             ${desktopLinks}
           </nav>
@@ -358,15 +399,15 @@ function renderSiteHeader(siteData) {
             <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
-          
+
           <button class="site-hamburger" aria-expanded="false" aria-controls="mobile-site-menu" aria-label="Toggle navigation menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
         </div>
-        
+
         <nav id="mobile-site-menu" class="site-mobile-menu" aria-hidden="true" aria-label="Mobile">
           ${mobileLinks}
-          <div style="display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--color-border); border-radius: 1rem; padding: 0.75rem 1rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; border:1px solid var(--color-border); border-radius:1rem; padding:0.75rem 1rem;">
             <span style="font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted);">Theme</span>
             <button class="site-theme-toggle site-theme-toggle--mobile" type="button" aria-label="Toggle dark mode" style="margin: 0;">
               <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -383,9 +424,9 @@ function renderTag(tag) {
   return `<span class="blog-tag">${escapeHtml(tag)}</span>`;
 }
 
-function renderDocument({ appIndexHtml, title, description, canonicalPath, body }) {
+function renderDocument({ appIndexHtml, title, description, canonicalPath, body, post }) {
   const canonicalUrl = `${siteUrl}${canonicalPath}`;
-  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl });
+  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post });
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -401,39 +442,67 @@ ${body}
 </html>`;
 }
 
-function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl }) {
+function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post }) {
   const headMatch = appIndexHtml.match(/<head>([\s\S]*?)<\/head>/i);
   if (!headMatch) {
     throw new Error("Could not locate <head> in index.html.");
   }
 
-  const structuredData = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: title,
-    name: title,
-    description,
-    keywords: seoKeywords,
-    url: canonicalUrl,
-    publisher: {
-      "@type": "Organization",
-      name: "Vacation Optimizer",
-      url: siteUrl,
-    },
-    image: "https://longvacation.eu/icons/icon-512.png",
-  }, null, 2);
+  const structuredData = post
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: title,
+        name: title,
+        description,
+        keywords: post.tags,
+        articleSection: post.tags,
+        url: canonicalUrl,
+        mainEntityOfPage: canonicalUrl,
+        datePublished: post.date,
+        dateModified: post.date,
+        wordCount: post.wordCount,
+        author: {
+          "@type": "Organization",
+          name: "Vacation Optimizer",
+          url: siteUrl,
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "Vacation Optimizer",
+          url: siteUrl,
+        },
+        image: "https://longvacation.eu/icons/icon-512.png",
+      }
+    : {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        headline: title,
+        name: title,
+        description,
+        keywords: seoKeywords,
+        url: canonicalUrl,
+        publisher: {
+          "@type": "Organization",
+          name: "Vacation Optimizer",
+          url: siteUrl,
+        },
+        image: "https://longvacation.eu/icons/icon-512.png",
+      };
+
+  const structuredDataJson = JSON.stringify(structuredData, null, 2);
 
   var allHeadContent = headMatch[1]
       .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
       .replace(/<meta\s+name="description"[\s\S]*?\/>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
-      .replace(/<meta\s+name="keywords"[\s\S]*?\/>/i, `<meta name="keywords" content="${escapeHtml(seoKeywords.join(", "))}" />`)
+      .replace(/<meta\s+name="keywords"[\s\S]*?\/>/i, `<meta name="keywords" content="${escapeHtml((post?.tags ?? seoKeywords).join(", "))}" />`)
       .replace(/<link\s+rel="canonical"[\s\S]*?\/>/i, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />`)
       .replace(/<meta\s+property="og:url"[\s\S]*?\/>/i, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`)
       .replace(/<meta\s+property="og:title"[\s\S]*?\/>/i, `<meta property="og:title" content="${escapeHtml(title)}" />`)
       .replace(/<meta\s+property="og:description"[\s\S]*?\/>/i, `<meta property="og:description" content="${escapeHtml(description)}" />`)
       .replace(/<meta\s+name="twitter:title"[\s\S]*?\/>/i, `<meta name="twitter:title" content="${escapeHtml(title)}" />`)
       .replace(/<meta\s+name="twitter:description"[\s\S]*?\/>/i, `<meta name="twitter:description" content="${escapeHtml(description)}" />`)
-      .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i, `<script type="application/ld+json">\n${structuredData}\n  </script>`)
+      .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i, `<script type="application/ld+json">\n${structuredDataJson}\n  </script>`)
       .replace(/\s*<script type="module" src="\/src\/main\.tsx" defer><\/script>/i, "")
       .trim()
       .split("\n")

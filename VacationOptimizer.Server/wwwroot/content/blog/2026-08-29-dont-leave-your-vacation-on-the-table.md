@@ -25,4 +25,6 @@ content: |
   The truth is that, in most cases, you need to find this information yourself. It is not served to you on the silver plate. The rules differ from one country to another and from one employer to another.
 
   In summary, take your vacation and enjoy your long vacation. Your future self will thank you.
+
+  Want concrete dates for your country? See our [2027 US vacation-planning guide](https://longvacation.eu/blog/maximize-your-vacation-in-the-us-in-2027/) and open the [planner](https://longvacation.eu/app?country=US&amp;year=2027) to turn these strategies into a real calendar of breaks.
 ---

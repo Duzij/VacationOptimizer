@@ -243,6 +243,22 @@ export function RouteMeta({
       "href",
       `https://longvacation.eu${canonicalPath}`,
     );
+
+    const canonicalUrl = `https://longvacation.eu${canonicalPath}`;
+    const ogUrlTag = document.querySelector('meta[property="og:url"]');
+    ogUrlTag?.setAttribute("content", canonicalUrl);
+
+    const ogTitleTag = document.querySelector('meta[property="og:title"]');
+    ogTitleTag?.setAttribute("content", title);
+
+    const ogDescriptionTag = document.querySelector('meta[property="og:description"]');
+    ogDescriptionTag?.setAttribute("content", description);
+
+    const twitterTitleTag = document.querySelector('meta[name="twitter:title"]');
+    twitterTitleTag?.setAttribute("content", title);
+
+    const twitterDescriptionTag = document.querySelector('meta[name="twitter:description"]');
+    twitterDescriptionTag?.setAttribute("content", description);
   }, [canonicalPath, description, title]);
 
   return null;

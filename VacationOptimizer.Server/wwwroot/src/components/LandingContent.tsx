@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CountryShowcase from "./CountryShowcase";
 import HtmlFragment from "./HtmlFragment";
 import landingBoxesHtml from "../content/landing-boxes.html?raw";
+import landingSeoHtml from "../content/landing-seo.html?raw";
 
 export default function LandingContent() {
   return (
@@ -86,6 +87,10 @@ export default function LandingContent() {
         <div className="landing-grid auto-rows-fr">
           <HtmlFragment html={landingBoxesHtml} className="contents" />
         </div>
+      </div>
+
+      <div className="mt-10">
+        <HtmlFragment html={landingSeoHtml} className="contents" />
       </div>
     </section>
   );

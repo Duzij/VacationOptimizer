@@ -29,4 +29,40 @@ content: |
   That is already 9 vacation days in total by simply taking three days of your PTOs. This is your sign to book them now.
 
   Check [LongVacation.eu](https://longvacation.eu/) to explore even more options and maximize your vacation in 2027!
+
+  ## Three PTO days, nine days off — worked example
+
+  The spring cluster is where the Netherlands' 2027 calendar pays off the most:
+
+  - **King's Day** falls on Tuesday, 27 April. Take **Monday, 26 April** off and the Tuesday holiday connects to the weekend: four consecutive days off (24–27 April) using a single PTO day.
+
+  - **Liberation Day** falls on Wednesday, 5 May, and **Ascension Day** on Thursday,6 May. Take **Friday,7 May** off and those two holidays plus the weekend become a five-day break (5–9 May) — again with a single PTO day.
+
+
+
+  That is nine days off spread across two breaks for the price of two vacation days — and you still have most of your allowance for summer and Christmas. See exactly how it stacks in the [planner](https://longvacation.eu/app?country=NL&amp;year=2027)。
+
+
+
+  ## Frequently asked questions
+
+
+
+  ### Does everyone get Liberation Day off?
+
+  Liberation Day (Bevrijdingsdag) is a national public holiday in the Netherlands, so most employees get it off. It is worth confirming with your employer anyway, especially if you work in essential services or under a sector agreement with different rules。
+
+
+
+
+
+  ### What about regional holidays?
+
+  The Netherlands has fewer region-specific public holidays than countries like Spain, but the planner still supports the national calendar fully, and you can add local dates — carnival days, school holidays, or your employer's shutdown days — as custom free days so suggestions match your real year.
+
+
+
+  ### Can I extend the Christmas weekend?
+
+  Christmas Day and Boxing Day fall on Saturday and Sunday, 25–26 December, in 2027 — so the working days around them (Christmas Eve on Friday, 24 December, and the days before New Year) are natural bridge candidates. Open the [planner](https://longvacation.eu/app?country=NL&amp;year=2027) and see what fits your remaining allowance around the festive break.
 ---

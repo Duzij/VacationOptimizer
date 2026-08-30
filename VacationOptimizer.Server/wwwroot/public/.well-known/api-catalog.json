@@ -1,0 +1,47 @@
+{
+  "name": "Vacation Optimizer API",
+  "description": "Public API endpoints for the Vacation Optimizer planner, showcase, and holiday data. Advertised from the homepage via an RFC 8288 Link header (rel=\"api-catalog\".",
+  "baseUrl": "https://longvacation.eu",
+  "endpoints": [
+    {
+      "path": "/api/vacations/optimize",
+      "method": "POST",
+      "description": "Run the vacation-day optimizer for a country, year, region/state/city, vacation-day settings, custom free days, ignored holidays, monthly caps, locked days, and range constraints."
+    },
+    {
+      "path": "/api/vacations/showcase",
+      "method": "GET",
+      "description": "Total days off for the default 25 vacation days in a country (powers the landing-page country showcase)."
+    },
+    {
+      "path": "/api/vacations/countries",
+      "method": "GET",
+      "description": "List supported countries."
+    },
+    {
+      "path": "/api/vacations/countries/{countryCode}/states",
+      "method": "GET",
+      "description": "List states/regions for a country."
+    },
+    {
+      "path": "/api/vacations/detected-country",
+      "method": "GET",
+      "description": "Detect the visitor's country from infrastructure headers."
+    },
+    {
+      "path": "/api/vacations/decode-seed",
+      "method": "POST",
+      "description": "Decode a shared planner seed into calendar day types."
+    },
+    {
+      "path": "/api/blog",
+      "method": "GET",
+      "description": "Blog index: title, date, author, summary, tags per post."
+    },
+    {
+      "path": "/openapi/v1.json",
+      "method": "GET",
+      "description": "OpenAPI machine-readable service description."
+    }
+  ]
+}

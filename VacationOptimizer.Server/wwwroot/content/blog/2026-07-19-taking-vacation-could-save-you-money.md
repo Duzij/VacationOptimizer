@@ -22,6 +22,12 @@ content: |
 
   Don't wait until you're exhausted to take a break. Your future self will thank you.
 
+  ## Frequently asked questions
+
+  ### How many days is enough?
+
+  There is no magic number — the studies cited above show benefits from regular, relatively short breaks, not just one long trip a year. The practical answer: use what you have, deliberately. Instead of burning days one by one, cluster them around public holidaysand weekends so a few PTO days become several real breaks across the year. The [planner](https://longvacation.eu/) can show you exactly where those clusters are for your country.
+
   ## Sources
 
   - https://pmc.ncbi.nlm.nih.gov/articles/PMC7610217/

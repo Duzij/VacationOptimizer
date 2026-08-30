@@ -90,9 +90,12 @@ PersistenceInitializer.Initialize(app);
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+// OpenAPI is served in all environments — it doubles as the machine-readable
+// service description advertised via RFC 8288 Link headers (rel="service-desc").
+app.MapOpenApi();
 
 // API Endpoints
 var api = app.MapGroup("/api/vacations");
