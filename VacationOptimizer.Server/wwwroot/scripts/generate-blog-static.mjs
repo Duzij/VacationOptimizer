@@ -95,7 +95,7 @@ async function mirrorAgentFilesToDist(publicDir) {
   const agentFiles = ["llms.txt", ".well-known/llms.txt", ".well-known/api-catalog.json"];
   for (const relativePath of agentFiles) {
     const sourcePath = path.join(publicDir, relativePath);
-    if (!(await pathExists(sourcePath)))) {
+    if (!(await pathExists(sourcePath))) {
       continue;
     }
     const destPath = path.join(projectRoot, "dist", relativePath);
