@@ -41,6 +41,7 @@ const faqJsonLd = {
     acceptedAnswer: { "@type": "Answer", text: faq.answer },
   })),
 };
+import landingSeoHtml from "../content/landing-seo.html?raw";
 
 export default function LandingContent() {
     return (
@@ -143,6 +144,10 @@ export default function LandingContent() {
         <p className="closing-cta__trust">Free &middot; No sign-up &middot; Your data stays in your browser</p>
       </section>
         </div>
-        </>
+    
+      <div className="mt-10">
+        <HtmlFragment html={landingSeoHtml} className="contents" />
+      </div>
+    </>
     );
 }

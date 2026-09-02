@@ -1,6 +1,10 @@
 services:
   vacation-app:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_POSTHOG_KEY: ${VITE_POSTHOG_KEY:-}
+        VITE_POSTHOG_HOST: ${VITE_POSTHOG_HOST:-}
     env_file:
       - .env
     environment:
@@ -19,6 +23,11 @@ services:
       timeout: 5s
       retries: 6
       start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: unless-stopped
 
   postgres:
@@ -39,6 +48,11 @@ services:
       timeout: 5s
       retries: 12
       start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: unless-stopped
 
   nginx:
@@ -55,6 +69,11 @@ services:
     depends_on:
       vacation-app:
         condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: always
 
 volumes:

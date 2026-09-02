@@ -100,6 +100,27 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task GetHomepage_ReturnsAgentDiscoveryLinkHeaders()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        Assert.True(response.Headers.TryGetValues("Link", out var linkValues));
+        var link = Assert.Single(linkValues);
+        Assert.Contains("rel=\"api-catalog\"", link);
+        Assert.Contains("rel=\"service-desc\"", link);
+        Assert.Contains("rel=\"service-doc\"", link);
+        Assert.Contains("rel=\"describedby\"", link);
+        Assert.Contains(".well-known/api-catalog.json", link);
+        Assert.Contains("llms.txt", link);
+    }
+
+    [Fact]
     public async Task GetCountries_ReturnsSeededDatabaseCountriesAndFallback()
     {
         // Arrange

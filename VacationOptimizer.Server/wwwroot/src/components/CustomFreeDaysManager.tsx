@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Trash2, Plus } from "lucide-react";
 import type { CustomFreeDay } from "../types/models";
 import Button from "./Button";
+import { useAnalytics } from "../posthog";
 
 interface Props {
     customFreeDays: CustomFreeDay[];
@@ -12,6 +13,7 @@ export default function CustomFreeDaysManager({ customFreeDays, onUpdate }: Prop
     const [isOpen, setIsOpen] = useState(false);
     const [date, setDate] = useState("");
     const [title, setTitle] = useState("");
+    const { capture } = useAnalytics();
 
     const handleAdd = () => {
         if (!date) return;
@@ -21,12 +23,14 @@ export default function CustomFreeDaysManager({ customFreeDays, onUpdate }: Prop
             title: title || undefined,
         };
 
+        capture("custom_free_day_added");
         onUpdate([...customFreeDays, newDay]);
         setDate("");
         setTitle("");
     };
 
     const handleRemove = (index: number) => {
+        capture("custom_free_day_removed");
         onUpdate(customFreeDays.filter((_, i) => i !== index));
     };
 

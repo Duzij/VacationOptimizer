@@ -94,6 +94,10 @@ export function PrivacyPage() {
     setClearStatus("cleared");
   };
 
+  const handleOpenCookieSettings = () => {
+    window.dispatchEvent(new Event("vacationOptimizer:open-cookie-settings"));
+  };
+
   return (
     <PageSection
       title="Privacy Policy"
@@ -153,6 +157,25 @@ export function PrivacyPage() {
                 Local storage data cleared. The planner will restore to default.
               </p>
             )}
+          </div>
+        </article>
+
+        <article className="content-panel space-y-3" id="cookie-settings">
+          <h2 className="text-xl font-semibold text-text">Cookie settings</h2>
+          <div className="space-y-3 text-sm leading-6 text-text-muted">
+            <p>
+              You can change or withdraw optional analytics and advertising consent at any time.
+              The planner remains available if you reject them.
+            </p>
+            <p className="flex justify-end py-2">
+              <button
+                type="button"
+                onClick={handleOpenCookieSettings}
+                className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-3 text-sm font-semibold text-text transition-colors hover:bg-surface-hover cursor-pointer"
+              >
+                Manage cookie settings
+              </button>
+            </p>
           </div>
         </article>
 
@@ -220,6 +243,22 @@ export function RouteMeta({
       "href",
       `https://longvacation.eu${canonicalPath}`,
     );
+
+    const canonicalUrl = `https://longvacation.eu${canonicalPath}`;
+    const ogUrlTag = document.querySelector('meta[property="og:url"]');
+    ogUrlTag?.setAttribute("content", canonicalUrl);
+
+    const ogTitleTag = document.querySelector('meta[property="og:title"]');
+    ogTitleTag?.setAttribute("content", title);
+
+    const ogDescriptionTag = document.querySelector('meta[property="og:description"]');
+    ogDescriptionTag?.setAttribute("content", description);
+
+    const twitterTitleTag = document.querySelector('meta[name="twitter:title"]');
+    twitterTitleTag?.setAttribute("content", title);
+
+    const twitterDescriptionTag = document.querySelector('meta[name="twitter:description"]');
+    twitterDescriptionTag?.setAttribute("content", description);
   }, [canonicalPath, description, title]);
 
   return null;

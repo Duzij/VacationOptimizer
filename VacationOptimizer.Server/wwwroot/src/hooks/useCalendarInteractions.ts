@@ -10,6 +10,7 @@ import {
   getOptimizeRequestScopeCode,
   isIndiaOptimizeRequest,
 } from "../features/countrySpecific/models";
+import { useAnalytics } from "../posthog";
 
 export interface FeedbackDraft {
   title: string;
@@ -81,6 +82,7 @@ export function useCalendarInteractions({
 }) {
   const [feedbackDraft, setFeedbackDraft] = useState<FeedbackDraft | null>(null);
   const [confirmDay, setConfirmDay] = useState<ConfirmDayState | null>(null);
+  const { capture } = useAnalytics();
 
   useEffect(() => {
     if (!feedbackDraft) {
@@ -159,6 +161,9 @@ export function useCalendarInteractions({
     const updatedNeverHolidayDates = neverHolidayDates.filter((date) => date !== confirmDay.date);
     const updatedLockedVacationDates = lockedVacationDates.filter((date) => date !== confirmDay.date);
 
+    capture("calendar_day_marked", {
+      action: confirmDay.mode === "remove" ? "custom_free_day_removed" : "custom_free_day_added",
+    });
     setCustomFreeDays(updatedDays);
     setNeverHolidayDates(updatedNeverHolidayDates);
     setLockedVacationDates(updatedLockedVacationDates);
@@ -185,6 +190,9 @@ export function useCalendarInteractions({
     const updatedCustomFreeDays = customFreeDays.filter((day) => day.date !== confirmDay.date);
     const updatedLockedVacationDates = lockedVacationDates.filter((date) => date !== confirmDay.date);
 
+    capture("calendar_day_marked", {
+      action: confirmDay.mode === "removeNeverHoliday" ? "never_holiday_removed" : "never_holiday_added",
+    });
     setNeverHolidayDates(updatedNeverHolidayDates);
     setCustomFreeDays(updatedCustomFreeDays);
     setLockedVacationDates(updatedLockedVacationDates);
@@ -213,6 +221,9 @@ export function useCalendarInteractions({
       ? lockedVacationDates.filter((date) => date !== confirmDay.date)
       : [...new Set([...lockedVacationDates, confirmDay.date])].sort();
 
+    capture("calendar_day_marked", {
+      action: confirmDay.isLockedVacationDay ? "vacation_day_unlocked" : "vacation_day_locked",
+    });
     setLockedVacationDates(updatedLockedVacationDates);
     setConfirmDay(null);
 
@@ -247,6 +258,7 @@ export function useCalendarInteractions({
       }
     }
 
+    capture("holiday_ignored", { reported_as_incorrect: reportAsIncorrect });
     setIgnoredHolidayDates(updatedIgnoredHolidayDates);
     setConfirmDay(null);
     void runOptimization(activeRequest, updatedIgnoredHolidayDates);

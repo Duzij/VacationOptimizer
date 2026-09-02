@@ -4,6 +4,11 @@
 FROM node:22-alpine AS frontend
 WORKDIR /app
 
+ARG VITE_POSTHOG_KEY
+ARG VITE_POSTHOG_HOST
+ENV VITE_POSTHOG_KEY=${VITE_POSTHOG_KEY}
+ENV VITE_POSTHOG_HOST=${VITE_POSTHOG_HOST}
+
 # adjust if your frontend is in another folder
 COPY VacationOptimizer.Server/wwwroot/package*.json ./
 RUN npm ci

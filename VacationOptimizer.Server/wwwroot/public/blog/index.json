@@ -1,6 +1,51 @@
 {
   "posts": [
     {
+      "title": "Don't Leave Your Vacation on the Table",
+      "date": "2026-08-29",
+      "author": "Team",
+      "slug": "dont-leave-your-vacation-on-the-table",
+      "summary": "Almost half of American employees and a third of British workers leave paid vacation days unused every year. Here are three simple ways to make sure you use what you have earned.",
+      "tags": [
+        "vacation",
+        "pto",
+        "bridge-days",
+        "vacation-planning",
+        "well-being"
+      ],
+      "wordCount": 474
+    },
+    {
+      "title": "How to Maximize Your Holidays in Australia in 2027",
+      "date": "2026-08-29",
+      "author": "Team",
+      "slug": "how-to-maximize-your-holidays-in-australia-in-2027",
+      "summary": "Six national public holidays, plus extra state days in NSW and 13 in Victoria — here's how to bridge Australia's 2027 calendar into longer breaks, staycation included.",
+      "tags": [
+        "australia",
+        "vacation-planning",
+        "pto",
+        "public-holidays",
+        "staycation"
+      ],
+      "wordCount": 884
+    },
+    {
+      "title": "Maximize Your PTO in the Netherlands in 2027",
+      "date": "2026-08-29",
+      "author": "Team",
+      "slug": "maximize-your-pto-in-the-netherlands-in-2027",
+      "summary": "The Netherlands' 2027 calendar has two great bridge opportunities, around King's Day and the May holidays. Take just three PTO days and turn them into nine days off.",
+      "tags": [
+        "netherlands",
+        "vacation-planning",
+        "pto",
+        "bridge-days",
+        "public-holidays"
+      ],
+      "wordCount": 638
+    },
+    {
       "title": "See Your Country's Vacation Potential at a Glance",
       "date": "2026-08-05",
       "author": "Team",
@@ -10,7 +55,8 @@
         "feature",
         "vacation-planning",
         "pto"
-      ]
+      ],
+      "wordCount": 610
     },
     {
       "title": "Save Days for Later: Monthly Vacation Caps",
@@ -22,7 +68,8 @@
         "feature",
         "vacation-planning",
         "pto"
-      ]
+      ],
+      "wordCount": 441
     },
     {
       "title": "Indonesia: Public Holidays vs. Collective Leave",
@@ -36,7 +83,8 @@
         "pto",
         "public-holidays",
         "collective-leave"
-      ]
+      ],
+      "wordCount": 448
     },
     {
       "title": "Maximize Your PTO in Spain in 2027",
@@ -50,7 +98,8 @@
         "pto",
         "public-holidays",
         "long-weekends"
-      ]
+      ],
+      "wordCount": 732
     },
     {
       "title": "Why Taking Vacation Could Save You Money",
@@ -64,7 +113,8 @@
         "pto",
         "well-being",
         "productivity"
-      ]
+      ],
+      "wordCount": 375
     },
     {
       "title": "Maximize Your Vacation in the US in 2027",
@@ -77,7 +127,8 @@
         "vacation-planning",
         "pto",
         "long-weekends"
-      ]
+      ],
+      "wordCount": 758
     }
   ]
 }

@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Allow: /app/
+Allow: /blog/
 Allow: /manifest.json
 Allow: /icons/
 Allow: /about

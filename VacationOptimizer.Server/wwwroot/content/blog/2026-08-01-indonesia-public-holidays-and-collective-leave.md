@@ -25,6 +25,8 @@ content: |
 
   That is why a long Indonesian holiday period can mean different things for different people. The date may be on the national calendar, but only a *libur nasional* is a public holiday; a *cuti bersama* day needs to be read alongside your employment terms. For 2026 planning, the biggest clusters are Chinese New Year in February, Nyepi and Eid al-Fitr in March, and Christmas in December.
 
+  Planning around big clusters like Chinese New Year or Eid al-Fitr often means reserving days elsewhere for trips you already have in mind. The planner's [monthly vacation caps](https://longvacation.eu/blog/monthly-vacation-caps/) let you cap how many vacation days are used per month, so the rest of your allowance stays protected for the rest of the year.
+
   ## Sources
 
   - [Joint Decree announcement and 2026 totals — Ministry of Administrative and Bureaucratic Reform](https://menpan.go.id/site/berita-terkini/penetapan-libur-nasional-dan-cuti-bersama-2026-menteri-panrb-permudah-perencanaan-kegiatan-dan-layanan-masyarakat)
