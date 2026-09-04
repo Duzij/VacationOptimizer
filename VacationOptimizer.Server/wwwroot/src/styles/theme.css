@@ -30,6 +30,7 @@
   --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23888888' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5l5 5 5-5'/%3E%3C/svg%3E");
   --landing-accent: #0f7b83;
   --landing-accent-soft: #e1f4f5;
+  --globe-dot: #bfd2d3;
   --landing-accent-alt: var(--color-accent);
   --landing-accent-alt-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
@@ -69,6 +70,7 @@
   --calendar-past-line: #cccccc;
   --landing-accent: #0f7b83;
   --landing-accent-soft: #e1f4f5;
+  --globe-dot: #bfd2d3;
 }
 
 .dark {
@@ -106,6 +108,7 @@
   --calendar-past-line: #333333;
   --landing-accent: #74d6dd;
   --landing-accent-soft: rgba(116, 214, 221, 0.12);
+  --globe-dot: #3f5f62;
 }
 
 .dark ::selection {
@@ -179,38 +182,6 @@
   .checkbox-field__label {
     font-size: 0.875rem;
     color: var(--color-text-muted);
-  }
-
-  .landing-grid {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-
-  .landing-box {
-    display: grid;
-    gap: 0.85rem;
-    min-height: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: 1.5rem;
-    background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
-    padding: 1.35rem;
-  }
-
-  .landing-box__eyebrow {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--landing-accent);
-  }
-
-  .landing-box--alt {
-    background-color: color-mix(in srgb, var(--landing-accent-alt-soft) 65%, var(--color-surface));
-  }
-
-  .landing-box--alt .landing-box__eyebrow {
-    color: var(--landing-accent-alt);
   }
 
   .content-panel {
@@ -361,10 +332,6 @@
   }
 
   @media (max-width: 767px) {
-    .landing-box {
-      padding: 1.1rem;
-    }
-
     .content-panel {
       padding: 1.1rem;
     }

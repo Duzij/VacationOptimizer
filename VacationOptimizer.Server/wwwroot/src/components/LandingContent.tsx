@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import CountryShowcase from "./CountryShowcase";
 import HtmlFragment from "./HtmlFragment";
@@ -7,6 +7,9 @@ import landingSeoHtml from "../content/landing-seo.html?raw";
 
 export default function LandingContent() {
   return (
+    <>
+      <div className="landing-page">
+
     <section className="mx-auto max-w-6xl">
       <div className="overflow-hidden rounded-[2rem] bg-surface/55">
         <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
@@ -47,51 +50,88 @@ export default function LandingContent() {
           </div>
 
           <aside className="border-border bg-background/65 py-4 md:py-8">
-            <div className="space-y-4">
-              <div className="relative overflow-hidden rounded-[1.5rem] bg-[var(--landing-accent-soft)] p-5">
-                <div className="pointer-events-none absolute -bottom-4 -right-4 text-[color-mix(in_srgb,var(--landing-accent)_20%,transparent)]">
-                  <CalendarDays className="h-28 w-28" strokeWidth={1.5} />
-                </div>
-
-                <div className="relative z-10 space-y-4">
-                  <div>
-                    <h2 className="text-xl font-semibold tracking-tight text-text">
-                      Built for a real calendar.
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-text-muted">
-                      National holidays, regional holidays, and custom free days
-                      can all shape the planning outcome.
-                    </p>
-                  </div>
-
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p className="text-3xl font-semibold tracking-tight text-text">
-                        30+
-                      </p>
-                      <p className="text-sm text-text-muted">
-                        countries supported
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CountryShowcase />
           </aside>
         </div>
       </div>
+</section>
 
-      <CountryShowcase />
+        <section
+          id="features"
+          className="landing-section"
+          aria-labelledby="features-title"
+        >
+          <div className="section-head">
+            <p className="section-head__eyebrow">Why Vacation Optimizer</p>
+          </div>
+          <div className="features-grid">
+            <HtmlFragment
+              html={landingBoxesHtml}
+              className="features-grid-inner"
+            />
+          </div>
+        </section>
 
-      <div className="mt-6 space-y-4">
-        <div className="landing-grid auto-rows-fr">
-          <HtmlFragment html={landingBoxesHtml} className="contents" />
-        </div>
-      </div>
+        <section
+          id="how-it-works"
+          className="landing-section"
+          aria-labelledby="how-it-works-title"
+        >
+          <div className="section-head">
+            <p className="section-head__eyebrow">How it works</p>
+            <h2 id="how-it-works-title" className="section-head__title">
+              From scattered holidays to a ready-to-request plan
+            </h2>
+          </div>
+          <ol className="steps">
+            <li className="step">
+              <h3 className="step__title">Pick your country</h3>
+              <p className="step__text">
+                Start with India, Spain, or Indonesia — each with regional
+                holiday detail down to states and provinces.
+              </p>
+            </li>
+            <li className="step">
+              <h3 className="step__title">Set your time-off budget</h3>
+              <p className="step__text">
+                Enter your vacation days and optional rules: minimum or maximum
+                trip length, monthly caps, custom free days.
+              </p>
+            </li>
+            <li className="step">
+              <h3 className="step__title">Get ranked stretches</h3>
+              <p className="step__text">
+                See the best vacation-day combinations scored by days off gained
+                per day used, on a full year calendar.
+              </p>
+            </li>
+          </ol>
+        </section>
 
-      <div className="mt-10">
+        <section className="closing-cta" aria-labelledby="closing-cta-title">
+          <h2 id="closing-cta-title" className="closing-cta__title">
+            Ready to turn scattered holidays into real vacations?
+          </h2>
+          <p className="closing-cta__text">
+            Pick a country, set your day budget, and get a ranked plan you can
+            request at work tomorrow.
+          </p>
+          <div className="closing-cta__actions">
+            <Link to="/app" className="btn-pill btn-pill--primary">
+              Open the free planner
+              <ArrowRight aria-hidden="true" />
+            </Link>
+            <a href="/blog/" className="btn-pill btn-pill--ghost">
+              Read planning guides
+            </a>
+          </div>
+          <p className="closing-cta__trust">
+            Free &middot; No sign-up &middot; Your data stays in your browser
+          </p>
+        </section>
+
         <HtmlFragment html={landingSeoHtml} className="contents" />
       </div>
-    </section>
+    </>
   );
 }

@@ -1,0 +1,714 @@
+/* ══════════════════════════════════════════════════════════════════
+   Landing page styles — hand-authored CSS (Tailwind-free zone).
+   Depends only on tokens from theme.css (--color-*, --landing-*).
+   Mobile-first; breakpoints: 640px / 768px / 900px / 1024px.
+   ══════════════════════════════════════════════════════════════════ */
+
+.landing-page {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+.landing-page [id] {
+  scroll-margin-top: 5.5rem;
+}
+
+/* ── Pill buttons ─────────────────────────────────────────────── */
+
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-pill svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.btn-pill:focus-visible {
+  outline: 2px solid var(--landing-accent);
+  outline-offset: 2px;
+}
+
+.btn-pill--primary {
+  border-color: color-mix(in srgb, var(--landing-accent) 18%, var(--color-border));
+  background-color: color-mix(in srgb, var(--landing-accent) 88%, black);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 123, 131, 0.18);
+}
+
+.btn-pill--primary:hover {
+  transform: translateY(-2px);
+  background-color: color-mix(in srgb, var(--landing-accent) 96%, black);
+  box-shadow: 0 14px 30px rgba(15, 123, 131, 0.22);
+}
+
+.btn-pill--ghost {
+  border-color: var(--color-border);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.btn-pill--ghost:hover {
+  background-color: var(--color-surface-hover);
+}
+
+/* ── Hero: map is the first screen, copy floats on top ────────── */
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: calc(100svh - 3.5rem);
+  min-height: 0;
+  /* Cancel main's landing-page gutter and top padding without using 100vw,
+     which includes the scrollbar and can create horizontal overflow. */
+  margin: -2rem -1rem 0;
+}
+
+@supports (height: 100dvh) {
+  .hero {
+    height: calc(100dvh - 3.5rem);
+  }
+}
+
+.hero__overlay {
+  position: absolute;
+  top: clamp(1.5rem, 6vh, 4rem);
+  /* Align the copy with the centered 72rem content column. Percentages
+     resolve against the hero itself, which matches the real layout width. */
+  left: max(1.25rem, calc((100% - 72rem) / 2 + 1rem));
+  right: 1.25rem;
+  z-index: 4;
+  display: grid;
+  gap: 1.5rem;
+  justify-items: start;
+  max-width: min(34rem, calc(100% - 2.5rem));
+  pointer-events: none;
+}
+
+.hero__overlay::before {
+  content: "";
+  position: absolute;
+  inset: -3rem -4rem -2rem -2.5rem;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse at 30% 35%,
+    color-mix(in srgb, var(--color-background) 88%, transparent) 0%,
+    color-mix(in srgb, var(--color-background) 55%, transparent) 45%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+.hero__overlay .hero-actions {
+  pointer-events: auto;
+}
+
+.hero-title {
+  font-size: clamp(2.2rem, 3.8vw + 0.9rem, 4rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  text-shadow:
+    0 1px 0 var(--color-background),
+    0 0 28px var(--color-background),
+    0 0 60px var(--color-background);
+}
+
+.hero-title-accent {
+  color: var(--landing-accent);
+  font-style: italic;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* ── Interactive dotted world map ─────────────────────────────── */
+
+.hero__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.worldmap__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.worldmap__canvas:active {
+  cursor: grabbing;
+}
+
+.worldmap__canvas:focus-visible {
+  outline: 2px solid var(--landing-accent);
+  outline-offset: -2px;
+}
+
+.worldmap__hud {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 3;
+  display: flex;
+  justify-content: end;
+}
+
+.worldmap__zoom {
+  display: inline-flex;
+  gap: 0.4rem;
+  pointer-events: auto;
+}
+
+.globe-zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--color-background) 85%, transparent);
+  color: var(--color-text);
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  transition: background-color 0.2s ease;
+}
+
+.globe-zoom-btn:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.globe-zoom-btn:focus-visible {
+  outline: 2px solid var(--landing-accent);
+  outline-offset: 2px;
+}
+
+.globe-zoom-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.worldmap__tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.7rem;
+  background-color: var(--color-text);
+  color: var(--color-background);
+  font-size: 0.72rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.worldmap__tooltip strong {
+  font-size: 0.78rem;
+}
+
+.worldmap__popup {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+  width: max-content;
+  max-width: min(16rem, calc(100% - 1rem));
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.1rem;
+  background-color: color-mix(in srgb, var(--color-background) 94%, transparent);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.worldmap__popup-close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.worldmap__popup-close:hover {
+  color: var(--color-text);
+  background-color: var(--color-surface-hover);
+}
+
+.worldmap__popup-close svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.worldmap__panel-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.worldmap__panel-days {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.worldmap__cta {
+  min-height: 2.5rem;
+  margin-top: 0.3rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
+}
+
+.worldmap__spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  animation: worldmap-spin 1s linear infinite;
+}
+
+@keyframes worldmap-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worldmap__spinner {
+    animation: none;
+  }
+
+  .worldmap__tooltip {
+    transition: none;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Keep the title locked over the map while it is panned beneath it. */
+  .hero__overlay {
+    position: absolute;
+    top: 1.5rem;
+    left: 0;
+    right: 0;
+    gap: 1rem;
+    padding-inline: 1.5rem;
+    justify-items: center;
+    max-width: none;
+    text-align: center;
+  }
+
+  .hero__overlay::before {
+    inset: -1.75rem -1.5rem -1.5rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 9.5vw, 3rem);
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .worldmap__hud {
+    top: auto;
+    bottom: 1rem;
+  }
+}
+
+/* ── Section scaffolding ──────────────────────────────────────── */
+
+.landing-section {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.section-head {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 44rem;
+}
+
+.section-head__eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--landing-accent);
+}
+
+.section-head__title {
+  font-size: clamp(1.6rem, 2.5vw + 0.6rem, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.section-head__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── Feature tiles ────────────────────────────────────────────── */
+
+.features-grid {
+  display: grid;
+  gap: 1rem;
+  grid-auto-rows: 1fr;
+}
+
+/* HtmlFragment wrapper must not become a grid item itself. */
+.features-grid-inner {
+  display: contents;
+}
+
+@media (min-width: 700px) {
+  .features-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .features-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.landing-box {
+  display: grid;
+  align-content: start;
+  gap: 0.85rem;
+  padding: 1.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.landing-box--alt {
+  background-color: color-mix(
+    in srgb,
+    var(--landing-accent-alt-soft) 65%,
+    var(--color-surface)
+  );
+}
+
+.landing-box__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  background-color: var(--landing-accent-soft);
+  color: var(--landing-accent);
+}
+
+.landing-box__icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.landing-box--alt .landing-box__icon {
+  background-color: color-mix(in srgb, var(--landing-accent-alt) 10%, transparent);
+  color: var(--landing-accent-alt);
+}
+
+.landing-box__eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--landing-accent);
+}
+
+.landing-box--alt .landing-box__eyebrow {
+  color: var(--landing-accent-alt);
+}
+
+.landing-box__title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.landing-box__text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+@media (hover: hover) {
+  .landing-box:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--landing-accent) 35%, var(--color-border));
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  }
+}
+
+/* ── How it works ─────────────────────────────────────────────── */
+
+.steps {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+@media (min-width: 900px) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.step {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+  padding: 1.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  counter-increment: step;
+}
+
+.step::before {
+  content: counter(step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background-color: var(--landing-accent);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.step__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.step__text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── FAQ ──────────────────────────────────────────────────────── */
+
+.faq-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.faq-item {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background-color: color-mix(in srgb, var(--color-surface) 60%, transparent);
+  transition: border-color 0.25s ease;
+}
+
+.faq-item[open] {
+  border-color: color-mix(in srgb, var(--landing-accent) 30%, var(--color-border));
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.35rem;
+  list-style: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: "";
+  flex-shrink: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  background: var(--select-chevron) center / contain no-repeat;
+  transition: transform 0.25s ease;
+}
+
+.faq-item[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.faq-item__question {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.faq-item__body {
+  padding: 0 1.35rem 1.25rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--color-text-muted);
+}
+
+/* ── Closing call to action ───────────────────────────────────── */
+
+.closing-cta {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 2.5rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--landing-accent) 22%, var(--color-border));
+  border-radius: 2rem;
+  background-image: linear-gradient(180deg, var(--landing-accent-soft), transparent);
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .closing-cta {
+    padding: 3.5rem 2rem;
+  }
+}
+
+.closing-cta__title {
+  max-width: 34rem;
+  font-size: clamp(1.6rem, 3vw + 0.5rem, 2.4rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.closing-cta__text {
+  max-width: 38rem;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.closing-cta__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.closing-cta__actions .btn-pill {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .closing-cta__actions {
+    flex-direction: row;
+    justify-content: center;
+    width: auto;
+  }
+
+  .closing-cta__actions .btn-pill {
+    width: auto;
+  }
+}
+
+.closing-cta__trust {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ── Accessibility helpers (Tailwind-free replacements) ───────── */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-pill,
+  .landing-box,
+  .faq-item,
+  .faq-item summary::after {
+    transition: none;
+  }
+
+  .btn-pill--primary:hover,
+  .landing-box:hover {
+    transform: none;
+  }
+}
