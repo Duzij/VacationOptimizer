@@ -4,11 +4,11 @@
 export const SHOWCASE_YEAR = 2026;
 export const SHOWCASE_VACATION_DAYS = 25;
 
-// Server-side showcase defaults for region-requiring countries
-// (ShowcaseDefaults in ShowcaseService.cs). The CTA URL must use the same
-// regions so the planner opens with the exact showcased configuration.
+export const FEATURED_COUNTRY_CODES = ["DE", "US", "GB", "FR", "ES", "NL", "AU", "JP"] as const;
+
 const SHOWCASE_DEFAULT_REGION_PARAMS: Record<string, string> = {
     IN: "stateCode=IN-KA",
+    CH: "cantonCode=CH-ZH",
 };
 
 export function buildShowcasePlannerPath(countryCode: string): string {
