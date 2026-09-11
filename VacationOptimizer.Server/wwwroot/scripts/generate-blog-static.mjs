@@ -207,11 +207,17 @@ function normalizeDate(value, fileName) {
 }
 
 function requireStringArray(value, fieldName, fileName) {
-  if (!Array.isArray(value) || value.some((entry) => typeof entry !== "string" || !entry.trim())) {
+  if (!Array.isArray(value)) {
+    throw new Error(`Blog post ${fileName} must provide an array for "${fieldName}".`);
+  }
+
+  const normalized = value.map((entry) => (typeof entry === "number" ? String(entry) : entry));
+
+  if (normalized.some((entry) => typeof entry !== "string" || !entry.trim())) {
     throw new Error(`Blog post ${fileName} must provide a non-empty string array for "${fieldName}".`);
   }
 
-  return value.map((entry) => entry.trim());
+  return normalized.map((entry) => entry.trim());
 }
 
 function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
