@@ -265,4 +265,62 @@ describe("CalendarView", () => {
     await userEvent.click(screen.getByRole("button", { name: /Set January vacation-day cap/i }));
     expect(onSetMonthCap).toHaveBeenCalledWith(0, "January");
   });
+
+  it("renders helpful tooltips on day cells for all day types and formats public holidays as Public holiday: [HolidayName]", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    const calendar = [
+      {
+        date: "2027-01-01",
+        type: DayType.PublicHoliday,
+        holidayName: "New Year's Day",
+      },
+      {
+        date: "2027-01-02",
+        type: DayType.Weekend,
+        holidayName: null,
+      },
+      {
+        date: "2027-01-04",
+        type: DayType.WorkDay,
+        holidayName: null,
+      },
+      {
+        date: "2027-01-05",
+        type: DayType.Vacation,
+        holidayName: null,
+      },
+      {
+        date: "2027-01-06",
+        type: DayType.Vacation,
+        holidayName: null,
+        isLockedVacationDay: true,
+      },
+      {
+        date: "2027-01-07",
+        type: DayType.NeverHoliday,
+        holidayName: null,
+      },
+      {
+        date: "2027-01-08",
+        type: DayType.CustomFreeDay,
+        holidayName: "Company Day",
+      },
+    ];
+
+    render(
+      <CalendarView
+        year={2027}
+        calendar={calendar}
+      />,
+    );
+
+    expect(screen.getByTitle("Public holiday: New Year's Day")).toBeTruthy();
+    expect(screen.getByTitle("Weekend")).toBeTruthy();
+    expect(screen.getByTitle("Work day")).toBeTruthy();
+    expect(screen.getByTitle("Vacation day")).toBeTruthy();
+    expect(screen.getByTitle("Locked vacation day")).toBeTruthy();
+    expect(screen.getByTitle("Never a holiday")).toBeTruthy();
+    expect(screen.getByTitle("Custom free day: Company Day")).toBeTruthy();
+  });
 });

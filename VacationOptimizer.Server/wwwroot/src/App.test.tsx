@@ -68,7 +68,21 @@ vi.mock("./components/OptimizerForm", () => ({
 }));
 
 vi.mock("./components/CalendarView", () => ({
-  default: () => <div data-testid="calendar-view" />,
+  default: ({ onDaySelect }: { onDaySelect?: (day: unknown) => void }) => (
+    <div data-testid="calendar-view">
+      <button
+        type="button"
+        data-testid="mock-select-day"
+        onClick={() => onDaySelect?.({
+          date: "2026-05-01",
+          type: "PublicHoliday",
+          holidayName: "Labour Day",
+        })}
+      >
+        Select sample day
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("./components/ResultsSummary", () => ({
@@ -88,7 +102,12 @@ vi.mock("./components/FeedbackModal", () => ({
 }));
 
 vi.mock("./components/ConfirmCustomDayModal", () => ({
-  default: () => null,
+  default: ({ date, holidayName, mode, onCancel }: { date: string; holidayName?: string; mode: string; onCancel: () => void }) => (
+    <div data-testid="confirm-custom-day-modal">
+      <span>Modal for {date} ({holidayName}) mode: {mode}</span>
+      <button type="button" onClick={onCancel}>Close modal</button>
+    </div>
+  ),
 }));
 
 function createSavedRequest() {
@@ -395,5 +414,28 @@ describe("App loading state", () => {
 
     expect(window.localStorage.getItem("vacationOptimizer.v2.connectedToken")).toBeNull();
     expect(window.localStorage.getItem("vacationOptimizer.v2.connectedCalendarName")).toBeNull();
+  });
+
+  it("opens day settings modal when day lip settings button is clicked on day select", async () => {
+    window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
+    window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("planner-seed-1")));
+    window.history.replaceState({}, "", "/app?country=DE");
+
+    render(<App />);
+
+    // Select sample day via calendar mock
+    await userEvent.click(screen.getByTestId("mock-select-day"));
+
+    // Verify day details and settings button in day lip
+    expect(screen.getAllByText("May 1, 2026").length).toBeGreaterThan(0);
+    const settingsButtons = screen.getAllByRole("button", { name: "Day settings" });
+    expect(settingsButtons.length).toBeGreaterThan(0);
+
+    // Click settings button
+    await userEvent.click(settingsButtons[0]!);
+
+    // Verify day settings modal opened
+    expect(screen.getByTestId("confirm-custom-day-modal")).toBeTruthy();
+    expect(screen.getByText(/Modal for 2026-05-01 \(Labour Day\) mode: holidayActions/)).toBeTruthy();
   });
 });

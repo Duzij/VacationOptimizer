@@ -3,12 +3,13 @@ import { Check } from "lucide-react";
 interface Props {
     checked: boolean;
     label: string;
+    title?: string;
     onChange: (checked: boolean) => void;
 }
 
-export default function CheckboxField({ checked, label, onChange }: Props) {
+export default function CheckboxField({ checked, label, title, onChange }: Props) {
     return (
-        <label className="checkbox-field">
+        <label className="checkbox-field" title={title}>
             <input
                 type="checkbox"
                 checked={checked}

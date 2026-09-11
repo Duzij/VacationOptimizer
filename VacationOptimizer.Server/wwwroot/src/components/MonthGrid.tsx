@@ -106,6 +106,36 @@ function getSharedHolidayRangePosition(
     return "single";
 }
 
+function getDayTitle(day: CalendarDay): string {
+    if (day.isLockedVacationDay) {
+        return "Locked vacation day";
+    }
+
+    switch (day.type) {
+        case DayType.PublicHoliday:
+            return day.holidayName ? `Public holiday: ${day.holidayName}` : "Public holiday";
+        case DayType.CollectiveLeave:
+            return day.holidayName ? `Collective leave: ${day.holidayName}` : "Collective leave day";
+        case DayType.CustomFreeDay:
+            return day.holidayName && !day.holidayName.startsWith("Custom free day")
+                ? `Custom free day: ${day.holidayName}`
+                : "Custom free day";
+        case DayType.Vacation:
+            return "Vacation day";
+        case DayType.NeverHoliday:
+            return "Never a holiday";
+        case DayType.Weekend:
+            return "Weekend";
+        case DayType.PassedDay:
+            return "Past day";
+        case DayType.Today:
+            return "Today";
+        case DayType.WorkDay:
+        default:
+            return "Work day";
+    }
+}
+
 function DayCell({
     day,
     sharedHolidayRangePosition,
@@ -155,13 +185,7 @@ function DayCell({
     return (
         <div
             className={`${sharedBaseClass} ${sharedHolidayRangeClass} relative aspect-square flex items-center justify-center rounded-md text-[11px] leading-none select-none ${getDayClass(day.type)} ${isLongPressEnabled ? "cursor-pointer" : "cursor-default"} ${isPressed ? "day-pressing" : ""} ${isFlashing ? "animate-cell-flash z-10" : "transition-colors"}`}
-            title={
-                day.isLockedVacationDay ? "Locked vacation day"
-                    : day.holidayName ? day.holidayName
-                    : day.type === "Vacation" ? "Vacation day"
-                        : day.type === "NeverHoliday" ? "Never a holiday"
-                        : undefined
-            }
+            title={getDayTitle(day)}
             onClick={() => onDaySelect?.(day)}
             {...(isLongPressEnabled ? longPressHandlers : {})}
         >

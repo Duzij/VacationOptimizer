@@ -307,8 +307,8 @@ function PlannerPage() {
   }, [activeRequest, lockedVacationDates.length, runOptimization, setLockedVacationDates]);
 
   const handleDaySelect = useCallback((day: CalendarDay) => {
-    setSelectedDayDetails(getDayLipDetails(day));
-  }, []);
+    setSelectedDayDetails(getDayLipDetails(day, () => handleDayLongPress(day)));
+  }, [handleDayLongPress]);
 
   const handleApplyMonthCap = useCallback((month: MonthName, value: number) => {
     if (!activeRequest) {
@@ -661,6 +661,7 @@ function PlannerPage() {
           detail={selectedDayDetails.detail}
           sharedDetail={selectedDayDetails.sharedDetail}
           actions={selectedDayDetails.actions}
+          onSettings={selectedDayDetails.onSettings}
           onClose={() => setSelectedDayDetails(null)}
         />
       )}
@@ -698,7 +699,7 @@ function PlannerPage() {
 
 
 
-function getDayLipDetails(day: CalendarDay): DayLipDetails {
+function getDayLipDetails(day: CalendarDay, onSettings?: () => void): DayLipDetails {
   const shouldShowSharedDetail = day.sharedType && (
     day.sharedType !== day.type
     || day.sharedType === DayType.PublicHoliday
@@ -719,6 +720,7 @@ function getDayLipDetails(day: CalendarDay): DayLipDetails {
     sharedDetail: shouldShowSharedDetail
       ? `Partner: ${getDayLabel({ ...day, type: day.sharedType } as CalendarDay).toLowerCase()}` 
       : null,
+    onSettings: day.type !== DayType.PassedDay ? onSettings : undefined,
   };
 }
 

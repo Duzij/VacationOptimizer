@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Settings, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { type ReactNode } from "react";
 import Button from "./Button";
@@ -11,9 +11,10 @@ interface Props {
     sharedDetail?: string | null;
     actions?: ReactNode;
     onClose: () => void;
+    onSettings?: () => void;
 }
 
-export default function DetailsLipDesktop({ formattedDate, dateTime, label, detail, sharedDetail, actions, onClose }: Props) {
+export default function DetailsLipDesktop({ formattedDate, dateTime, label, detail, sharedDetail, actions, onClose, onSettings }: Props) {
     const content = (
         <div className="fixed inset-x-0 bottom-0 z-20 sm:inset-x-auto sm:left-1/2 hidden sm:block sm:bottom-4 sm:w-full sm:max-w-md sm:-translate-x-1/2">
             <div className="border border-border border-b-0 rounded-t-2xl bg-background shadow-lg px-4 py-3 sm:border-b sm:rounded-2xl">
@@ -37,14 +38,26 @@ export default function DetailsLipDesktop({ formattedDate, dateTime, label, deta
                             </div>
                         )}
                     </div>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={onClose}
-                        aria-label="Close day details"
-                    >
-                        <X className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {onSettings && (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={onSettings}
+                                aria-label="Day settings"
+                            >
+                                <Settings className="h-4 w-4" />
+                            </Button>
+                        )}
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={onClose}
+                            aria-label="Close day details"
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

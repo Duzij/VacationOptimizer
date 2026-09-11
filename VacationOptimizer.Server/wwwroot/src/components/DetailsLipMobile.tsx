@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Settings, Shuffle } from "lucide-react";
 import { createPortal } from "react-dom";
 import Button from "./Button";
 
@@ -10,6 +10,7 @@ export interface DayLipDetails {
     detail?: string | null;
     sharedDetail?: string | null;
     actions?: ReactNode;
+    onSettings?: () => void;
 }
 
 interface Props {
@@ -101,16 +102,31 @@ export default function DetailsLipMobile({
                 {dayDetails ? (
                     <div className="space-y-3">
                         <div className="space-y-1">
-                            <p className="text-[1.15rem] font-semibold leading-tight text-text">
-                                {dayDetails.dateTime ? (
-                                    <time dateTime={dayDetails.dateTime}>{dayDetails.formattedDate}</time>
-                                ) : (
-                                    dayDetails.formattedDate
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-[1.15rem] font-semibold leading-tight text-text">
+                                        {dayDetails.dateTime ? (
+                                            <time dateTime={dayDetails.dateTime}>{dayDetails.formattedDate}</time>
+                                        ) : (
+                                            dayDetails.formattedDate
+                                        )}
+                                    </p>
+                                    <p className="text-base leading-snug text-text">
+                                        {dayDetails.label}
+                                    </p>
+                                </div>
+                                {dayDetails.onSettings && (
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        onClick={dayDetails.onSettings}
+                                        aria-label="Day settings"
+                                        className="shrink-0"
+                                    >
+                                        <Settings className="h-4 w-4" />
+                                    </Button>
                                 )}
-                            </p>
-                            <p className="text-base leading-snug text-text">
-                                {dayDetails.label}
-                            </p>
+                            </div>
                             {dayDetails.detail && (
                                 <p className="text-sm leading-snug text-text-muted">
                                     {dayDetails.detail}

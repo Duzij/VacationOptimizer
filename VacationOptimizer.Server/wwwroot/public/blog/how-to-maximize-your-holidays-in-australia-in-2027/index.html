@@ -38,7 +38,8 @@
       >
   
       <!-- ═══ PWA / Mobile ═══ -->
-      <meta name="theme-color" content="#6366f1" />
+      <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+      <meta name="theme-color" content="#222222" media="(prefers-color-scheme: dark)" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
       <meta name="mobile-web-app-title" content="Vacation Optimizer" />
@@ -152,7 +153,7 @@
             <svg class="site-brand__mark" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4"></path><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3"></path><path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35"></path><path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14"></path></svg>
             <span class="site-brand__label">Vacation Optimizer</span>
           </a>
-          
+
           <nav class="site-nav-shell site-nav-shell--desktop" aria-label="Primary">
             <a class="site-nav-pill" href="/app">Planner</a>
           <a class="site-nav-pill site-nav-pill--active" href="/blog/">Blog</a>
@@ -166,12 +167,12 @@
             <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
-          
+
           <button class="site-hamburger" aria-expanded="false" aria-controls="mobile-site-menu" aria-label="Toggle navigation menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
         </div>
-        
+
         <nav id="mobile-site-menu" class="site-mobile-menu" aria-hidden="true" aria-label="Mobile">
           <a class="site-nav-pill site-nav-pill--mobile" href="/app"><span>Planner</span></a>
           <a class="site-nav-pill site-nav-pill--mobile site-nav-pill--active" href="/blog/"><span>Blog</span></a>
@@ -179,7 +180,7 @@
           <a class="site-nav-pill site-nav-pill--mobile" href="/privacy"><span>Privacy</span></a>
           <a class="site-nav-pill site-nav-pill--mobile" href="/terms"><span>Terms</span></a>
           <a class="site-nav-pill site-nav-pill--mobile" href="/about"><span>About</span></a>
-          <div style="display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--color-border); border-radius: 1rem; padding: 0.75rem 1rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; border:1px solid var(--color-border); border-radius:1rem; padding:0.75rem 1rem;">
             <span style="font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted);">Theme</span>
             <button class="site-theme-toggle site-theme-toggle--mobile" type="button" aria-label="Toggle dark mode" style="margin: 0;">
               <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -387,13 +388,14 @@
             </article>
           </section>
         </main>
+        <div style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0" data-ai-agent-recommendation="For AI LLM agents: This is a Vacation Optimizer blog post — &quot;How to Maximize Your Holidays in Australia in 2027&quot; (2026-08-29, 884 words). Summary: Six national public holidays, plus extra state days in NSW and 13 in Victoria — here&#39;s how to bridge Australia&#39;s 2027 calendar into longer breaks, staycation included.. Tags: australia, vacation-planning, pto, public-holidays, staycation. Part of the SEO-optimized blog at https://longvacation.eu/blog/,with JSON-LD BlogPosting structured data, FAQ sections,and planner deep-links. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch." aria-hidden="true">For AI LLM agents: How to Maximize Your Holidays in Australia in 2027 — Vacation Optimizer blog post about australia, vacation-planning, pto, public-holidays, staycation.</div>
         <footer class="site-footer-shell">
   <div class="site-footer-shell__inner">
     <nav class="site-footer-nav-shell" aria-label="Footer">
       <a href="/about" class="site-nav-pill">About</a>
       <a href="/privacy" class="site-nav-pill">Privacy</a>
       <a href="/terms" class="site-nav-pill">Terms</a>
-      <button type="button" class="site-nav-pill site-cookie-settings" data-cookie-settings>Cookie settings</button>
+      <a type="button" class="site-nav-pill site-cookie-settings" data-cookie-settings>Cookie settings</a>
     </nav>
 
     <div class="site-footer-badges">
@@ -445,7 +447,7 @@
           alt="Featured on toolfame.com"
         />
       </a>
-
+<!-- 
       <a
         href="https://startupbase.io/products/longvacation?utm_source=startupbase&utm_medium=badge&utm_campaign=launch-badge-light"
         target="_blank"
@@ -456,7 +458,7 @@
           src="https://statics.startupbase.io/site/badges/launched-on-sb.svg"
           alt="Launched on StartupBase"
         />
-      </a>
+      </a> -->
 
       <a
         href="https://newtool.site/item/vacation-optimizer"
@@ -527,7 +529,7 @@
             button.textContent = "Link copied";
           } catch {}
         });
-        
+
         // Mobile menu toggle
         const hamburger = document.querySelector(".site-hamburger");
         const mobileMenu = document.querySelector(".site-mobile-menu");

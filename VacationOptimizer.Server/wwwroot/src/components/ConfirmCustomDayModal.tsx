@@ -124,10 +124,17 @@ export default function ConfirmCustomDayModal({
                             checked={reportAsIncorrect}
                             onChange={setReportAsIncorrect}
                             label="Report this holiday as incorrect"
+                            title="Submit feedback that this holiday is incorrect or does not apply to this region"
                         />
 
                         <div className="flex gap-3 flex-wrap">
-                            <Button type="button" onClick={onCancel} variant="secondary" className="flex-1">
+                            <Button
+                                type="button"
+                                onClick={onCancel}
+                                variant="secondary"
+                                className="flex-1"
+                                title="Keep this holiday unchanged and close without saving changes"
+                            >
                                 Cancel
                             </Button>
                             <Button
@@ -135,6 +142,7 @@ export default function ConfirmCustomDayModal({
                                 onClick={onConfirmNeverHoliday}
                                 variant="secondary"
                                 className="flex-1"
+                                title="Exclude this day from the algorithm so vacation is never placed on it"
                             >
                                 Never vacation
                             </Button>
@@ -143,6 +151,7 @@ export default function ConfirmCustomDayModal({
                                 onClick={handleIgnoreHoliday}
                                 disabled={isSubmittingIgnore}
                                 className="flex-1"
+                                title="Ignore this public holiday and treat it as a normal work day in optimization"
                             >
                                 {isSubmittingIgnore ? "Ignoring..." : "Ignore"}
                             </Button>
@@ -150,7 +159,13 @@ export default function ConfirmCustomDayModal({
                     </>
                 ) : (
                     <div className="flex gap-3 flex-wrap">
-                        <Button type="button" onClick={onCancel} variant="secondary" className="flex-1">
+                        <Button
+                            type="button"
+                            onClick={onCancel}
+                            variant="secondary"
+                            className="flex-1"
+                            title="Close dialog without saving changes"
+                        >
                             Cancel
                         </Button>
                         {isGeneralActions ? (
@@ -160,6 +175,7 @@ export default function ConfirmCustomDayModal({
                                     onClick={onConfirmNeverHoliday}
                                     variant="secondary"
                                     className="flex-1"
+                                    title="Exclude this day from the algorithm so vacation is never placed on it"
                                 >
                                     Never vacation
                                 </Button>
@@ -167,6 +183,7 @@ export default function ConfirmCustomDayModal({
                                     type="button"
                                     onClick={onConfirmCustomDay}
                                     className="flex-1"
+                                    title="Add a custom free day (e.g. company day off or birthday) that does not use your vacation budget"
                                 >
                                     Custom vacation
                                 </Button>
@@ -175,6 +192,7 @@ export default function ConfirmCustomDayModal({
                                     onClick={onConfirmLockedVacationDay}
                                     disabled={isLockDisabled}
                                     className="flex-1"
+                                    title="Lock a vacation day on this date so it stays fixed across all optimizations"
                                 >
                                     Lock vacation
                                 </Button>
@@ -187,6 +205,7 @@ export default function ConfirmCustomDayModal({
                                     variant={isLockedVacationDay ? "danger" : "primary"}
                                     disabled={!isLockedVacationDay && isLockDisabled}
                                     className="flex-1"
+                                    title={isLockedVacationDay ? "Unlock this vacation day so the optimizer can move it" : "Lock this vacation day so it stays fixed across all optimizations"}
                                 >
                                     {isLockedVacationDay ? "Unlock vacation" : "Lock vacation"}
                                 </Button>
@@ -195,6 +214,7 @@ export default function ConfirmCustomDayModal({
                                     onClick={onConfirmNeverHoliday}
                                     variant="secondary"
                                     className="flex-1"
+                                    title="Exclude this day from the algorithm so vacation is never placed on it"
                                 >
                                     Never vacation
                                 </Button>
@@ -205,6 +225,7 @@ export default function ConfirmCustomDayModal({
                                 onClick={isRemoveNeverHoliday ? onConfirmNeverHoliday : onConfirmCustomDay}
                                 variant="danger"
                                 className="flex-1"
+                                title={isRemoveNeverHoliday ? "Remove never vacation rule for this day" : "Remove this custom vacation day"}
                             >
                                 Remove
                             </Button>
