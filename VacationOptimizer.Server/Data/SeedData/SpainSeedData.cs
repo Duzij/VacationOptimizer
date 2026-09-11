@@ -124,5 +124,28 @@ public static class SpainSeedData
 
         new Holiday { Id = 54, CountryId = Country.Id, StateId = MadridCityStateId, Date = new DateOnly(2026, 5, 15), Name = "San Isidro" },
         new Holiday { Id = 55, CountryId = Country.Id, StateId = MadridCityStateId, Date = new DateOnly(2026, 11, 9), Name = "Virgin of Almudena" },
+
+        // 2027 Barcelona holidays
+        new Holiday { Id = 56, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 1, 1), Name = "New Year's Day" },
+        new Holiday { Id = 57, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 1, 6), Name = "Epiphany" },
+        new Holiday { Id = 58, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 3, 26), Name = "Good Friday" },
+        new Holiday { Id = 59, CountryId = Country.Id, StateId = CataloniaStateId, Date = new DateOnly(2027, 3, 29), Name = "Easter Monday" },
+        new Holiday { Id = 60, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 5, 1), Name = "Labour Day" },
+        new Holiday { Id = 61, CountryId = Country.Id, StateId = BarcelonaCityStateId, Date = new DateOnly(2027, 5, 17), Name = "Whit Monday" },
+        new Holiday { Id = 62, CountryId = Country.Id, StateId = CataloniaStateId, Date = new DateOnly(2027, 6, 24), Name = "Sant Joan" },
+        new Holiday { Id = 63, CountryId = Country.Id, StateId = CataloniaStateId, Date = new DateOnly(2027, 9, 11), Name = "Catalan National Day" },
+        new Holiday { Id = 64, CountryId = Country.Id, StateId = BarcelonaCityStateId, Date = new DateOnly(2027, 9, 24), Name = "La Mercè" },
+        new Holiday { Id = 65, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 10, 12), Name = "National Day of Spain" },
+        new Holiday { Id = 66, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 11, 1), Name = "All Saints' Day" },
+        new Holiday { Id = 67, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 12, 6), Name = "Spanish Constitution Day" },
+        new Holiday { Id = 68, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 12, 8), Name = "Feast of the Immaculate Conception" },
+        new Holiday { Id = 69, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 12, 25), Name = "Christmas" },
+
+        // 2027 Madrid holidays
+        new Holiday { Id = 70, CountryId = Country.Id, StateId = CommunityOfMadridStateId, Date = new DateOnly(2027, 3, 25), Name = "Maundy Thursday" },
+        new Holiday { Id = 71, CountryId = Country.Id, StateId = CommunityOfMadridStateId, Date = new DateOnly(2027, 5, 3), Name = "Revuelta" },
+        new Holiday { Id = 72, CountryId = Country.Id, StateId = null, Date = new DateOnly(2027, 8, 16), Name = "Assumption of Mary" },
+        new Holiday { Id = 73, CountryId = Country.Id, StateId = MadridCityStateId, Date = new DateOnly(2027, 5, 15), Name = "San Isidro" },
+        new Holiday { Id = 74, CountryId = Country.Id, StateId = MadridCityStateId, Date = new DateOnly(2027, 11, 9), Name = "Virgin of Almudena" },
     };
 }

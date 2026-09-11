@@ -63,4 +63,45 @@ public class HolidayYearSupportTests
             holiday.Date == DateOnly.Parse(date)
             && holiday.Name == holidayName);
     }
+
+    [Theory]
+    [InlineData("ES-CT-BCN", "2027-05-17", "Whit Monday")]
+    [InlineData("ES-CT-BCN", "2027-09-24", "La Mercè")]
+    [InlineData("ES-MD-MAD", "2027-05-15", "San Isidro")]
+    [InlineData("ES-MD-MAD", "2027-11-09", "Virgin of Almudena")]
+    public void GetHolidays_SpainCityScope_IncludesCityHoliday_2027(string cityCode, string date, string holidayName)
+    {
+        var holidays = _holidayService.GetHolidays("ES", 2027, cityCode);
+
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == DateOnly.Parse(date)
+            && holiday.Name == holidayName);
+    }
+
+    [Theory]
+    [InlineData("CH-ZH")]
+    [InlineData("CH-LU")]
+    public void GetHolidays_2027_IsSupportedForEverySwitzerlandCantonScope(string cantonCode)
+    {
+        var holidays = _holidayService.GetHolidays("CH", SupportedYear, cantonCode);
+
+        Assert.All(holidays, holiday => Assert.Equal(SupportedYear, holiday.Date.Year));
+    }
+
+    [Theory]
+    [InlineData("CH-ZH", "2027-01-01", "New Year's Day")]
+    [InlineData("CH-ZH", "2027-03-26", "Good Friday")]
+    [InlineData("CH-ZH", "2027-12-25", "Christmas Day")]
+    [InlineData("CH-BE", "2027-01-02", "Berchtold Day")]
+    [InlineData("CH-LU", "2027-03-19", "Saint Joseph's Day")]
+    [InlineData("CH-LU", "2027-05-27", "Corpus Christi")]
+    [InlineData("CH-LU", "2027-12-08", "Immaculate Conception")]
+    public void GetHolidays_SwitzerlandCantonScope_IncludesCantonHoliday_2027(string cantonCode, string date, string holidayName)
+    {
+        var holidays = _holidayService.GetHolidays("CH", 2027, cantonCode);
+
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == DateOnly.Parse(date)
+            && holiday.Name == holidayName);
+    }
 }

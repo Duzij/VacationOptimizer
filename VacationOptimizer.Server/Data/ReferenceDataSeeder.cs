@@ -11,6 +11,7 @@ public static class ReferenceDataSeeder
         SeedCountry(dbContext, IndiaSeedData.Country, IndiaSeedData.States, IndiaSeedData.Holidays);
         SeedCountry(dbContext, SpainSeedData.Country, SpainSeedData.States, SpainSeedData.Holidays);
         SeedCountry(dbContext, IndonesiaSeedData.Country, IndonesiaSeedData.States, IndonesiaSeedData.Holidays);
+        SeedCountry(dbContext, SwitzerlandSeedData.Country, SwitzerlandSeedData.States, SwitzerlandSeedData.Holidays);
         dbContext.SaveChanges();
     }
 

@@ -9,6 +9,7 @@ public static class CountrySeedCatalog
         IndiaSeedData.Country,
         SpainSeedData.Country,
         IndonesiaSeedData.Country,
+        SwitzerlandSeedData.Country,
     };
 
     private static readonly IReadOnlyList<State> NormalizedStates = BuildStates();
@@ -23,6 +24,7 @@ public static class CountrySeedCatalog
         var localStates = IndiaSeedData.States
             .Concat(SpainSeedData.States)
             .Concat(IndonesiaSeedData.States)
+            .Concat(SwitzerlandSeedData.States)
             .ToList();
 
         return localStates
@@ -41,6 +43,7 @@ public static class CountrySeedCatalog
         var localStates = IndiaSeedData.States
             .Concat(SpainSeedData.States)
             .Concat(IndonesiaSeedData.States)
+            .Concat(SwitzerlandSeedData.States)
             .ToList();
 
         var stateIdMap = localStates
@@ -57,6 +60,7 @@ public static class CountrySeedCatalog
         var localHolidays = IndiaSeedData.Holidays
             .Concat(SpainSeedData.Holidays)
             .Concat(IndonesiaSeedData.Holidays)
+            .Concat(SwitzerlandSeedData.Holidays)
             .ToList();
 
         return localHolidays
