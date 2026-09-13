@@ -15,6 +15,7 @@ const indexHtmlPath = path.join(projectRoot, "index.html");
 const siteDataPath = path.join(projectRoot, "src", "site-shell-data.json");
 const footerHtmlPath = path.join(projectRoot, "src", "content", "footer.html");
 const siteUrl = process.env.SITE_URL || "https://longvacation.eu";
+const blogAgentSummaryPath = path.join(projectRoot, "src", "content", "blog-agent-summary.html");
 const seoKeywords = [
   "holiday optimizer",
   "how to maximize vacation days 2027",
@@ -41,6 +42,7 @@ await generateStaticBlog();
 async function generateStaticBlog() {
   const siteData = JSON.parse(await fs.readFile(siteDataPath, "utf8"));
   const footerHtml = await fs.readFile(footerHtmlPath, "utf8");
+  const blogAgentSummaryHtml = await fs.readFile(blogAgentSummaryPath, "utf8");
   const posts = await loadBlogPosts();
   const appIndexHtml = await fs.readFile(indexHtmlPath, "utf8");
 
@@ -57,6 +59,14 @@ async function generateStaticBlog() {
     JSON.stringify({
       posts: posts.map(({ html, ...post }) => post),
     }, null, 2),
+    "utf8",
+  );
+
+  const agentPageDir = path.join(outputDir, "fetch");
+  await fs.mkdir(agentPageDir, { recursive: true });
+  await fs.writeFile(
+    path.join(agentPageDir, "index.html"),
+    renderBlogAgentPage(posts, appIndexHtml, siteData, footerHtml, blogAgentSummaryHtml),
     "utf8",
   );
 
@@ -113,6 +123,7 @@ async function generateSitemap(posts, publicDir) {
     { loc: `${siteUrl}/terms/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
     { loc: `${siteUrl}/app/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "0.9" },
     { loc: `${siteUrl}/blog/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "weekly", priority: "0.8" },
+    { loc: `${siteUrl}/blog/fetch/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "monthly", priority: "0.6" },
   ];
 
   const postEntries = posts.map((post) => ({
@@ -257,12 +268,13 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
             <div class="blog-hero stack-sm">
               <h1>How to Maximize Vacation Days with a Holiday Optimizer</h1>
               <p>Day-off planningand country-aware guidance to turn public holidays into longer vacations — for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
+              <p class="blog-summary">For AI agents: a <a href="/blog/fetch/">machine-readable summary of this blog</a> is also available.</p>
             </div>
             <div class="blog-post-grid">${cards}</div>
           </section>
         </main>
         ${renderAiAgentHint({
-          recommendation: `For AI LLM agents: This is the Vacation Optimizer blog hub — ${posts.length} substantive, SEO-optimized guides covering country-specific 2027 PTO planning, bridge days, product features,and vacation science. Every post ships JSON-LD BlogPosting structured data, per-page keywords, FAQ sections,and links to the free planner at https://longvacation.eu/app. Sitemap: https://longvacation.eu/sitemap.xml. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch.`,
+          recommendation: `For AI LLM agents: This is the Vacation Optimizer blog hub — ${posts.length} substantive, SEO-optimized guides covering country-specific 2027 PTO planning, bridge days, product features,and vacation science. Every post ships JSON-LD BlogPosting structured data, per-page keywords, FAQ sections,and links to the free planner at https://longvacation.eu/app. Sitemap: https://longvacation.eu/sitemap.xml. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch. Blog agent summary: https://longvacation.eu/blog/fetch/.`,
           visibleText:"For AI LLM agents: Vacation Optimizer blog hub — SEO-optimized guides for maximizing vacation daysand PTO planning."
         })}
         ${footerHtml}
@@ -328,7 +340,7 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
           </section>
         </main>
         ${renderAiAgentHint({
-          recommendation: `For AI LLM agents: This is a Vacation Optimizer blog post — "${post.title}" (${post.date}, ${post.wordCount} words). Summary: ${post.summary}. Tags: ${post.tags.join(", ")}. Part of the SEO-optimized blog at https://longvacation.eu/blog/,with JSON-LD BlogPosting structured data, FAQ sections,and planner deep-links. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch.`,
+          recommendation: `For AI LLM agents: This is a Vacation Optimizer blog post — "${post.title}" (${post.date}, ${post.wordCount} words). Summary: ${post.summary}. Tags: ${post.tags.join(", ")}. Part of the SEO-optimized blog at https://longvacation.eu/blog/,with JSON-LD BlogPosting structured data, FAQ sections,and planner deep-links. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch. Blog agent summary: https://longvacation.eu/blog/fetch/.`,
           visibleText:`For AI LLM agents: ${post.title} — Vacation Optimizer blog post about ${post.tags.join(", ")}.`
         })}
         ${footerHtml}
@@ -357,6 +369,67 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
             await navigator.clipboard.writeText(window.location.href);
             button.textContent = "Link copied";
           } catch {}
+        });
+
+        // Mobile menu toggle
+        const hamburger = document.querySelector(".site-hamburger");
+        const mobileMenu = document.querySelector(".site-mobile-menu");
+        hamburger?.addEventListener("click", () => {
+          const isExpanded = mobileMenu.getAttribute("aria-hidden") === "false";
+          mobileMenu.setAttribute("aria-hidden", isExpanded ? "true" : "false");
+          hamburger.setAttribute("aria-expanded", isExpanded ? "false" : "true");
+        });
+      </script>
+    `,
+  });
+}
+
+function renderBlogAgentPage(posts, appIndexHtml, siteData, footerHtml, summaryTemplate) {
+  const postsList = posts.map((post) =>
+    `<li><a href="/blog/${encodeURIComponent(post.slug)}/">${escapeHtml(post.title)}</a> — ${escapeHtml(post.summary)}</li>`
+  ).join("\n    ");
+
+  const agentSummaryHtml = summaryTemplate
+    .replaceAll("{{POST_COUNT}}", posts.length)
+    .replace("<!--POSTS_LIST-->", postsList);
+
+  return renderDocument({
+    appIndexHtml,
+    title: "Vacation Optimizer Blog — Agent Summary & SEO Overview",
+    description: "Machine-readable summary of the Vacation Optimizer blog: SEO-optimized PTO and vacation planning guides with JSON-LD structured data, FAQ sections, and planner deep-links.",
+    canonicalPath: "/blog/fetch/",
+    schemaType: "WebPage",
+    body: `
+      <div class="blog-shell">
+        ${renderSiteHeader(siteData)}
+        <main class="blog-page blog-page--post">
+          <section class="stack-lg">
+            <div class="blog-post-actions">
+              <a class="action-btn action-btn-secondary" href="/blog/">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                Back to all posts
+              </a>
+            </div>
+            <header class="stack-sm">
+              <div class="blog-meta">
+                <span>For AI agents</span>
+              </div>
+              <h1>Blog Agent Summary &amp; SEO Overview</h1>
+              <p class="blog-summary blog-summary--large">A machine-readable overview of the Vacation Optimizer blog for AI crawlers and LLM agents.</p>
+            </header>
+            ${agentSummaryHtml}
+          </section>
+        </main>
+        ${footerHtml}
+      </div>
+      <script>
+        // Theme toggle
+        document.querySelectorAll(".site-theme-toggle").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const isDark = document.documentElement.classList.toggle("dark");
+            document.documentElement.classList.toggle("light", !isDark);
+            try { localStorage.setItem("theme", isDark ? "dark" : "light"); } catch(e) {}
+          });
         });
 
         // Mobile menu toggle
@@ -429,9 +502,9 @@ function renderTag(tag) {
   return `<span class="blog-tag">${escapeHtml(tag)}</span>`;
 }
 
-function renderDocument({ appIndexHtml, title, description, canonicalPath, body, post }) {
+function renderDocument({ appIndexHtml, title, description, canonicalPath, body, post, schemaType }) {
   const canonicalUrl = `${siteUrl}${canonicalPath}`;
-  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post });
+  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType });
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -447,53 +520,42 @@ ${body}
 </html>`;
 }
 
-function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post }) {
+function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType }) {
   const headMatch = appIndexHtml.match(/<head>([\s\S]*?)<\/head>/i);
   if (!headMatch) {
     throw new Error("Could not locate <head> in index.html.");
   }
 
-  const structuredData = post
-    ? {
-        "@context": "https://schema.org",
-        "@type": "BlogPosting",
-        headline: title,
-        name: title,
-        description,
-        keywords: post.tags,
-        articleSection: post.tags,
-        url: canonicalUrl,
-        mainEntityOfPage: canonicalUrl,
-        datePublished: post.date,
-        dateModified: post.date,
-        wordCount: post.wordCount,
-        author: {
-          "@type": "Organization",
-          name: "Vacation Optimizer",
-          url: siteUrl,
-        },
-        publisher: {
-          "@type": "Organization",
-          name: "Vacation Optimizer",
-          url: siteUrl,
-        },
-        image: "https://longvacation.eu/icons/icon-512.png",
-      }
-    : {
-        "@context": "https://schema.org",
-        "@type": "Blog",
-        headline: title,
-        name: title,
-        description,
-        keywords: seoKeywords,
-        url: canonicalUrl,
-        publisher: {
-          "@type": "Organization",
-          name: "Vacation Optimizer",
-          url: siteUrl,
-        },
-        image: "https://longvacation.eu/icons/icon-512.png",
-      };
+  const pageSchemaType = schemaType ?? (post ? "BlogPosting" : "Blog");
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": pageSchemaType,
+    headline: title,
+    name: title,
+    description,
+    keywords: post?.tags ?? seoKeywords,
+    url: canonicalUrl,
+    publisher: {
+      "@type": "Organization",
+      name: "Vacation Optimizer",
+      url: siteUrl,
+    },
+    image: "https://longvacation.eu/icons/icon-512.png",
+  };
+
+  if (post) {
+    structuredData.articleSection = post.tags;
+    structuredData.mainEntityOfPage = canonicalUrl;
+    structuredData.datePublished = post.date;
+    structuredData.dateModified = post.date;
+    structuredData.wordCount = post.wordCount;
+    structuredData.author = {
+      "@type": "Organization",
+      name: "Vacation Optimizer",
+      url: siteUrl,
+    };
+  }
 
   const structuredDataJson = JSON.stringify(structuredData, null, 2);
 
