@@ -303,6 +303,13 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
 }
 
 function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
+
+  const tablePreProcessor = post.html
+  .replace(/<table>/g, '<div class="blog-table"><table>')
+  .replace(/<\/table>/g, '</table></div>');
+
+  post.html = tablePreProcessor;
+
   return renderDocument({
     appIndexHtml,
     title: `${post.title} | Vacation Optimizer`,
