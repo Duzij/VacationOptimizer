@@ -1,6 +1,6 @@
-# Vacation Optimizer (longvacation.eu)
+# Long Vacation - Vacation Optimizer (longvacation.eu)
 
-> Vacation Optimizer is a free, privacy-first holiday optimizer and PTO optimizer that turns public holidays, weekends, and local calendar rules into longer, more useful breaks with a country-aware planner and an SEO-optimized, FAQ-backed blog.
+> Long Vacation - Vacation Optimizer is a free, privacy-first holiday optimizer and PTO optimizer that turns public holidays, weekends, and local calendar rules into longer, more useful breaks with a country-aware planner and an SEO-optimized, FAQ-backed blog.
 
 ## Overview
 

@@ -36,7 +36,7 @@ The fix is substantive depth, not filler: answer the follow-up questions a reade
   3. **Example with real numbers** — "25 vacation days → 40+ days off" reusing the country-showcase output as original data (E-E-A-T signal), plus a note that any supported country can be picked.
 
 - **FAQ section** (H2 "Frequently asked questions") with 5–6 substantive Q&A (2–3 sentences each), each answer linking to the planner or a relevant blog post. Candidate questions:
-  - "Is Vacation Optimizer free?"
+  - "Is Long Vacation free?"
   - "What is a bridge day?"
   - "How accurate is the holiday data?"
   - "Can I add my own office closures and ignore holidays that don't apply?"

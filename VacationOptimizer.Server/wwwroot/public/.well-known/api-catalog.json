@@ -1,6 +1,6 @@
 {
-  "name": "Vacation Optimizer API",
-  "description": "Public API endpoints for the Vacation Optimizer planner, showcase, and holiday data. Advertised from the homepage via an RFC 8288 Link header (rel=\"api-catalog\".",
+  "name": "Long Vacation API",
+  "description": "Public API endpoints for the Long Vacation planner, showcase, and holiday data. Advertised from the homepage via an RFC 8288 Link header (rel=\"api-catalog\".",
   "baseUrl": "https://longvacation.eu",
   "endpoints": [
     {

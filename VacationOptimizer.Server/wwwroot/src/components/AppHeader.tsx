@@ -35,7 +35,7 @@ export default function AppHeader({ isDark, onToggleTheme }: AppHeaderProps) {
           <Link to="/" className="site-brand">
             <TreePalm className="site-brand__mark text-primary" />
             <span className="site-brand__label bg-gradient-to-r bg-clip-text">
-              Vacation Optimizer
+              Long Vacation
             </span>
           </Link>
 

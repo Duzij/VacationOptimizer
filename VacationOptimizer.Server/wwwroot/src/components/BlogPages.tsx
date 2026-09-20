@@ -146,7 +146,7 @@ export function BlogSamplePostPage() {
       return;
     }
 
-    document.title = `${post.title} | Vacation Optimizer`;
+    document.title = `${post.title} | Long Vacation - Vacation Optimizer`;
 
     const descriptionTag = document.querySelector('meta[name="description"]');
     descriptionTag?.setAttribute("content", post.summary);

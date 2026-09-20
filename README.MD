@@ -1,4 +1,4 @@
-# Vacation Optimizer Docker Deploy
+# Long Vacation - Docker Deploy
 
 This project is deployed with `docker compose`.
 

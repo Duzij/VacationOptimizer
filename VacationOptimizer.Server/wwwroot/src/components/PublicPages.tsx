@@ -46,8 +46,8 @@ export function HomePage() {
 export function AboutPage() {
   return (
     <PageSection
-      title="About Vacation Optimizer"
-      description="Vacation Optimizer is a vacation planning site built to help people use vacation days more deliberately by comparing breaks around public holidays, weekends, and local calendar rules."
+      title="About Long Vacation - Vacation Optimizer"
+      description="Long Vacation is a vacation planning site built to help people use vacation days more deliberately by comparing breaks around public holidays, weekends, and local calendar rules."
     >
       <HtmlFragment
         html={aboutPageHtml}
@@ -60,7 +60,7 @@ export function AboutPage() {
 export function ContactPage() {
   return (
     <PageSection
-      title="Contact Vacation Optimizer"
+      title="Contact Long Vacation - Vacation Optimizer"
       description="Use this page to report product issues, holiday-data corrections, planner feedback, or questions about how the site works."
     >
       <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
@@ -110,7 +110,7 @@ export function PrivacyPage() {
           </h2>
           <div className="space-y-3 text-sm leading-6 text-text-muted">
             <p>
-              Vacation Optimizer stores planner form state in your
+              Long Vacation - Vacation Optimizer stores planner form state in your
               browser&apos;s local storage so the app can restore your latest
               setup and result when you return.
             </p>
@@ -189,7 +189,7 @@ export function TermsPage() {
   return (
     <PageSection
       title="Terms of Use"
-      description="Vacation Optimizer provides informational planning support. Users remain responsible for verifying holiday accuracy, employer policy, and final travel or leave decisions."
+      description="Long Vacation - Vacation Optimizer provides informational planning support. Users remain responsible for verifying holiday accuracy, employer policy, and final travel or leave decisions."
     >
       <HtmlFragment
         html={termsPageHtml}

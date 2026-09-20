@@ -105,7 +105,7 @@ describe("Blog pages", () => {
       </MemoryRouter>,
     );
 
-    expect(document.title).toBe("Maximize Your Vacation in the US in 2027 | Vacation Optimizer");
+    expect(document.title).toBe("Maximize Your Vacation in the US in 2027 | Long Vacation - Vacation Optimizer");
     expect(document.querySelector('meta[name="description"]')?.getAttribute("content"))
       .toBe("Stretch limited PTO around US federal holidays in 2027.");
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href"))

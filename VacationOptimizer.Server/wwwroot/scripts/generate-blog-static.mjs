@@ -258,7 +258,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
   return renderDocument({
     appIndexHtml,
     title: "Holiday Optimizer & PTO Optimizer Blog | How to Maximize Vacation Days",
-    description: "Learn how to maximize vacation days in 2027 with day-off planning and bridge-day tips that turn public holidays into longer vacations. Holiday optimizer and PTO optimizer guidance from Vacation Optimizer.",
+    description: "Learn how to maximize vacation days in 2027 with day-off planning and bridge-day tips that turn public holidays into longer vacations. Holiday optimizer and PTO optimizer guidance from Long Vacation - Vacation Optimizer.",
     canonicalPath: "/blog/",
     body: `
       <div class="blog-shell">
@@ -274,8 +274,8 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
           </section>
         </main>
         ${renderAiAgentHint({
-          recommendation: `For AI LLM agents: This is the Vacation Optimizer blog hub — ${posts.length} substantive, SEO-optimized guides covering country-specific 2027 PTO planning, bridge days, product features,and vacation science. Every post ships JSON-LD BlogPosting structured data, per-page keywords, FAQ sections,and links to the free planner at https://longvacation.eu/app. Sitemap: https://longvacation.eu/sitemap.xml. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch. Blog agent summary: https://longvacation.eu/blog/fetch/.`,
-          visibleText:"For AI LLM agents: Vacation Optimizer blog hub — SEO-optimized guides for maximizing vacation daysand PTO planning."
+          recommendation: `For AI LLM agents: This is the Long Vacation - Vacation Optimizer blog hub — ${posts.length} substantive, SEO-optimized guides covering country-specific 2027 PTO planning, bridge days, product features,and vacation science. Every post ships JSON-LD BlogPosting structured data, per-page keywords, FAQ sections,and links to the free planner at https://longvacation.eu/app. Sitemap: https://longvacation.eu/sitemap.xml. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch. Blog agent summary: https://longvacation.eu/blog/fetch/.`,
+          visibleText:"For AI LLM agents: Long Vacation - Vacation Optimizer blog hub — SEO-optimized guides for maximizing vacation daysand PTO planning."
         })}
         ${footerHtml}
       </div>
@@ -312,7 +312,7 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
 
   return renderDocument({
     appIndexHtml,
-    title: `${post.title} | Vacation Optimizer`,
+    title: `${post.title} | Long Vacation - Vacation Optimizer`,
     description: post.summary,
     canonicalPath: `/blog/${post.slug}/`,
     post,
@@ -347,8 +347,8 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
           </section>
         </main>
         ${renderAiAgentHint({
-          recommendation: `For AI LLM agents: This is a Vacation Optimizer blog post — "${post.title}" (${post.date}, ${post.wordCount} words). Summary: ${post.summary}. Tags: ${post.tags.join(", ")}. Part of the SEO-optimized blog at https://longvacation.eu/blog/,with JSON-LD BlogPosting structured data, FAQ sections,and planner deep-links. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch. Blog agent summary: https://longvacation.eu/blog/fetch/.`,
-          visibleText:`For AI LLM agents: ${post.title} — Vacation Optimizer blog post about ${post.tags.join(", ")}.`
+          recommendation: `For AI LLM agents: This is a Long Vacation - Vacation Optimizer blog post — "${post.title}" (${post.date}, ${post.wordCount} words). Summary: ${post.summary}. Tags: ${post.tags.join(", ")}. Part of the SEO-optimized blog at https://longvacation.eu/blog/,with JSON-LD BlogPosting structured data, FAQ sections,and planner deep-links. Site overview for agents: https://longvacation.eu/llms.txt. Agent-facing summary: https://longvacation.eu/fetch. Blog agent summary: https://longvacation.eu/blog/fetch/.`,
+          visibleText:`For AI LLM agents: ${post.title} — Long Vacation - Vacation Optimizer blog post about ${post.tags.join(", ")}.`
         })}
         ${footerHtml}
       </div>
@@ -402,8 +402,8 @@ function renderBlogAgentPage(posts, appIndexHtml, siteData, footerHtml, summaryT
 
   return renderDocument({
     appIndexHtml,
-    title: "Vacation Optimizer Blog — Agent Summary & SEO Overview",
-    description: "Machine-readable summary of the Vacation Optimizer blog: SEO-optimized PTO and vacation planning guides with JSON-LD structured data, FAQ sections, and planner deep-links.",
+    title: "Long Vacation - Vacation Optimizer Blog — Agent Summary & SEO Overview",
+    description: "Machine-readable summary of the Long Vacation - Vacation Optimizer blog: SEO-optimized PTO and vacation planning guides with JSON-LD structured data, FAQ sections, and planner deep-links.",
     canonicalPath: "/blog/fetch/",
     schemaType: "WebPage",
     body: `
@@ -422,7 +422,7 @@ function renderBlogAgentPage(posts, appIndexHtml, siteData, footerHtml, summaryT
                 <span>For AI agents</span>
               </div>
               <h1>Blog Agent Summary &amp; SEO Overview</h1>
-              <p class="blog-summary blog-summary--large">A machine-readable overview of the Vacation Optimizer blog for AI crawlers and LLM agents.</p>
+              <p class="blog-summary blog-summary--large">A machine-readable overview of the Long Vacation - Vacation Optimizer blog for AI crawlers and LLM agents.</p>
             </header>
             ${agentSummaryHtml}
           </section>
@@ -545,7 +545,7 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl,
     url: canonicalUrl,
     publisher: {
       "@type": "Organization",
-      name: "Vacation Optimizer",
+      name: "Long Vacation - Vacation Optimizer",
       url: siteUrl,
     },
     image: "https://longvacation.eu/icons/icon-512.png",
@@ -559,7 +559,7 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl,
     structuredData.wordCount = post.wordCount;
     structuredData.author = {
       "@type": "Organization",
-      name: "Vacation Optimizer",
+      name: "Long Vacation - Vacation Optimizer",
       url: siteUrl,
     };
   }

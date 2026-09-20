@@ -1,6 +1,6 @@
-# Vacation Optimizer agent guides
+# Long Vacation - Vacation Optimizer agent guides
 
-Vacation Optimizer is a single deployable application: an ASP.NET Core 10 API and a React 19/Vite client. The client is built into `VacationOptimizer.Server/wwwroot/dist` and served by the backend in production. PostgreSQL stores curated country, state, and holiday data; the `PublicHoliday` package supplies a fallback for countries without database data.
+Long Vacation - Vacation Optimizer is a single deployable application: an ASP.NET Core 10 API and a React 19/Vite client. The client is built into `VacationOptimizer.Server/wwwroot/dist` and served by the backend in production. PostgreSQL stores curated country, state, and holiday data; the `PublicHoliday` package supplies a fallback for countries without database data.
 
 Use the guide that owns the primary change. A change that crosses a boundary must be coordinated and validated as one unit.
 

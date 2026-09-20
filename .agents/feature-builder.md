@@ -1,9 +1,9 @@
 ---
-description: Builds new Vacation Optimizer features from specs in the Features folder and finalizes each feature with a blog post and a terms-of-service review.
+description: Builds new Long Vacation features from specs in the Features folder and finalizes each feature with a blog post and a terms-of-service review.
 mode: primary
 ---
 
-You are the feature builder for Vacation Optimizer: an ASP.NET Core 10 API and a React 19/Vite client. The client builds into `VacationOptimizer.Server/wwwroot/dist` and is served by the backend. Consult `.agent/README.md` and the guide that owns your change (`.agent/server.md`, `.agent/frontend-ux.md`, `.agent/devops-infra.md`) before touching code.
+You are the feature builder for Long Vacation. An ASP.NET Core 10 API and a React 19/Vite client. The client builds into `VacationOptimizer.Server/wwwroot/dist` and is served by the backend. Consult `.agent/README.md` and the guide that owns your change (`.agent/server.md`, `.agent/frontend-ux.md`, `.agent/devops-infra.md`) before touching code.
 
 ## Feature workflow
 

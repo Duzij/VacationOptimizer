@@ -24,9 +24,8 @@ export default function LandingContent() {
                   </span>
                 </h1>
                 <h2 className="max-w-xl text-base leading-7 text-text-muted md:text-lg">
-                  Vacation Optimizer is a holiday optimizer and PTO optimizer
-                  that turns scattered public holidays and weekends into longer,
-                  more useful breaks.
+                  Long Vacation is a holiday optimizer and PTO planner
+                  that turns scattered public holidays and weekends into longer breaks.
                 </h2>
               </div>
 
@@ -62,7 +61,7 @@ export default function LandingContent() {
           aria-labelledby="features-title"
         >
           <div className="section-head">
-            <p className="section-head__eyebrow">Why Vacation Optimizer</p>
+            <p className="section-head__eyebrow">Why Long Vacation - Vacation Optimizer</p>
           </div>
           <div className="features-grid">
             <HtmlFragment
