@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSwitzerlandSchema } from "./api";
 import { isSwitzerlandOptimizeRequest } from "../models";
-import { buildBaseRequest, type CountryOptimizerFormProps, SharedOptimizerControls, StateSelectField } from "../shared/optimizerFormShared";
+import { buildBaseRequest, isValidCustomPeriod, type CountryOptimizerFormProps, SharedOptimizerControls, StateSelectField } from "../shared/optimizerFormShared";
 
 export default function SwitzerlandCountryOptimizerForm({
     country,
@@ -61,7 +61,7 @@ export default function SwitzerlandCountryOptimizerForm({
                 customFreeDays={customFreeDays}
                 onCustomFreeDaysChange={onCustomFreeDaysChange}
                 isLoading={isLoading}
-                isSubmitDisabled={isLoading || schemaLoading || !cantonCode}
+                isSubmitDisabled={isLoading || schemaLoading || !cantonCode || !isValidCustomPeriod(sharedDraft)}
                 showAdvanced={showAdvanced}
                 onShowAdvancedChange={setShowAdvanced}
                 yearMin={schema?.yearRange.min}

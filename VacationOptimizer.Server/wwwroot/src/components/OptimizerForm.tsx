@@ -9,6 +9,7 @@ import SpainCountryOptimizerForm from "../features/countrySpecific/spain/SpainCo
 import SwitzerlandCountryOptimizerForm from "../features/countrySpecific/switzerland/SwitzerlandCountryOptimizerForm";
 import {
     buildBaseRequest,
+    isValidCustomPeriod,
     type SharedDraft,
     SharedOptimizerControls,
     StateSelectField,
@@ -32,6 +33,8 @@ function getInitialSharedDraft(initialRequest: OptimizeRequest | null | undefine
         minimumDaysPerRange: initialRequest?.minimumDaysPerRange ?? defaultMinimumDaysPerRange,
         maximumDaysPerRange: initialRequest?.maximumDaysPerRange ?? defaultMaximumDaysPerRange,
         maxNumberOfVacationsPerMonth: initialRequest?.maxNumberOfVacationsPerMonth ?? {},
+        startDate: initialRequest?.startDate,
+        endDate: initialRequest?.endDate,
     };
 }
 
@@ -278,7 +281,7 @@ function LegacyCountryOptimizerForm({
                 customFreeDays={customFreeDays}
                 onCustomFreeDaysChange={onCustomFreeDaysChange}
                 isLoading={isLoading}
-                isSubmitDisabled={isLoading}
+                isSubmitDisabled={isLoading || !isValidCustomPeriod(sharedDraft)}
                 showAdvanced={showAdvanced}
                 onShowAdvancedChange={setShowAdvanced}
                 lockedVacationDaysCount={lockedVacationDaysCount}

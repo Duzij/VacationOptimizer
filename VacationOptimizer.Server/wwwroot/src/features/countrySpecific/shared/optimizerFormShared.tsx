@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, LockOpen, Loader2, Plane } from "lucide-react";
 import { getDefaultYear } from "../../../optimizerDefaults";
 import { type CustomFreeDay, type MonthlyVacationLimits, type StateOption } from "../../../types/models";
@@ -11,6 +12,8 @@ export interface SharedDraft {
     minimumDaysPerRange: number | null;
     maximumDaysPerRange: number | null;
     maxNumberOfVacationsPerMonth?: MonthlyVacationLimits;
+    startDate?: string;
+    endDate?: string;
 }
 
 export function buildBaseRequest(country: string, draft: SharedDraft, customFreeDays: CustomFreeDay[]) {
@@ -22,6 +25,12 @@ export function buildBaseRequest(country: string, draft: SharedDraft, customFree
             return active;
         }, {});
 
+    const period: { startDate?: string; endDate?: string } = {};
+    if (draft.startDate && draft.endDate) {
+        period.startDate = draft.startDate;
+        period.endDate = draft.endDate;
+    }
+
     return {
         country,
         year: draft.year,
@@ -32,7 +41,41 @@ export function buildBaseRequest(country: string, draft: SharedDraft, customFree
             ? monthlyVacationLimits
             : undefined,
         customFreeDays: customFreeDays.length > 0 ? customFreeDays : undefined,
+        ...period,
     };
+}
+
+function isValidDateString(value: string | undefined): value is string {
+    return Boolean(value && !Number.isNaN(Date.parse(value)));
+}
+
+export function isValidCustomPeriod(draft: SharedDraft): boolean {
+    if (!draft.startDate || !draft.endDate) {
+        return true;
+    }
+    return isValidDateString(draft.startDate)
+        && isValidDateString(draft.endDate)
+        && draft.startDate < draft.endDate;
+}
+
+function getPrecedingMonthDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    const startYear = date.getFullYear();
+    const startMonth = date.getMonth() + 1;
+    const startDay = date.getDate();
+
+    let endYear = startYear;
+    let endMonth = startMonth - 1;
+    if (endMonth === 0) {
+        endMonth = 12;
+    } else {
+        endYear += 1;
+    }
+
+    const lastDay = new Date(Date.UTC(endYear, endMonth, 0)).getUTCDate();
+    const endDay = Math.min(startDay, lastDay);
+
+    return `${endYear}-${String(endMonth).padStart(2, "0")}-${String(endDay).padStart(2, "0")}`;
 }
 
 export interface CountryOptimizerFormProps<TCountry extends string> {
@@ -124,42 +167,123 @@ export function SharedOptimizerControls({
     const maximumYear = yearMax ?? currentYear + 5;
     const monthlyVacationLimits = sharedDraft.maxNumberOfVacationsPerMonth ?? {};
 
+    const [isCustomPeriod, setIsCustomPeriod] = useState(Boolean(sharedDraft.startDate || sharedDraft.endDate));
+
+    useEffect(() => {
+        setIsCustomPeriod(Boolean(sharedDraft.startDate || sharedDraft.endDate));
+    }, [sharedDraft.startDate, sharedDraft.endDate]);
+
+    const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const startDate = e.target.value;
+        if (!isValidDateString(startDate)) {
+            return;
+        }
+        const start = new Date(startDate);
+        onSharedDraftChange((draft) => ({
+            ...draft,
+            year: start.getFullYear(),
+            startDate,
+            endDate: getPrecedingMonthDate(startDate),
+        }));
+    };
+
+    const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const endDate = e.target.value;
+        if (!isValidDateString(endDate)) {
+            return;
+        }
+        onSharedDraftChange((draft) => ({ ...draft, endDate }));
+    };
+
+    const toggleCustomPeriod = () => {
+        if (isCustomPeriod) {
+            setIsCustomPeriod(false);
+            onSharedDraftChange((draft) => ({ ...draft, startDate: undefined, endDate: undefined }));
+        } else {
+            setIsCustomPeriod(true);
+            onSharedDraftChange((draft) => ({
+                ...draft,
+                startDate: `${draft.year}-01-01`,
+                endDate: `${draft.year}-12-31`,
+            }));
+        }
+    };
+
+    const periodInvalid = !isValidCustomPeriod(sharedDraft);
+    const periodDates = { startDate: sharedDraft.startDate, endDate: sharedDraft.endDate };
+
     return (
         <>
             <div className="space-y-1.5">
-                <label htmlFor="year" className="text-sm font-medium text-text-muted">
-                    Year
-                </label>
-                <div className="flex items-center w-full rounded-lg border border-border bg-surface focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all overflow-hidden">
-                    <input
-                        id="year"
-                        type="number"
-                        min={minimumYear}
-                        max={maximumYear}
-                        value={sharedDraft.year}
-                        onChange={(e) => onSharedDraftChange((draft) => ({ ...draft, year: Number(e.target.value) }))}
-                        className="flex-1 bg-transparent px-3 py-2.5 text-sm text-text focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
-                    />
-                    <div className="flex flex-col h-full">
-                        <button
-                            type="button"
-                            onClick={() => onSharedDraftChange((draft) => ({ ...draft, year: Math.min(draft.year + 1, maximumYear) }))}
-                            className="flex-1 px-2.5 flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
-                            aria-label="Increment year"
-                        >
-                            <ChevronUp className="w-3 h-3" />
-                        </button>
-                        <div className="h-px bg-border" />
-                        <button
-                            type="button"
-                            onClick={() => onSharedDraftChange((draft) => ({ ...draft, year: Math.max(draft.year - 1, minimumYear) }))}
-                            className="flex-1 px-2.5 flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
-                            aria-label="Decrement year"
-                        >
-                            <ChevronDown className="w-3 h-3" />
-                        </button>
-                    </div>
+                <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-text-muted">
+                        {isCustomPeriod ? "Custom Period" : "Year"}
+                    </span>
+                    <button type="button" onClick={toggleCustomPeriod} className="text-xs text-primary hover:underline font-medium">
+                        {isCustomPeriod ? "Reset to Year" : "Edit"}
+                    </button>
                 </div>
+                {!isCustomPeriod ? (
+                    <div className="flex items-center w-full rounded-lg border border-border bg-surface focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all overflow-hidden">
+                        <label htmlFor="year" className="sr-only">Year</label>
+                        <input
+                            id="year"
+                            type="number"
+                            min={minimumYear}
+                            max={maximumYear}
+                            value={sharedDraft.year}
+                            onChange={(e) => onSharedDraftChange((draft) => ({ ...draft, year: Number(e.target.value) }))}
+                            className="flex-1 bg-transparent px-3 py-2.5 text-sm text-text focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
+                        />
+                        <div className="flex flex-col h-full">
+                            <button
+                                type="button"
+                                onClick={() => onSharedDraftChange((draft) => ({ ...draft, year: Math.min(draft.year + 1, maximumYear) }))}
+                                className="flex-1 px-2.5 flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
+                                aria-label="Increment year"
+                            >
+                                <ChevronUp className="w-3 h-3" />
+                            </button>
+                            <div className="h-px bg-border" />
+                            <button
+                                type="button"
+                                onClick={() => onSharedDraftChange((draft) => ({ ...draft, year: Math.max(draft.year - 1, minimumYear) }))}
+                                className="flex-1 px-2.5 flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
+                                aria-label="Decrement year"
+                            >
+                                <ChevronDown className="w-3 h-3" />
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2">
+                            <label htmlFor="start-date" className="sr-only">Start date</label>
+                            <input
+                                id="start-date"
+                                type="date"
+                                value={sharedDraft.startDate ?? `${sharedDraft.year}-01-01`}
+                                onChange={handleStartDateChange}
+                                className="flex-1 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            />
+                            <span className="text-text-muted text-sm">to</span>
+                            <label htmlFor="end-date" className="sr-only">End date</label>
+                            <input
+                                id="end-date"
+                                type="date"
+                                value={sharedDraft.endDate ?? `${sharedDraft.year}-12-31`}
+                                onChange={handleEndDateChange}
+                                className="flex-1 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            />
+                        </div>
+                        <p className="text-xs text-text-muted">
+                            Selected period: {periodDates.startDate ?? "—"} to {periodDates.endDate ?? "—"}
+                        </p>
+                        {periodInvalid && (
+                            <p className="text-xs text-red-500">End date must be after start date.</p>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="space-y-1.5">
@@ -264,5 +388,3 @@ export function SharedOptimizerControls({
         </>
     );
 }
-
-

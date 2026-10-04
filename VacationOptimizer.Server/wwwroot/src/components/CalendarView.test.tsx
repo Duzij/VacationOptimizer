@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import CalendarView from "./CalendarView";
 import { DayType } from "../types/models";
+import type { CalendarDay } from "../types/models";
 
 const useQueryMock = vi.fn();
 
@@ -31,6 +32,27 @@ describe("CalendarView", () => {
 
     expect(screen.getByText("January 2027")).toBeTruthy();
     expect(screen.getByText("December 2027")).toBeTruthy();
+  });
+
+  it("keeps consecutive years in one calendar flow with compact year separators", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    const { container } = render(
+      <CalendarView
+        year={2026}
+        calendar={[
+          { date: "2026-12-31", type: DayType.WorkDay, holidayName: null },
+          { date: "2027-01-01", type: DayType.PublicHoliday, holidayName: "New Year's Day" },
+        ]}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "2026" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "2027" })).toBeTruthy();
+    expect(container.querySelector("#calendar-month-2026-11")).toBeTruthy();
+    expect(container.querySelector("#calendar-month-2027-0")).toBeTruthy();
+    expect(screen.getByText("December 2026")).toBeTruthy();
+    expect(screen.getByText("January 2027")).toBeTruthy();
   });
 
   it("extends the shared range styling through continuous matched holiday, weekend, and vacation days", () => {
@@ -266,6 +288,36 @@ describe("CalendarView", () => {
     expect(onSetMonthCap).toHaveBeenCalledWith(0, "January");
   });
 
+  it("renders a full two-year custom period without hiding any months", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2025, 0, 1)));
+
+    const calendar: CalendarDay[] = [];
+    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+      const date = new Date(Date.UTC(2026, 4 + monthOffset, 15));
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth() + 1;
+      const day = String(date.getUTCDate()).padStart(2, "0");
+      const monthStr = String(month).padStart(2, "0");
+      calendar.push({
+        date: `${year}-${monthStr}-${day}`,
+        type: DayType.WorkDay,
+        holidayName: null,
+      });
+    }
+
+    const { container } = render(<CalendarView year={2026} calendar={calendar} />);
+
+    expect(screen.getByRole("heading", { name: "2026" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "2027" })).toBeTruthy();
+    expect(screen.getByText("May 2026")).toBeTruthy();
+    expect(screen.getByText("December 2026")).toBeTruthy();
+    expect(screen.getByText("January 2027")).toBeTruthy();
+    expect(screen.getByText("April 2027")).toBeTruthy();
+    expect(container.querySelectorAll("[id^='calendar-month-2026-']")).toHaveLength(8);
+    expect(container.querySelectorAll("[id^='calendar-month-2027-']")).toHaveLength(4);
+  });
   it("renders helpful tooltips on day cells for all day types and formats public holidays as Public holiday: [HolidayName]", () => {
     useQueryMock.mockReturnValue({ data: undefined });
 

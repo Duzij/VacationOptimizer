@@ -94,6 +94,11 @@ function getStartMonthForYear(year: number, today = new Date()) {
     return 0;
 }
 
+interface CalendarMonth {
+    year: number;
+    month: MonthModel;
+}
+
 export default function CalendarView({ calendar, ranges = [], year, country, locale, onDayLongPress, onDaySelect, connectedToken, monthlyCaps, onSetMonthCap }: Props) {
     const startMonth = getStartMonthForYear(year);
     const MonthGridComponent = country === "US" ? USMonthGrid : MonthGrid;
@@ -152,36 +157,67 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
     }, [calendar, sharedDays, matchedRangeDates]);
 
     const months = useMemo(() => {
-        const nextMonths: MonthModel[] = Array.from(
-            { length: 12 - startMonth },
-            (_, i) => new MonthModel(startMonth + i, locale || "en-US"),
-        );
+        if (decoratedCalendar.length === 0) {
+            return Array.from(
+                { length: 12 - startMonth },
+                (_, index): CalendarMonth => ({
+                    year,
+                    month: new MonthModel(startMonth + index, locale || "en-US"),
+                }),
+            );
+        }
 
+        const monthsByDate = new Map<string, CalendarMonth>();
         decoratedCalendar.forEach((day) => {
-            const d = parseDate(day.date);
-            const currentMonth = nextMonths.find((m) => m.monthIndex === d.getUTCMonth());
-            if (currentMonth) {
-                currentMonth.addDay(day);
+            const date = parseDate(day.date);
+            const dayYear = date.getUTCFullYear();
+            const monthIndex = date.getUTCMonth();
+
+            // Keep the existing behavior of hiding already-passed months in
+            // the current year, while retaining every month from later years.
+            if (dayYear === year && monthIndex < startMonth) {
+                return;
             }
+
+            const key = `${dayYear}-${monthIndex}`;
+            let calendarMonth = monthsByDate.get(key);
+            if (!calendarMonth) {
+                calendarMonth = {
+                    year: dayYear,
+                    month: new MonthModel(monthIndex, locale || "en-US"),
+                };
+                monthsByDate.set(key, calendarMonth);
+            }
+            calendarMonth.month.addDay(day);
         });
 
-        return nextMonths;
-    }, [decoratedCalendar, locale, startMonth]);
+        return [...monthsByDate.values()].sort((left, right) =>
+            left.year - right.year || left.month.monthIndex - right.month.monthIndex,
+        );
+    }, [decoratedCalendar, locale, startMonth, year]);
 
     return (
         <div className="space-y-4 w-full max-w-6xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {months.map((month) => (
-                    <MonthGridComponent
-                        key={month.monthIndex}
-                        id={`calendar-month-${month.monthIndex}`}
-                        month={month}
-                        year={year}
-                        onDayLongPress={onDayLongPress}
-                        onDaySelect={onDaySelect}
-                        monthlyCaps={monthlyCaps}
-                        onSetMonthCap={onSetMonthCap}
-                    />
+                {months.map(({ year: monthYear, month }, index) => (
+                    <div key={`${monthYear}-${month.monthIndex}`} className="contents">
+                        {(index === 0 || months[index - 1]?.year !== monthYear) && (
+                            <div className="col-span-full flex items-center gap-3 pt-2" aria-label={`Calendar year ${monthYear}`}>
+                                <div className="h-px flex-1 bg-border" />
+                                <h2 className="text-sm font-semibold text-text-muted">{monthYear}</h2>
+                                <div className="h-px flex-1 bg-border" />
+                            </div>
+                        )}
+                        <MonthGridComponent
+                            id={`calendar-month-${monthYear}-${month.monthIndex}`}
+                            month={month}
+                            year={monthYear}
+                            onDayLongPress={onDayLongPress}
+                            onDaySelect={onDaySelect}
+                            monthlyCaps={monthlyCaps}
+                            onSetMonthCap={onSetMonthCap}
+                        />
+                    </div>
                 ))}
             </div>
         </div>

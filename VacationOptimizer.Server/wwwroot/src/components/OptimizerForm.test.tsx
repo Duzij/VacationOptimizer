@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import OptimizerForm from "./OptimizerForm";
@@ -161,11 +161,11 @@ describe("OptimizerForm", () => {
     await user.selectOptions(screen.getByLabelText("Country"), "IN");
 
     expect(screen.getByLabelText("State / Region")).toBeTruthy();
-    expect((screen.getByRole("button", { name: /Optimize/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getAllByRole("button", { name: /Optimize/i })[0] as HTMLButtonElement).disabled).toBe(true);
 
     await user.selectOptions(screen.getByLabelText("State / Region"), "IN-KA");
 
-    const optimizeButton = screen.getByRole("button", { name: /Optimize/i });
+    const optimizeButton = screen.getAllByRole("button", { name: /Optimize/i })[0];
     expect((optimizeButton as HTMLButtonElement).disabled).toBe(false);
   });
 
@@ -189,7 +189,7 @@ describe("OptimizerForm", () => {
     const increaseJanuaryCap = screen.getByRole("button", { name: /Increase January/i });
     await user.click(increaseJanuaryCap);
     await user.click(increaseJanuaryCap);
-    await user.click(screen.getByRole("button", { name: /Optimize/i }));
+    await user.click(screen.getAllByRole("button", { name: /Optimize/i })[0]);
 
     expect(onResult).toHaveBeenCalledWith(expect.objectContaining({
       maxNumberOfVacationsPerMonth: { January: 2 },
@@ -242,5 +242,117 @@ describe("OptimizerForm", () => {
 
     expect(screen.getByRole("button", { name: /Decrease February/i })).toBeTruthy();
     expect(screen.getByDisplayValue("2")).toBeTruthy();
+  });
+  it("toggles custom period date selectors when Edit button is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <OptimizerForm
+        onResult={vi.fn()}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+      />
+    );
+    expect(screen.queryByLabelText("Custom Period")).toBeNull();
+    const editButton = screen.getByRole("button", { name: "Edit" });
+    await user.click(editButton);
+    expect(screen.queryByLabelText("Year")).toBeNull();
+
+    expect(screen.getByLabelText("Start date")).toBeTruthy();
+    expect(screen.getByLabelText("End date")).toBeTruthy();
+  });
+
+  it("auto-fills the preceding month as the end of a planning year while preserving the selected day", async () => {
+    const user = userEvent.setup();
+    render(
+      <OptimizerForm
+        onResult={vi.fn()}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const startInput = screen.getByLabelText("Start date") as HTMLInputElement;
+    const endInput = screen.getByLabelText("End date") as HTMLInputElement;
+    fireEvent.change(startInput, { target: { value: "2026-05-12" } });
+    await waitFor(() => {
+        expect(endInput.value).toBe("2027-04-12");
+    });
+  });
+
+  it("submits the exact selected cross-year dates", async () => {
+    const user = userEvent.setup();
+    const onResult = vi.fn();
+    render(
+      <OptimizerForm
+        onResult={onResult}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const startInput = screen.getByLabelText("Start date") as HTMLInputElement;
+    const endInput = screen.getByLabelText("End date") as HTMLInputElement;
+    fireEvent.change(startInput, { target: { value: "2026-10-15" } });
+    fireEvent.change(endInput, { target: { value: "2027-03-20" } });
+
+    await user.click(screen.getAllByRole("button", { name: /Optimize/i })[0]);
+    expect(onResult).toHaveBeenCalledWith(expect.objectContaining({
+      startDate: "2026-10-15",
+      endDate: "2027-03-20"
+    }));
+  });
+
+  it("keeps the selected end year and raw dates", async () => {
+    const user = userEvent.setup();
+    const onResult = vi.fn();
+    render(
+      <OptimizerForm
+        onResult={onResult}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-01-01" } });
+    fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2027-01-15" } });
+
+    await user.click(screen.getAllByRole("button", { name: /Optimize/i })[0]);
+    expect(onResult).toHaveBeenCalledWith(expect.objectContaining({
+      startDate: "2026-01-01",
+      endDate: "2027-01-15",
+    }));
+  });
+
+  it("disables submit and shows an error when the end date is not after the start date", async () => {
+    const user = userEvent.setup();
+    const onResult = vi.fn();
+    render(
+      <OptimizerForm
+        onResult={onResult}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const startInput = screen.getByLabelText("Start date") as HTMLInputElement;
+    const endInput = screen.getByLabelText("End date") as HTMLInputElement;
+    fireEvent.change(startInput, { target: { value: "2026-10-15" } });
+    fireEvent.change(endInput, { target: { value: "2026-10-15" } });
+
+    expect(screen.getByText("End date must be after start date.")).toBeTruthy();
+    expect((screen.getAllByRole("button", { name: /Optimize/i })[0] as HTMLButtonElement).disabled).toBe(true);
+
+    await user.click(screen.getAllByRole("button", { name: /Optimize/i })[0]);
+    expect(onResult).not.toHaveBeenCalled();
   });
 });

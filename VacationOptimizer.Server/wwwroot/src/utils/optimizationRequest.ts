@@ -211,6 +211,8 @@ function normalizeBaseFields(request: OptimizeRequest) {
   const lockedVacationDates = normalizeLockedVacationDates(request.lockedVacationDates);
   const maxNumberOfVacationsPerMonth = normalizeMonthlyVacationLimits(request.maxNumberOfVacationsPerMonth);
   const seedToken = normalizeSeedToken(request.seedToken);
+  const startDate = normalizeDateString(request.startDate);
+  const endDate = normalizeDateString(request.endDate);
 
   return {
     country: request.country.trim().toUpperCase(),
@@ -225,7 +227,16 @@ function normalizeBaseFields(request: OptimizeRequest) {
     ...(lockedVacationDates ? { lockedVacationDates } : {}),
     ...(request.usedResultTokens ? { usedResultTokens: request.usedResultTokens } : {}),
     ...(seedToken ? { seedToken } : {}),
+    ...(startDate && endDate ? { startDate, endDate } : {}),
   };
+}
+
+function normalizeDateString(value: string | undefined) {
+  const trimmed = value?.trim();
+  if (!trimmed || Number.isNaN(Date.parse(trimmed))) {
+    return undefined;
+  }
+  return trimmed;
 }
 
 function normalizeIndiaRequest(request: IndiaOptimizeRequest): IndiaOptimizeRequest {
@@ -280,6 +291,14 @@ export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequ
   };
 }
 
+function parseDate(value: string | null) {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed || Number.isNaN(Date.parse(trimmed))) {
+    return undefined;
+  }
+  return trimmed;
+}
+
 export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeRequest | null {
   const country = params.get("country")?.trim().toUpperCase();
 
@@ -306,6 +325,8 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
       lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
       seedToken: params.get("seed") ?? undefined,
+      startDate: parseDate(params.get("startDate")),
+      endDate: parseDate(params.get("endDate")),
     });
   }
 
@@ -324,6 +345,8 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
       lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
       seedToken: params.get("seed") ?? undefined,
+      startDate: parseDate(params.get("startDate")),
+      endDate: parseDate(params.get("endDate")),
     });
   }
 
@@ -346,6 +369,8 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
       neverHolidayDates: parseDateList(params.get("neverHolidays")),
       lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
       seedToken: params.get("seed") ?? undefined,
+      startDate: parseDate(params.get("startDate")),
+      endDate: parseDate(params.get("endDate")),
     });
   }
 
@@ -362,6 +387,8 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     neverHolidayDates: parseDateList(params.get("neverHolidays")),
     lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
     seedToken: params.get("seed") ?? undefined,
+    startDate: parseDate(params.get("startDate")),
+    endDate: parseDate(params.get("endDate")),
   });
 }
 
@@ -435,6 +462,11 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
     params.set("seed", normalizedRequest.seedToken);
   }
 
+  if (normalizedRequest.startDate && normalizedRequest.endDate) {
+    params.set("startDate", normalizedRequest.startDate);
+    params.set("endDate", normalizedRequest.endDate);
+  }
+
   return params;
 }
 
@@ -477,7 +509,9 @@ export function requestsMatch(left: OptimizeRequest | null, right: OptimizeReque
     && uniqueDates(normalizedLeft.neverHolidayDates ?? []).join(",")
       === uniqueDates(normalizedRight.neverHolidayDates ?? []).join(",")
     && uniqueDates(normalizedLeft.lockedVacationDates ?? []).join(",")
-      === uniqueDates(normalizedRight.lockedVacationDates ?? []).join(",");
+      === uniqueDates(normalizedRight.lockedVacationDates ?? []).join(",")
+    && normalizedLeft.startDate === normalizedRight.startDate
+    && normalizedLeft.endDate === normalizedRight.endDate;
 }
 
 export function hasSameHolidayScope(left: OptimizeRequest | null, right: OptimizeRequest) {

@@ -1,6 +1,19 @@
 {
   "posts": [
     {
+      "title": "Plan Your Vacation Year, Your Way",
+      "date": "2026-10-04",
+      "author": "Team",
+      "slug": "plan-any-vacation-period",
+      "summary": "The vacation planner can now optimize a planning year that begins in any month and crosses into the next calendar year when needed.",
+      "tags": [
+        "feature",
+        "vacation-planning",
+        "pto"
+      ],
+      "wordCount": 260
+    },
+    {
       "title": "India 2027: Stretch One Day of Leave Into a Whole Week",
       "date": "2026-09-11",
       "author": "Team",

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSpainSchema } from "./api";
 import { isSpainOptimizeRequest } from "../models";
 import type { SpainCityOption } from "./models";
-import { buildBaseRequest, type CountryOptimizerFormProps, SharedOptimizerControls, StateSelectField } from "../shared/optimizerFormShared";
+import { buildBaseRequest, isValidCustomPeriod, type CountryOptimizerFormProps, SharedOptimizerControls, StateSelectField } from "../shared/optimizerFormShared";
 
 export default function SpainCountryOptimizerForm({
     country,
@@ -101,7 +101,7 @@ export default function SpainCountryOptimizerForm({
                 customFreeDays={customFreeDays}
                 onCustomFreeDaysChange={onCustomFreeDaysChange}
                 isLoading={isLoading}
-                isSubmitDisabled={isLoading || schemaLoading}
+                isSubmitDisabled={isLoading || schemaLoading || !isValidCustomPeriod(sharedDraft)}
                 showAdvanced={showAdvanced}
                 onShowAdvancedChange={setShowAdvanced}
                 yearMin={schema?.yearRange.min}

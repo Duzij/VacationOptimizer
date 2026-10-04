@@ -97,6 +97,24 @@ public class CalendarServiceTests
         Assert.Null(day.HolidayName);
     }
 
+    [Fact]
+    public void BuildCalendar_CustomPeriodSpansYearsAndIncludesHolidaysFromBoth()
+    {
+        var start = new DateOnly(DefaultYear, 12, 25);
+        var end = new DateOnly(DefaultYear + 1, 1, 1);
+
+        var calendar = _calendarService.BuildCalendar(
+            DefaultCountry,
+            DefaultYear,
+            startDate: start,
+            endDate: end);
+
+        Assert.Equal(8, calendar.Days.Count);
+        Assert.Equal(start, calendar.Days.First().Date);
+        Assert.Equal(end, calendar.Days.Last().Date);
+        Assert.Equal(DayType.PublicHoliday, GetDayFromCalendar(calendar.Days, end).Type);
+    }
+
     private static void AssertDayType(List<CalendarDay> calendar, DateOnly date, DayType expectedType) =>
         Assert.Equal(expectedType, GetDayFromCalendar(calendar, date).Type);
 

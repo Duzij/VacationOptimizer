@@ -31,6 +31,8 @@ public record CountrySpecificOptimizeRequestBase
     public List<string>? UsedResultTokens { get; init; }
     public List<DateOnly>? LockedVacationDates { get; init; }
     public string? SeedToken { get; init; }
+    public DateOnly? StartDate { get; init; }
+    public DateOnly? EndDate { get; init; }
 
     public OptimizeRequest ToOptimizeRequest(string country, string? state)
     {
@@ -53,7 +55,9 @@ public record CountrySpecificOptimizeRequestBase
             NeverHolidayDates: NeverHolidayDates,
             UsedResultTokens: UsedResultTokens,
             LockedVacationDates: LockedVacationDates,
-            SeedToken: SeedToken);
+            SeedToken: SeedToken,
+            StartDate: StartDate,
+            EndDate: EndDate);
     }
 }
 

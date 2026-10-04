@@ -8,28 +8,29 @@ interface Props {
     children?: React.ReactNode;
 }
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, includeYear = false): string {
     // Parse YYYY-MM-DD format in UTC to avoid timezone issues
     const [year, month, day] = dateStr.split("-").map(Number);
     const d = new Date(Date.UTC(year, month - 1, day));
     return d.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
+        ...(includeYear ? { year: "numeric" } : {}),
     });
 }
 
 function formatRange(range: VacationRange): string {
-    return `${formatDate(range.start)} – ${formatDate(range.end)}`;
+    const spansYears = range.start.slice(0, 4) !== range.end.slice(0, 4);
+    return `${formatDate(range.start, spansYears)} – ${formatDate(range.end, spansYears)}`;
 }
 
-function getMonthIndexFromDate(dateStr: string): number {
-    const [, month] = dateStr.split("-").map(Number);
-    return month - 1; // 0-indexed
+function getCalendarMonthId(dateStr: string): string {
+    const [year, month] = dateStr.split("-").map(Number);
+    return `calendar-month-${year}-${month - 1}`;
 }
 
 function scrollToMonth(dateStr: string) {
-    const monthIndex = getMonthIndexFromDate(dateStr);
-    const el = document.getElementById(`calendar-month-${monthIndex}`);
+    const el = document.getElementById(getCalendarMonthId(dateStr));
     if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
     }

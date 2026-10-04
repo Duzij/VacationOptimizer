@@ -9,59 +9,60 @@ export default function LandingContent() {
   return (
     <>
       <div className="landing-page">
+        <section className="mx-auto max-w-6xl">
+          <div className="overflow-hidden rounded-[2rem] bg-surface/55">
+            <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
+              <div className="py-4 md:py-10">
+                <div className="space-y-6">
+                  <div className="max-w-2xl space-y-4">
+                    <h1 className="text-5xl font-semibold leading-[0.95] tracking-tight text-text md:text-7xl">
+                      There is a better way
+                      <br />
+                      <span className="text-[var(--landing-accent)] italic">
+                        to use vacation days.
+                      </span>
+                    </h1>
+                    <h2 className="max-w-xl text-base leading-7 text-text-muted md:text-lg">
+                      Long Vacation is a holiday optimizer and PTO planner that
+                      turns scattered public holidays and weekends into longer
+                      breaks.
+                    </h2>
+                  </div>
 
-    <section className="mx-auto max-w-6xl">
-      <div className="overflow-hidden rounded-[2rem] bg-surface/55">
-        <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
-          <div className="py-4 md:py-10">
-            <div className="space-y-6">
-              <div className="max-w-2xl space-y-4">
-                <h1 className="text-5xl font-semibold leading-[0.95] tracking-tight text-text md:text-7xl">
-                  There is a better way
-                  <br />
-                  <span className="text-[var(--landing-accent)] italic">
-                    to use vacation days.
-                  </span>
-                </h1>
-                <h2 className="max-w-xl text-base leading-7 text-text-muted md:text-lg">
-                  Long Vacation is a holiday optimizer and PTO planner
-                  that turns scattered public holidays and weekends into longer breaks.
-                </h2>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      to="/app"
+                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--landing-accent)_18%,var(--color-border))] bg-[color-mix(in_srgb,var(--landing-accent)_88%,black)] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,123,131,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--landing-accent)_96%,black)] hover:shadow-[0_14px_30px_rgba(15,123,131,0.22)]"
+                    >
+                      Start planning
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+
+                    <Link
+                      to="/about"
+                      className="inline-flex min-h-12 items-center justify-center rounded-full border bg-background px-6 py-3 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
+                    >
+                      Learn more
+                    </Link>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  to="/app"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--landing-accent)_18%,var(--color-border))] bg-[color-mix(in_srgb,var(--landing-accent)_88%,black)] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,123,131,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--landing-accent)_96%,black)] hover:shadow-[0_14px_30px_rgba(15,123,131,0.22)]"
-                >
-                  Start planning
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-
-                <Link
-                  to="/about"
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border bg-background px-6 py-3 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
-                >
-                  Learn more
-                </Link>
-              </div>
+              <aside className="border-border bg-background/65 py-4 md:py-8">
+                <CountryShowcase />
+              </aside>
             </div>
           </div>
-
-          <aside className="border-border bg-background/65 py-4 md:py-8">
-            <CountryShowcase />
-          </aside>
-        </div>
-      </div>
-</section>
-
+        </section>
         <section
           id="features"
           className="landing-section"
           aria-labelledby="features-title"
         >
           <div className="section-head">
-            <p className="section-head__eyebrow">Why Long Vacation - Vacation Optimizer</p>
+            <p className="section-head__eyebrow">
+              Why Long Vacation - Vacation Optimizer
+            </p>
           </div>
           <div className="features-grid">
             <HtmlFragment

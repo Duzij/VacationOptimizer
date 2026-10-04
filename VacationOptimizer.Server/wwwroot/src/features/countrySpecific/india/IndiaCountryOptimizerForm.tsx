@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useIndiaSchema } from "./api";
 import { isIndiaOptimizeRequest } from "../models";
-import { buildBaseRequest, type CountryOptimizerFormProps, SharedOptimizerControls, StateSelectField } from "../shared/optimizerFormShared";
+import { buildBaseRequest, isValidCustomPeriod, type CountryOptimizerFormProps, SharedOptimizerControls, StateSelectField } from "../shared/optimizerFormShared";
 
 export default function IndiaCountryOptimizerForm({
     country,
@@ -61,7 +61,7 @@ export default function IndiaCountryOptimizerForm({
                 customFreeDays={customFreeDays}
                 onCustomFreeDaysChange={onCustomFreeDaysChange}
                 isLoading={isLoading}
-                isSubmitDisabled={isLoading || schemaLoading || !stateCode}
+                isSubmitDisabled={isLoading || schemaLoading || !stateCode || !isValidCustomPeriod(sharedDraft)}
                 showAdvanced={showAdvanced}
                 onShowAdvancedChange={setShowAdvanced}
                 yearMin={schema?.yearRange.min}

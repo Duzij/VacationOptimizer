@@ -17,13 +17,22 @@ public class CalendarService
         string? stateCode = null,
         List<CustomFreeDay>? customFreeDays = null,
         List<DateOnly>? ignoredHolidayDates = null,
-        List<DateOnly>? neverHolidayDates = null)
+        List<DateOnly>? neverHolidayDates = null,
+        DateOnly? startDate = null,
+        DateOnly? endDate = null)
     {
         var ignoredHolidayDateSet = ignoredHolidayDates?.ToHashSet() ?? new HashSet<DateOnly>();
         var neverHolidayDateSet = neverHolidayDates?.ToHashSet() ?? new HashSet<DateOnly>();
-        var holidays = _holidayService.GetHolidays(country, year, stateCode)
-            .Where(h => !ignoredHolidayDateSet.Contains(h.Date))
-            .ToList();
+        var start = startDate ?? new DateOnly(year, 1, 1);
+        var end = endDate ?? new DateOnly(year, 12, 31);
+
+        var holidays = new List<HolidayInfo>();
+        for (int y = start.Year; y <= end.Year; y++)
+        {
+            holidays.AddRange(_holidayService.GetHolidays(country, y, stateCode)
+                .Where(h => !ignoredHolidayDateSet.Contains(h.Date)));
+        }
+
         // Holiday providers can emit two entries for the same date (for example a
         // holiday and its observed substitute), so keep the first entry per date
         // instead of letting ToDictionary throw on duplicate keys.
@@ -35,8 +44,6 @@ public class CalendarService
         var customFreeDayLookup = customFreeDays?.ToDictionary(c => c.Date, c => c) ?? new Dictionary<DateOnly, CustomFreeDay>();
 
         var days = new List<CalendarDay>();
-        var start = new DateOnly(year, 1, 1);
-        var end = new DateOnly(year, 12, 31);
 
         for (var date = start; date <= end; date = date.AddDays(1))
         {

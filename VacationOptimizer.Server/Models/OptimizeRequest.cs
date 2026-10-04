@@ -13,7 +13,9 @@ public record OptimizeRequest(
     List<DateOnly>? NeverHolidayDates = null,
     List<string>? UsedResultTokens = null,
     List<DateOnly>? LockedVacationDates = null,
-    string? SeedToken = null
+    string? SeedToken = null,
+    DateOnly? StartDate = null,
+    DateOnly? EndDate = null
 );
 
 public enum Month

@@ -619,6 +619,65 @@ public class VacationOptimizerServiceTests
         }));
     }
 
+    [Fact]
+    public void Optimize_CustomPeriodLongerThanOneYear_IsAllowed()
+    {
+        var start = new DateOnly(DefaultYear, 5, 15);
+        var end = new DateOnly(DefaultYear + 2, 4, 20);
+        var request = CreateOptimizeRequest() with
+        {
+            StartDate = start,
+            EndDate = end
+        };
+
+        var result = _optimizer.Optimize(request);
+
+        Assert.Equal(new DateOnly(DefaultYear, 5, 1), result.Calendar.Days.First().Date);
+        Assert.Equal(new DateOnly(DefaultYear + 2, 4, 30), result.Calendar.Days.Last().Date);
+    }
+
+    [Fact]
+    public void Optimize_NormalizesCustomPeriodToMonthBoundaries()
+    {
+        var start = new DateOnly(DefaultYear, 5, 15);
+        var end = new DateOnly(DefaultYear, 8, 10);
+        var request = CreateOptimizeRequest() with
+        {
+            StartDate = start,
+            EndDate = end
+        };
+
+        var result = _optimizer.Optimize(request);
+
+        Assert.Equal(new DateOnly(DefaultYear, 5, 1), result.Calendar.Days.First().Date);
+        Assert.Equal(new DateOnly(DefaultYear, 8, 31), result.Calendar.Days.Last().Date);
+    }
+
+    [Fact]
+    public void Optimize_ThrowsWhenStartDateEqualsEndDate()
+    {
+        var date = new DateOnly(DefaultYear, 5, 15);
+        var request = CreateOptimizeRequest() with
+        {
+            StartDate = date,
+            EndDate = date
+        };
+
+        Assert.Throws<ArgumentException>(() => _optimizer.Optimize(request));
+    }
+
+    [Fact]
+    public void Optimize_ThrowsWhenEndDateIsBeforeStartDate()
+    {
+        var request = CreateOptimizeRequest() with
+        {
+            StartDate = new DateOnly(DefaultYear, 5, 15),
+            EndDate = new DateOnly(DefaultYear, 5, 14)
+        };
+
+        Assert.Throws<ArgumentException>(() => _optimizer.Optimize(request));
+    }
+
     // Helper methods
     private List<CalendarDay> BuildDefaultCalendar() =>
         _calendarService.BuildCalendar(DefaultCountry, DefaultYear).Days;

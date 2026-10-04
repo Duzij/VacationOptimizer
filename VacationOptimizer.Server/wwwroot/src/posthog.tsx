@@ -1,4 +1,4 @@
-import { useCallback, useEffect, type ReactNode } from "react";
+import { type ReactNode, useCallback, useEffect } from "react";
 import { PostHogProvider, usePostHog } from "@posthog/react";
 
 const consentStorageKey = "vacationOptimizer.cookieConsent.v1";
@@ -25,7 +25,10 @@ function hasSavedAnalyticsConsent() {
   }
 }
 
-function setAnalyticsConsent(posthog: ReturnType<typeof usePostHog>, hasConsent: boolean) {
+function setAnalyticsConsent(
+  posthog: ReturnType<typeof usePostHog>,
+  hasConsent: boolean,
+) {
   if (!hasConsent) {
     log("no consent -> opt_out_capturing");
     posthog.opt_out_capturing();
@@ -54,7 +57,8 @@ function PostHogConsentGate({ children }: { children: ReactNode }) {
     };
 
     window.addEventListener(consentChangeEvent, handleConsentChange);
-    return () => window.removeEventListener(consentChangeEvent, handleConsentChange);
+    return () =>
+      window.removeEventListener(consentChangeEvent, handleConsentChange);
   }, [posthog]);
 
   return <>{children}</>;
@@ -65,7 +69,9 @@ export function PostHogAnalytics({ children }: { children: ReactNode }) {
   const apiHost = import.meta.env.VITE_POSTHOG_HOST;
 
   if (!apiKey || !apiHost) {
-    console.warn("PostHog API key or host is not set. Analytics will be disabled.");
+    console.warn(
+      "PostHog API key or host is not set. Analytics will be disabled.",
+    );
     return <>{children}</>;
   }
 
@@ -76,7 +82,7 @@ export function PostHogAnalytics({ children }: { children: ReactNode }) {
       apiKey={apiKey}
       options={{
         api_host: apiHost,
-        defaults: "2026-05-30"
+        defaults: "2026-05-30",
       }}
     >
       <PostHogConsentGate>{children}</PostHogConsentGate>
@@ -89,7 +95,13 @@ export function useAnalytics() {
 
   const capture = useCallback(
     (eventName: string, properties?: Record<string, unknown>) => {
-      log("capture", eventName, properties ?? {}, "optedOut=", posthog.has_opted_out_capturing());
+      log(
+        "capture",
+        eventName,
+        properties ?? {},
+        "optedOut=",
+        posthog.has_opted_out_capturing(),
+      );
       posthog.capture(eventName, properties);
     },
     [posthog],

@@ -266,7 +266,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
         <main class="blog-page">
           <section class="stack-lg">
             <div class="blog-hero stack-sm">
-              <h1>How to Maximize Vacation Days with a Holiday Optimizer</h1>
+              <h1>How to Maximize Vacation Days with a LongVacation holiday Optimizer</h1>
               <p>Day-off planningand country-aware guidance to turn public holidays into longer vacations — for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
               <p class="blog-summary">For AI agents: a <a href="/blog/fetch/">machine-readable summary of this blog</a> is also available.</p>
             </div>

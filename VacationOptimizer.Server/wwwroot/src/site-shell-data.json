@@ -1,5 +1,5 @@
 {
-  "brandName": "Long Vacation - Vacation Optimizer",
+  "brandName": "Long Vacation",
   "navLinks": [
     { "href": "/app", "label": "Planner" },
     { "href": "/blog/", "label": "Blog", "isDocument": true },
