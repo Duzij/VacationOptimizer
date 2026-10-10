@@ -32,4 +32,9 @@ const payload = {
   urlList: uniqueUrls,
 };
 
+console.error(`Prepared IndexNow request for ${uniqueUrls.length} URLs:`);
+for (const url of uniqueUrls) {
+  console.error(`- ${url}`);
+}
+
 process.stdout.write(`${JSON.stringify(payload)}\n`);
