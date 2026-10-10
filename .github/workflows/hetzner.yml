@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Test SSH Connectivity
         shell: bash
         run: |
@@ -185,3 +188,13 @@ jobs:
             done
 
             log_success "🎉 Deployment completed!"
+
+      - name: Submit deployed sitemap URLs to IndexNow
+        shell: bash
+        run: |
+          request_file="$RUNNER_TEMP/indexnow-request.json"
+          npm --prefix VacationOptimizer.Server/wwwroot run --silent indexnow:prepare > "$request_file"
+          curl --fail-with-body --silent --show-error \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data-binary "@$request_file" \
+            https://api.indexnow.org/IndexNow

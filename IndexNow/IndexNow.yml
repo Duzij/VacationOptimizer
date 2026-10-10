@@ -1,0 +1,48 @@
+info:
+  name: IndexNow
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: https://api.indexnow.org/IndexNow
+  headers:
+    - name: Content-Type
+      value: application/json; charset=utf-8
+  body:
+    type: json
+    data: |-
+      {
+        "host": "longvacation.eu",
+        "key": "5d2b211542e04e0693b6f60033c208d4",
+        "keyLocation": "https://longvacation.eu/5d2b211542e04e0693b6f60033c208d4.txt",
+        "urlList": [
+          "https://longvacation.eu/",
+          "https://longvacation.eu/about/",
+          "https://longvacation.eu/contact/",
+          "https://longvacation.eu/privacy/",
+          "https://longvacation.eu/terms/",
+          "https://longvacation.eu/app/",
+          "https://longvacation.eu/blog/",
+          "https://longvacation.eu/blog/fetch/",
+          "https://longvacation.eu/blog/best-time-to-book-your-cruise-for-next-year/",
+          "https://longvacation.eu/blog/plan-any-vacation-period/",
+          "https://longvacation.eu/blog/maximize-your-pto-in-india-in-2027/",
+          "https://longvacation.eu/blog/dont-leave-your-vacation-on-the-table/",
+          "https://longvacation.eu/blog/how-to-maximize-your-holidays-in-australia-in-2027/",
+          "https://longvacation.eu/blog/maximize-your-pto-in-the-netherlands-in-2027/",
+          "https://longvacation.eu/blog/see-your-countrys-vacation-potential/",
+          "https://longvacation.eu/blog/monthly-vacation-caps/",
+          "https://longvacation.eu/blog/indonesia-public-holidays-and-collective-leave/",
+          "https://longvacation.eu/blog/maximize-your-pto-in-spain-in-2027/",
+          "https://longvacation.eu/blog/why-taking-vacation-could-save-you-money/",
+          "https://longvacation.eu/blog/maximize-your-vacation-in-the-us-in-2027/"
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

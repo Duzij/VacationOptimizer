@@ -64,6 +64,8 @@ The deployment workflow (`.github/workflows/hetzner.yml`) expects the following 
 | `CF_ORIGIN_CERT` | TLS certificate content (e.g., Cloudflare Origin CA certificate PEM) |
 | `CF_ORIGIN_KEY` | TLS private key content corresponding to the certificate |
 
+After a successful deployment and production health check, the workflow prepares the IndexNow request from the checked-in sitemap with `npm run indexnow:prepare`, then submits that JSON to IndexNow with `curl`. It uses the fixed verification URL `https://longvacation.eu/5d2b211542e04e0693b6f60033c208d4.txt`; no additional GitHub secret is required. A rejected submission fails the workflow step so the notification issue is visible.
+
 ### 1.3 Local `.env` file
 
 For local development, create a `.env` file in the project root. It is intentionally not committed.
@@ -89,7 +91,7 @@ In production, the deployment workflow recreates the `.env` file automatically f
 
 The following files contain hard-coded domain references (currently `longvacation.eu`) that must be updated for your own domain before deploying:
 
-- `.github/workflows/hetzner.yml` — health check URLs and `--resolve` targets
+- `.github/workflows/hetzner.yml` — health check and IndexNow URLs/host
 - `nginx/templates/default.ssl.conf` — `server_name` and certificate paths
 - `nginx/templates/default.http.conf` — `server_name`
 - `nginx/start-nginx.sh` — certificate file paths
