@@ -16,6 +16,18 @@ Run `npm run bump:shell-css` after editing `public/site-shell.css`. It recalcula
 
 The script also runs automatically at the start of `npm run build` / `npm run build_prod`, so production deployments always get a fresh postfix.
 
+## Blog posts and translations
+
+Add English posts to `content/blog/` as Markdown with YAML frontmatter. The `language` field is optional and defaults to `en`. For an optional translated edition, add another Markdown file with a unique `slug`, set `language` to its BCP 47 tag (for example, `es`), and set `translationOf` to the English edition's slug:
+
+```yaml
+slug: "aprovechar-vacaciones-espana-2027"
+language: es
+translationOf: "maximize-your-pto-in-spain-in-2027"
+```
+
+Repeat this for as many languages as the post needs. Posts do not need translations. The build creates a static page for every edition, links available editions on each page, and adds reciprocal `hreflang` metadata. `/blog/`, `/blog/index.json`, and the agent-facing blog index list English editions only; every edition is included in the sitemap. The generator checks that translation references point to an English post and that each edition has a unique slug and language.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh

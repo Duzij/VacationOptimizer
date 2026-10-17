@@ -44,6 +44,8 @@ async function generateStaticBlog() {
   const footerHtml = await fs.readFile(footerHtmlPath, "utf8");
   const blogAgentSummaryHtml = await fs.readFile(blogAgentSummaryPath, "utf8");
   const posts = await loadBlogPosts();
+  validateBlogPosts(posts);
+  const englishPosts = posts.filter((post) => !post.translationOf && isEnglishLanguage(post.language));
   const appIndexHtml = await fs.readFile(indexHtmlPath, "utf8");
 
   await fs.rm(outputDir, { recursive: true, force: true });
@@ -51,13 +53,13 @@ async function generateStaticBlog() {
 
   await fs.writeFile(
     path.join(outputDir, "index.html"),
-    renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml),
+    renderBlogIndexPage(englishPosts, appIndexHtml, siteData, footerHtml),
     "utf8",
   );
   await fs.writeFile(
     path.join(outputDir, "index.json"),
     JSON.stringify({
-      posts: posts.map(({ html, ...post }) => post),
+      posts: englishPosts.map(({ html, ...post }) => post),
     }, null, 2),
     "utf8",
   );
@@ -66,7 +68,7 @@ async function generateStaticBlog() {
   await fs.mkdir(agentPageDir, { recursive: true });
   await fs.writeFile(
     path.join(agentPageDir, "index.html"),
-    renderBlogAgentPage(posts, appIndexHtml, siteData, footerHtml, blogAgentSummaryHtml),
+    renderBlogAgentPage(englishPosts, appIndexHtml, siteData, footerHtml, blogAgentSummaryHtml),
     "utf8",
   );
 
@@ -76,7 +78,7 @@ async function generateStaticBlog() {
       await fs.mkdir(postDir, { recursive: true });
       await fs.writeFile(
         path.join(postDir, "index.html"),
-        renderBlogPostPage(post, appIndexHtml, siteData, footerHtml),
+        renderBlogPostPage(post, posts, appIndexHtml, siteData, footerHtml),
         "utf8",
       );
     }),
@@ -190,11 +192,74 @@ async function loadBlogPostFromFile(fileName) {
     date: normalizeDate(data.date, fileName),
     author: requireString(data.author, "author", fileName),
     slug: requireString(data.slug, "slug", fileName),
+    language: normalizeLanguage(data.language, fileName),
+    translationOf: optionalString(data.translationOf, "translationOf", fileName),
     summary: requireString(data.summary, "summary", fileName),
     tags: requireStringArray(data.tags, "tags", fileName),
     wordCount: countWords(content),
     html,
   };
+}
+
+function validateBlogPosts(posts) {
+  const postsBySlug = new Map();
+
+  for (const post of posts) {
+    if (postsBySlug.has(post.slug)) {
+      throw new Error(`Blog post slug "${post.slug}" is used more than once.`);
+    }
+    postsBySlug.set(post.slug, post);
+  }
+
+  const editionsByEnglishSlug = new Map();
+  for (const post of posts) {
+    if (!post.translationOf) {
+      if (!isEnglishLanguage(post.language)) {
+        throw new Error(`Blog post ${post.slug} must reference an English post with "translationOf".`);
+      }
+      continue;
+    }
+
+    const englishPost = postsBySlug.get(post.translationOf);
+    if (!englishPost || !isEnglishLanguage(englishPost.language) || englishPost.translationOf) {
+      throw new Error(`Blog post ${post.slug} references missing or non-English source "${post.translationOf}".`);
+    }
+    if (post.slug === post.translationOf) {
+      throw new Error(`Blog post ${post.slug} cannot translate itself.`);
+    }
+
+    const editions = editionsByEnglishSlug.get(englishPost.slug) ?? new Set([englishPost.language]);
+    if (editions.has(post.language)) {
+      throw new Error(`Blog post ${englishPost.slug} has more than one ${post.language} edition.`);
+    }
+    editions.add(post.language);
+    editionsByEnglishSlug.set(englishPost.slug, editions);
+  }
+}
+
+function normalizeLanguage(value, fileName) {
+  if (value === undefined || value === null || value === "") {
+    return "en";
+  }
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`Blog post ${fileName} must provide a valid BCP 47 language tag.`);
+  }
+
+  try {
+    return Intl.getCanonicalLocales(value.trim())[0];
+  } catch {
+    throw new Error(`Blog post ${fileName} must provide a valid BCP 47 language tag.`);
+  }
+}
+
+function optionalString(value, fieldName, fileName) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`Blog post ${fileName} must provide a non-empty string for "${fieldName}".`);
+  }
+  return value.trim();
 }
 
 function countWords(content) {
@@ -302,7 +367,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
   });
 }
 
-function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
+function renderBlogPostPage(post, posts, appIndexHtml, siteData, footerHtml) {
 
   const tablePreProcessor = post.html
   .replace(/<table>/g, '<div class="blog-table"><table>')
@@ -316,6 +381,7 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
     description: post.summary,
     canonicalPath: `/blog/${post.slug}/`,
     post,
+    alternateLinks: renderAlternateLinkTags(post, posts),
     body: `
       <div class="blog-shell">
         ${renderSiteHeader(siteData)}
@@ -330,6 +396,7 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
                 Share
               </button>
+${renderLanguageSwitcher(post, posts)}
             </div>
             <header class="stack-sm">
               <div class="blog-meta">
@@ -389,6 +456,69 @@ function renderBlogPostPage(post, appIndexHtml, siteData, footerHtml) {
       </script>
     `,
   });
+}
+
+function getPostEditions(post, posts) {
+  const englishPost = isEnglishLanguage(post.language)
+    ? post
+    : posts.find((candidate) => candidate.slug === post.translationOf);
+  if (!englishPost) {
+    return [post];
+  }
+
+  return posts
+    .filter((candidate) => candidate.slug === englishPost.slug || candidate.translationOf === englishPost.slug)
+    .sort((a, b) => a.language.localeCompare(b.language));
+}
+
+function renderLanguageSwitcher(post, posts) {
+  const editions = getPostEditions(post, posts).filter((edition) => edition.slug !== post.slug);
+  if (editions.length === 0) {
+    return "";
+  }
+
+  const links = editions.map((edition) => {
+    const href = `/blog/${encodeURIComponent(edition.slug)}/`;
+    const label = getLanguageLinkLabel(post.language, edition.language);
+    return `<a class="action-btn action-btn-secondary" href="${href}" hreflang="${escapeHtml(edition.language)}">${escapeHtml(label)}</a>`;
+  }).join("\n              ");
+
+  return `<nav class="blog-language-switcher" aria-label="Available languages">${links}</nav>`;
+}
+
+function renderAlternateLinkTags(post, posts) {
+  const editions = getPostEditions(post, posts);
+  if (editions.length < 2) {
+    return "";
+  }
+
+  const links = editions.map((edition) => {
+    const href = `${siteUrl}/blog/${encodeURIComponent(edition.slug)}/`;
+    return `<link rel="alternate" hreflang="${escapeHtml(edition.language)}" href="${escapeHtml(href)}" />`;
+  });
+  const englishPost = editions.find((edition) => isEnglishLanguage(edition.language));
+  if (englishPost) {
+    const href = `${siteUrl}/blog/${encodeURIComponent(englishPost.slug)}/`;
+    links.push(`<link rel="alternate" hreflang="x-default" href="${escapeHtml(href)}" />`);
+  }
+
+  return links.join("\n  ");
+}
+
+function getLanguageLinkLabel(currentLanguage, targetLanguage) {
+  const currentBaseLanguage = currentLanguage.split("-")[0].toLowerCase();
+  const targetBaseLanguage = targetLanguage.split("-")[0].toLowerCase();
+  if (currentBaseLanguage === "en" && targetBaseLanguage === "es") {
+    return "Leer en español";
+  }
+  if (currentBaseLanguage === "es" && targetBaseLanguage === "en") {
+    return "Read in English";
+  }
+  return new Intl.DisplayNames([currentLanguage], { type: "language" }).of(targetLanguage) ?? targetLanguage;
+}
+
+function isEnglishLanguage(language) {
+  return language.split("-")[0].toLowerCase() === "en";
 }
 
 function renderBlogAgentPage(posts, appIndexHtml, siteData, footerHtml, summaryTemplate) {
@@ -509,12 +639,12 @@ function renderTag(tag) {
   return `<span class="blog-tag">${escapeHtml(tag)}</span>`;
 }
 
-function renderDocument({ appIndexHtml, title, description, canonicalPath, body, post, schemaType }) {
+function renderDocument({ appIndexHtml, title, description, canonicalPath, body, post, schemaType, alternateLinks }) {
   const canonicalUrl = `${siteUrl}${canonicalPath}`;
-  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType });
+  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType, alternateLinks });
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${escapeHtml(post?.language ?? "en")}">
   <head>
 ${head}
   </head>
@@ -527,7 +657,7 @@ ${body}
 </html>`;
 }
 
-function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType }) {
+function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType, alternateLinks }) {
   const headMatch = appIndexHtml.match(/<head>([\s\S]*?)<\/head>/i);
   if (!headMatch) {
     throw new Error("Could not locate <head> in index.html.");
@@ -543,6 +673,7 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl,
     description,
     keywords: post?.tags ?? seoKeywords,
     url: canonicalUrl,
+    ...(post ? { inLanguage: post.language } : {}),
     publisher: {
       "@type": "Organization",
       name: "Long Vacation - Vacation Optimizer",
@@ -583,7 +714,7 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl,
       .map((line) => `  ${line}`)
       .join("\n");
 
-  return allHeadContent;
+  return alternateLinks ? `${allHeadContent}\n  ${alternateLinks}` : allHeadContent;
 }
 
 function formatDate(value) {

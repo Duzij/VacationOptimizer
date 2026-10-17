@@ -6,6 +6,8 @@ export interface BlogPost {
   date: string;
   author: string;
   slug: string;
+  language: string;
+  translationOf?: string;
   summary: string;
   tags: string[];
   html: string;
@@ -45,10 +47,33 @@ function parseBlogPost(filePath: string, source: string): BlogPost {
     date: normalizeDateField(data.date, fileName),
     author: normalizeStringField(data.author, "author", fileName),
     slug: normalizeStringField(data.slug, "slug", fileName),
+    language: normalizeLanguage(data.language, fileName),
+    translationOf: normalizeOptionalStringField(data.translationOf, "translationOf", fileName),
     summary: normalizeStringField(data.summary, "summary", fileName),
     tags: normalizeTags(data.tags, fileName),
     html: markdown.render(content),
   };
+}
+
+function normalizeLanguage(value: unknown, fileName: string) {
+  if (value === undefined || value === null || value === "") {
+    return "en";
+  }
+
+  const language = normalizeStringField(value, "language", fileName);
+  try {
+    return Intl.getCanonicalLocales(language)[0] ?? "en";
+  } catch {
+    throw new Error(`Blog post ${fileName} must provide a valid BCP 47 language tag.`);
+  }
+}
+
+function normalizeOptionalStringField(value: unknown, fieldName: string, fileName: string) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  return normalizeStringField(value, fieldName, fileName);
 }
 
 function normalizeStringField(value: unknown, fieldName: string, fileName: string) {

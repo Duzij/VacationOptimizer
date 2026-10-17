@@ -2,7 +2,7 @@ import { ArrowRight, ChevronLeft, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import HtmlFragment from "./HtmlFragment";
-import { getBlogPostBySlug, type BlogPost } from "../blog";
+import { getAllBlogPosts, getBlogPostBySlug, type BlogPost } from "../blog";
 
 interface BlogPostListItem {
   title: string;
@@ -19,6 +19,18 @@ function formatPostDate(value: string) {
     month: "long",
     day: "numeric",
   });
+}
+
+function getLanguageLinkLabel(currentLanguage: string, targetLanguage: string) {
+  const currentBaseLanguage = currentLanguage.split("-")[0].toLowerCase();
+  const targetBaseLanguage = targetLanguage.split("-")[0].toLowerCase();
+  if (currentBaseLanguage === "en" && targetBaseLanguage === "es") {
+    return "Leer en español";
+  }
+  if (currentBaseLanguage === "es" && targetBaseLanguage === "en") {
+    return "Read in English";
+  }
+  return new Intl.DisplayNames([currentLanguage], { type: "language" }).of(targetLanguage) ?? targetLanguage;
 }
 
 function BlogTags({ tags }: Pick<BlogPost, "tags">) {
@@ -153,6 +165,8 @@ export function BlogSamplePostPage() {
 
     const canonicalTag = document.querySelector('link[rel="canonical"]');
     canonicalTag?.setAttribute("href", `${window.location.origin}/blog/${post.slug}/`);
+
+    document.documentElement.lang = post.language ?? "en";
   }, [post]);
 
   if (!post) {
@@ -173,6 +187,15 @@ export function BlogSamplePostPage() {
       </section>
     );
   }
+
+  const language = post.language ?? "en";
+  const englishSlug = language.split("-")[0].toLowerCase() === "en"
+    ? post.slug
+    : post.translationOf;
+  const alternatePosts = englishSlug
+    ? getAllBlogPosts().filter((candidate) =>
+      candidate.slug !== post.slug && (candidate.slug === englishSlug || candidate.translationOf === englishSlug))
+    : [];
 
   const handleShare = async () => {
     const shareUrl = window.location.href;
@@ -205,7 +228,21 @@ export function BlogSamplePostPage() {
           <ChevronLeft className="h-4 w-4" />
           Back to blog
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {alternatePosts.length > 0 && (
+            <nav className="flex flex-wrap gap-2" aria-label="Available languages">
+              {alternatePosts.map((edition) => (
+                <Link
+                  key={edition.slug}
+                  to={`/blog/${edition.slug}/`}
+                  hrefLang={edition.language}
+                  className="action-btn action-btn-secondary"
+                >
+                  {getLanguageLinkLabel(language, edition.language)}
+                </Link>
+              ))}
+            </nav>
+          )}
           {shareStatus !== "idle" && (
             <span className="text-sm text-text-muted">
               {shareStatus === "copied" ? "Link copied" : "Share sheet opened"}
