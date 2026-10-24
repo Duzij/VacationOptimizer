@@ -68,8 +68,9 @@ describe("CountryShowcase", () => {
     });
 
     it("shows the featured country with its optimized days off and a planner CTA", async () => {
-        renderShowcase();
+        const { container } = renderShowcase();
 
+        expect(container.querySelector("img.showcase-flag")?.getAttribute("src")).toContain("flag-icons-de");
         const cta = await screen.findByRole("link", { name: /In Germany from 25 days to 42 overall days/i });
         expect(cta.getAttribute("href")).toBe("/app?country=DE&year=2026&vacationDays=25");
         expect(screen.getByText("42 days off")).toBeTruthy();

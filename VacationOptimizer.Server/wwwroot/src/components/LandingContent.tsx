@@ -42,7 +42,7 @@ export default function LandingContent() {
                       to="/about"
                       className="inline-flex min-h-12 items-center justify-center rounded-full border bg-background px-6 py-3 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
                     >
-                      Learn more
+                      How the vacation optimizer works
                     </Link>
                   </div>
                 </div>

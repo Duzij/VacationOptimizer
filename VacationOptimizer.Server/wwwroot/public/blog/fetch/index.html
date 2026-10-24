@@ -92,11 +92,31 @@
       <link rel="stylesheet" href="/site-shell.css?v=78daae95" />
       <script src="/cookie-consent.js" defer></script>
   
-      <!-- ═══ Fonts with display=swap for faster text rendering ═══ -->
+      <!-- Keep Inter, but load its stylesheet and font without blocking first render. -->
       <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"
+        rel="preload"
+        href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
       />
+      <link
+        rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&amp;display=swap"
+        as="style"
+      />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&amp;display=swap"
+        rel="stylesheet"
+        media="print"
+        onload="this.media='all'"
+      />
+      <noscript>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&amp;display=swap"
+          rel="stylesheet"
+        />
+      </noscript>
   
       <!-- ═══ Structured Data (JSON-LD, non-blocking) ═══ -->
       <script type="application/ld+json">
@@ -247,11 +267,11 @@
       <a href="/about" class="site-nav-pill">About</a>
       <a href="/privacy" class="site-nav-pill">Privacy</a>
       <a href="/terms" class="site-nav-pill">Terms</a>
-      <a
+      <button
         type="button"
         class="site-nav-pill site-cookie-settings"
         data-cookie-settings
-      >Cookie settings</a>
+      >Cookie settings</button>
     </nav>
 
     <div class="site-footer-badges">

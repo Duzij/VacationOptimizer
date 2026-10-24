@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -32,6 +32,7 @@ export default defineConfig(({ command }) => {
     },
     plugins: [
       injectStaticFooter(),
+      inlineBundledCss(),
       react(),
       serveStaticBlogPages(),
       tailwindcss(),
@@ -45,7 +46,40 @@ function injectStaticFooter() {
     transformIndexHtml(html: string) {
       const footerPath = path.resolve(process.cwd(), "src", "content", "footer.html");
       const footerHtml = fs.readFileSync(footerPath, "utf8");
-      return html.replace("<!-- static-footer -->", footerHtml);
+      const siteShellPath = path.resolve(process.cwd(), "public", "site-shell.css");
+      const siteShellCss = fs.readFileSync(siteShellPath, "utf8");
+      const siteShellLink = /<link\s+rel="stylesheet"\s+href="\/site-shell\.css\?v=[^"]+"\s*\/>/;
+
+      return html
+        .replace(siteShellLink, `<style data-site-shell>${siteShellCss}</style>`)
+        .replace("<!-- static-footer -->", footerHtml);
+    },
+  };
+}
+
+function inlineBundledCss(): Plugin {
+  return {
+    name: "inline-bundled-css",
+    apply: "build",
+    enforce: "post",
+    generateBundle(_options, bundle) {
+      const htmlAsset = bundle["index.html"];
+      if (htmlAsset?.type !== "asset") {
+        return;
+      }
+
+      htmlAsset.source = String(htmlAsset.source).replace(/<link\b[^>]*rel="stylesheet"[^>]*>/g, (link) => {
+        const href = link.match(/\bhref="([^"]+)"/)?.[1];
+        const fileName = href?.replace(/^\//, "");
+        const cssAsset = fileName ? bundle[fileName] : undefined;
+
+        if (!fileName || cssAsset?.type !== "asset" || !fileName.endsWith(".css")) {
+          return link;
+        }
+
+        delete bundle[fileName];
+        return `<style data-inline-css="${fileName}">${String(cssAsset.source)}</style>`;
+      });
     },
   };
 }

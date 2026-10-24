@@ -10,6 +10,11 @@ import {
 } from "../showcase";
 
 const ROTATION_INTERVAL_MS = 4500;
+const flagUrls = import.meta.glob<string>("../../node_modules/flag-icons/flags/4x3/{at,au,be,br,ca,ch,co,cz,de,dk,ec,ee,es,fi,fr,gb,gr,hr,hu,id,ie,in,it,jp,kz,lt,lu,lv,me,mx,nl,no,nz,pl,pt,ro,se,si,sk,tr,us,za}.svg", {
+    eager: true,
+    query: "?url",
+    import: "default",
+});
 
 function prefersReducedMotion() {
     return typeof window !== "undefined"
@@ -59,6 +64,7 @@ export default function CountryShowcase() {
     const showcaseQuery = useShowcaseDaysOff(selectedCode);
     const totalDaysOff = showcaseQuery.data;
     const plannerPath = buildShowcasePlannerPath(selectedCode);
+    const flagUrl = flagUrls[`../../node_modules/flag-icons/flags/4x3/${selectedCode.toLowerCase()}.svg`];
 
     return (
         <div
@@ -88,10 +94,18 @@ export default function CountryShowcase() {
                     className="showcase-enter flex items-center gap-3"
                     aria-live="polite"
                 >
-                    <span
-                        aria-hidden="true"
-                        className={`showcase-flag fi fi-${selectedCode.toLowerCase()} text-4xl`}
-                    />
+                    {flagUrl ? (
+                        <img
+                            src={flagUrl}
+                            alt=""
+                            aria-hidden="true"
+                            width="64"
+                            height="48"
+                            className="showcase-flag h-12 w-16 shrink-0"
+                        />
+                    ) : (
+                        <span aria-hidden="true" className="showcase-flag h-12 w-16 shrink-0" />
+                    )}
                     <div className="min-w-0 space-y-0.5">
                         <p className="landing-box__eyebrow">{selectedName}</p>
                         <p className="text-lg font-semibold tracking-tight text-text">
