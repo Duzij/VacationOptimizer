@@ -27,20 +27,28 @@ function toDateKey(date: Date) {
     return date.toISOString().slice(0, 10);
 }
 
-function buildDateSetForRanges(ranges: VacationRange[]) {
-    const dates = new Set<string>();
+function offsetDate(dateStr: string, days: number) {
+    return toDateKey(new Date(parseDate(dateStr).getTime() + days * 24 * 60 * 60 * 1000));
+}
+
+function buildHolidayRangeMap(ranges: VacationRange[]) {
+    const rangesByDate = new Map<string, VacationRange>();
 
     ranges.forEach((range) => {
         let current = parseDate(range.start);
         const end = parseDate(range.end);
 
         while (current <= end) {
-            dates.add(toDateKey(current));
+            rangesByDate.set(toDateKey(current), range);
             current = new Date(current.getTime() + 24 * 60 * 60 * 1000);
         }
     });
 
-    return dates;
+    return rangesByDate;
+}
+
+function buildDateSetForRanges(ranges: VacationRange[]) {
+    return new Set(buildHolidayRangeMap(ranges).keys());
 }
 
 function isConnectedRangeDay(day: CalendarDay) {
@@ -111,6 +119,8 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
         retry: false
     });
 
+    const holidayRangesByDate = useMemo(() => buildHolidayRangeMap(ranges), [ranges]);
+
     const matchedRangeDates = useMemo(() => {
         if (!calendar || !sharedDays || sharedDays.length !== calendar.length || ranges.length === 0) {
             return new Set<string>();
@@ -142,19 +152,30 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
             return [];
         }
 
-        return calendar.map((day, index) => (
-            sharedDays && sharedDays[index]
-                ? {
-                    ...day,
-                    sharedType: sharedDays[index],
-                    // Mark the full continuous matched time-off span so the
-                    // shared range styling can extend through holidays,
-                    // weekends, and suggested vacation days.
-                    sharedMatchedRange: matchedRangeDates.has(day.date),
-                }
-                : day
-        ));
-    }, [calendar, sharedDays, matchedRangeDates]);
+        return calendar.map((day, index) => {
+            const sharedType = sharedDays?.[index];
+            const holidayRange = holidayRangesByDate.get(day.date);
+
+            if (!sharedType && !holidayRange) {
+                return day;
+            }
+
+            return {
+                ...day,
+                sharedType: sharedType ?? day.sharedType,
+                // Mark the full continuous matched time-off span so the
+                // shared range styling can extend through holidays,
+                // weekends, and suggested vacation days.
+                sharedMatchedRange: sharedType ? matchedRangeDates.has(day.date) : day.sharedMatchedRange,
+                holidayRange,
+            };
+        });
+    }, [calendar, sharedDays, matchedRangeDates, holidayRangesByDate]);
+
+    const calendarDaysByDate = useMemo(
+        () => new Map(decoratedCalendar.map((day) => [day.date, day])),
+        [decoratedCalendar],
+    );
 
     const months = useMemo(() => {
         if (decoratedCalendar.length === 0) {
@@ -199,26 +220,40 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
     return (
         <div className="space-y-4 w-full max-w-6xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {months.map(({ year: monthYear, month }, index) => (
-                    <div key={`${monthYear}-${month.monthIndex}`} className="contents">
-                        {(index === 0 || months[index - 1]?.year !== monthYear) && (
-                            <div className="col-span-full flex items-center gap-3 pt-2" aria-label={`Calendar year ${monthYear}`}>
-                                <div className="h-px flex-1 bg-border" />
-                                <h2 className="text-sm font-semibold text-text-muted">{monthYear}</h2>
-                                <div className="h-px flex-1 bg-border" />
-                            </div>
-                        )}
-                        <MonthGridComponent
-                            id={`calendar-month-${monthYear}-${month.monthIndex}`}
-                            month={month}
-                            year={monthYear}
-                            onDayLongPress={onDayLongPress}
-                            onDaySelect={onDaySelect}
-                            monthlyCaps={monthlyCaps}
-                            onSetMonthCap={onSetMonthCap}
-                        />
-                    </div>
-                ))}
+                {months.map(({ year: monthYear, month }, index) => {
+                    const sortedMonthDays = [...month.days].sort((left, right) => left.date.localeCompare(right.date));
+                    const firstDay = sortedMonthDays[0];
+                    const lastDay = sortedMonthDays[sortedMonthDays.length - 1];
+                    const previousCalendarDay = firstDay
+                        ? calendarDaysByDate.get(offsetDate(firstDay.date, -1))
+                        : undefined;
+                    const nextCalendarDay = lastDay
+                        ? calendarDaysByDate.get(offsetDate(lastDay.date, 1))
+                        : undefined;
+
+                    return (
+                        <div key={`${monthYear}-${month.monthIndex}`} className="contents">
+                            {(index === 0 || months[index - 1]?.year !== monthYear) && (
+                                <div className="col-span-full flex items-center gap-3 pt-2" aria-label={`Calendar year ${monthYear}`}>
+                                    <div className="h-px flex-1 bg-border" />
+                                    <h2 className="text-sm font-semibold text-text-muted">{monthYear}</h2>
+                                    <div className="h-px flex-1 bg-border" />
+                                </div>
+                            )}
+                            <MonthGridComponent
+                                id={`calendar-month-${monthYear}-${month.monthIndex}`}
+                                month={month}
+                                year={monthYear}
+                                onDayLongPress={onDayLongPress}
+                                onDaySelect={onDaySelect}
+                                previousCalendarDay={previousCalendarDay}
+                                nextCalendarDay={nextCalendarDay}
+                                monthlyCaps={monthlyCaps}
+                                onSetMonthCap={onSetMonthCap}
+                            />
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

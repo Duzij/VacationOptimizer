@@ -55,14 +55,8 @@ describe("CalendarView", () => {
     expect(screen.getByText("January 2027")).toBeTruthy();
   });
 
-  it("extends the shared range styling through continuous matched holiday, weekend, and vacation days", () => {
-    useQueryMock.mockReturnValue({
-      data: [
-        DayType.PublicHoliday,
-        DayType.Weekend,
-        DayType.Vacation,
-      ],
-    });
+  it("styles continuous calendar ranges by default and shows range totals in day tooltips", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
 
     const { container } = render(
       <CalendarView
@@ -98,16 +92,18 @@ describe("CalendarView", () => {
             vacationDaysUsed: 1,
           },
         ]}
-        connectedToken="shared-seed"
       />,
     );
 
-    const cells = Array.from(container.querySelectorAll(".shared-holiday-range"));
+    const cells = Array.from(container.querySelectorAll(".holiday-range"));
 
     expect(cells).toHaveLength(3);
-    expect(cells[0]?.className).toContain("shared-holiday-range-first");
-    expect(cells[1]?.className).toContain("shared-holiday-range-middle");
-    expect(cells[2]?.className).toContain("shared-holiday-range-last");
+    expect(cells[0]?.className).toContain("holiday-range-first");
+    expect(cells[1]?.className).toContain("holiday-range-middle");
+    expect(cells[2]?.className).toContain("holiday-range-last");
+    expect(cells[0]?.getAttribute("title")).toBe("Public holiday: Holiday · 3 days off · 1 PTO day used");
+    expect(cells[1]?.getAttribute("title")).toBe("Weekend · 3 days off · 1 PTO day used");
+    expect(cells[2]?.getAttribute("title")).toBe("Vacation day · 3 days off · 1 PTO day used");
   });
 
   it("builds shared matched ranges from overlapping continuous dates instead of exact range signatures", () => {
@@ -165,7 +161,7 @@ describe("CalendarView", () => {
       />,
     );
 
-    const cells = Array.from(container.querySelectorAll(".shared-holiday-range"));
+    const cells = Array.from(container.querySelectorAll(".holiday-range"));
 
     expect(cells).toHaveLength(3);
     expect(cells[0]?.textContent).toBe("24");
@@ -256,7 +252,7 @@ describe("CalendarView", () => {
       />,
     );
 
-    expect(container.querySelectorAll(".shared-holiday-range")).toHaveLength(3);
+    expect(container.querySelectorAll(".holiday-range")).toHaveLength(3);
 
     rerender(
       <CalendarView
@@ -267,7 +263,40 @@ describe("CalendarView", () => {
       />,
     );
 
-    expect(container.querySelectorAll(".shared-holiday-range")).toHaveLength(0);
+    expect(container.querySelectorAll(".holiday-range")).toHaveLength(0);
+  });
+
+  it("continues holiday range styling across a year boundary", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    const { container } = render(
+      <CalendarView
+        year={2026}
+        calendar={[
+          { date: "2026-12-31", type: DayType.Vacation, holidayName: null },
+          { date: "2027-01-01", type: DayType.Vacation, holidayName: null },
+          { date: "2027-01-02", type: DayType.Weekend, holidayName: null },
+        ]}
+        ranges={[
+          {
+            start: "2026-12-31",
+            end: "2027-01-02",
+            totalDaysOff: 3,
+            vacationDaysUsed: 2,
+          },
+        ]}
+      />,
+    );
+
+    const cells = Array.from(container.querySelectorAll(".holiday-range"));
+
+    expect(cells).toHaveLength(3);
+    expect(cells[0]?.textContent).toBe("31");
+    expect(cells[0]?.className).toContain("holiday-range-first");
+    expect(cells[1]?.textContent).toBe("1");
+    expect(cells[1]?.className).toContain("holiday-range-middle");
+    expect(cells[2]?.textContent).toBe("2");
+    expect(cells[2]?.className).toContain("holiday-range-last");
   });
 
   it("shows a monthly cap value and opens the cap editor when the month icon is clicked", async () => {

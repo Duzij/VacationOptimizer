@@ -93,10 +93,17 @@ async function generateStaticBlog() {
 
   // Generate sitemap
   const publicDir = path.join(projectRoot, "public");
+  await syncLlmsFiles(publicDir);
   await generateSitemap(posts, publicDir);
 
   // Mirror agent-discovery files into dist (Vite may skip dotfiles)
   await mirrorAgentFilesToDist(publicDir);
+}
+
+async function syncLlmsFiles(publicDir) {
+  const wellKnownDir = path.join(publicDir, ".well-known");
+  await fs.mkdir(wellKnownDir, { recursive: true });
+  await fs.copyFile(path.join(publicDir, "llms.txt"), path.join(wellKnownDir, "llms.txt"));
 }
 
 async function mirrorAgentFilesToDist(publicDir) {
@@ -124,6 +131,7 @@ async function generateSitemap(posts, publicDir) {
     { loc: `${siteUrl}/privacy/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
     { loc: `${siteUrl}/terms/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
     { loc: `${siteUrl}/app/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "0.9" },
+    { loc: `${siteUrl}/fetch/`, lastmod: "2026-10-24", changefreq: "monthly", priority: "0.6" },
     { loc: `${siteUrl}/blog/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "weekly", priority: "0.8" },
     { loc: `${siteUrl}/blog/fetch/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "monthly", priority: "0.6" },
   ];

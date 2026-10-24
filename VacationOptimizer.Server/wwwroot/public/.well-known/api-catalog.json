@@ -1,12 +1,22 @@
 {
   "name": "Long Vacation API",
-  "description": "Public API endpoints for the Long Vacation planner, showcase, and holiday data. Advertised from the homepage via an RFC 8288 Link header (rel=\"api-catalog\".",
+  "description": "Public API endpoints for the Long Vacation planner, showcase, and holiday data. Advertised from the homepage via an RFC 8288 Link header (rel=\"api-catalog\").",
   "baseUrl": "https://longvacation.eu",
   "endpoints": [
     {
       "path": "/api/vacations/optimize",
       "method": "POST",
-      "description": "Run the vacation-day optimizer for a country, year, region/state/city, vacation-day settings, custom free days, ignored holidays, monthly caps, locked days, and range constraints."
+      "description": "Run the vacation-day optimizer for a supported country, year, region/state/city, vacation-day settings, custom free days, ignored holidays, monthly caps, locked days, and range constraints. Use the country-specific optimize route for IN, ES, and CH."
+    },
+    {
+      "path": "/api/vacations/countries/{countryCode}/schema",
+      "method": "GET",
+      "description": "Get the country-specific planner schema and available regional options."
+    },
+    {
+      "path": "/api/vacations/countries/{countryCode}/optimize",
+      "method": "POST",
+      "description": "Run country-specific optimization for IN, ES, or CH."
     },
     {
       "path": "/api/vacations/showcase",

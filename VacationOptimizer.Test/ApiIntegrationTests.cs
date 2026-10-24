@@ -123,6 +123,30 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task AgentContent_ProvidesPlannerFlowAndCzechCountryCoverage()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+        var webRoot = Path.Combine(environment.ContentRootPath, "wwwroot");
+        var llms = await File.ReadAllTextAsync(Path.Combine(webRoot, "public", "llms.txt"));
+        var wellKnownLlms = await File.ReadAllTextAsync(Path.Combine(webRoot, "public", ".well-known", "llms.txt"));
+        var agentSummary = await File.ReadAllTextAsync(Path.Combine(webRoot, "public", "fetch", "index.html"));
+        var landingPage = await File.ReadAllTextAsync(Path.Combine(webRoot, "index.html"));
+
+        Assert.Equal(llms, wellKnownLlms);
+        foreach (var content in new[] { llms, agentSummary, landingPage })
+        {
+            Assert.Contains("Czech Republic", content);
+            Assert.Contains("CZ", content);
+            Assert.Contains("/api/vacations/countries", content);
+            Assert.DoesNotContain("currently covering India, Spain", content);
+        }
+
+        Assert.Contains("https://longvacation.eu/app?country=CZ&year=2027&vacationDays=25", llms);
+        Assert.Contains("Open the free planner", agentSummary);
+    }
+
+    [Fact]
     public async Task GetCountries_ReturnsSeededDatabaseCountriesAndFallback()
     {
         // Arrange
@@ -138,6 +162,8 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         // Deserialize and check
         Assert.Contains("XX", jsonString);
         Assert.Contains("TestLand", jsonString);
+        Assert.Contains("CZ", jsonString);
+        Assert.Contains("Czech Republic", jsonString);
     }
 
     [Fact]
@@ -250,6 +276,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("https://longvacation.eu/about/", xml);
         Assert.Contains("https://longvacation.eu/contact/", xml);
         Assert.Contains("https://longvacation.eu/app/", xml);
+        Assert.Contains("https://longvacation.eu/fetch/", xml);
     }
 
     [Fact]

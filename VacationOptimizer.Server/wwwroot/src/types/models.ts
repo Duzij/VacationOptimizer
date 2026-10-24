@@ -63,6 +63,7 @@ export interface CalendarDay {
     isLockedVacationDay?: boolean;
     sharedType?: DayType;
     sharedMatchedRange?: boolean;
+    holidayRange?: VacationRange;
 }
 
 export interface VacationRange {

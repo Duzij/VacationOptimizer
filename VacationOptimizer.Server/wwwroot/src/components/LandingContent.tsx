@@ -87,8 +87,8 @@ export default function LandingContent() {
             <li className="step">
               <h3 className="step__title">Pick your country</h3>
               <p className="step__text">
-                Start with India, Spain, or Indonesia — each with regional
-                holiday detail down to states and provinces.
+                Choose from 43 supported countries, including Czech Republic
+                (Czechia), with regional, state, and city holidays where available.
               </p>
             </li>
             <li className="step">

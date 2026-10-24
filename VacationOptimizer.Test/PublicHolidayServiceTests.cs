@@ -35,6 +35,16 @@ public class PublicHolidayServiceTests
         Assert.Contains("DE", countries);
         Assert.Contains("US", countries);
         Assert.Contains("ID", countries);
+        Assert.Contains("CZ", countries);
+    }
+
+    [Fact]
+    public void GetHolidays_CzechRepublic_ReturnsNationalHolidays()
+    {
+        var holidays = _holidayService.GetHolidays("CZ", DefaultYear);
+
+        Assert.NotEmpty(holidays);
+        Assert.Contains(holidays, h => h.Date == new DateOnly(DefaultYear, 1, 1));
     }
 
     [Fact]
