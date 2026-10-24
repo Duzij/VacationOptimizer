@@ -1,8 +1,8 @@
 import type { OptimizeRequest } from "./types/models";
 
 export const defaultVacationDays = 25;
-export const defaultMinimumDaysPerRange = 4;
-export const defaultMaximumDaysPerRange = 14;
+export const defaultMinimumDaysPerRange = 3;
+export const defaultMaximumDaysPerRange = 21;
 export function getDefaultYear() {
   return new Date().getFullYear();
 }

@@ -266,6 +266,29 @@ public class VacationOptimizerServiceTests
     }
 
     [Fact]
+    public void OptimizeCalendar_ExplicitRangeLimits_AreNotRelaxedToUseBudget()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var calendar = new CalendarData(new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 2), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 4), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 5), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 6), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 7), DayType.Weekend),
+        });
+
+        var result = InvokeOptimizeCalendar(
+            calendar,
+            CreateOptimizeRequest(year: nextYear, vacationDays: 1, minimumDaysPerRange: 4, maximumDaysPerRange: 21),
+            new Random(0));
+
+        Assert.Equal(0, result.VacationDaysUsed);
+        Assert.Empty(result.SelectedVacationDays);
+    }
+
+    [Fact]
     public void Optimize_WithCustomFreeDays_IncludesThemInCalculation()
     {
         // Add custom free days (e.g., birthdays)
@@ -370,7 +393,121 @@ public class VacationOptimizerServiceTests
     }
 
     [Fact]
-    public void OptimizeCalendar_MonthlyVacationLimit_BlocksCandidatesInCappedMonth()
+    public void OptimizeCalendar_RemainingBudget_UsesSingleDaysNextToWeekends()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var calendar = new CalendarData(new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 2), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 4), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 5), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 6), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 7), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 8), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 9), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 10), DayType.Weekend),
+        });
+
+        var request = CreateOptimizeRequest(year: nextYear, vacationDays: 1, minimumDaysPerRange: 3, maximumDaysPerRange: 21);
+        var results = Enumerable.Range(0, OptimizationDefaults.MaxUsedResultTokens)
+            .Select(attempt => InvokeOptimizeCalendar(
+                new CalendarData(calendar.Days.Select(day => day with { }).ToList()),
+                request,
+                new Random(attempt)))
+            .ToList();
+
+        Assert.All(results, result => Assert.Equal(1, result.VacationDaysUsed));
+        var bestResult = results
+            .OrderByDescending(result => result.TotalDaysOff)
+            .ThenByDescending(result => result.VacationDaysUsed)
+            .First();
+        var selectedDate = Assert.Single(bestResult.SelectedVacationDays);
+        Assert.True(selectedDate == new DateOnly(nextYear, 1, 4) || selectedDate == new DateOnly(nextYear, 1, 8));
+        Assert.Contains(bestResult.Ranges, range => range.TotalDaysOff == 3 && range.Start <= selectedDate && range.End >= selectedDate);
+    }
+
+    [Fact]
+    public void OptimizeCalendar_TightRangeLimit_DoesNotStrandFinalDayAfterEarlyChoice()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var calendar = new CalendarData(new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 2), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 4), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 5), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 6), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 7), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 8), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 9), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 10), DayType.Weekend),
+        });
+        var request = CreateOptimizeRequest(year: nextYear, vacationDays: 3, minimumDaysPerRange: 3, maximumDaysPerRange: 4);
+
+        var results = Enumerable.Range(0, OptimizationDefaults.MaxUsedResultTokens)
+            .Select(attempt => InvokeOptimizeCalendar(
+                new CalendarData(calendar.Days.Select(day => day with { }).ToList()),
+                request,
+                new Random(attempt)))
+            .ToList();
+
+        Assert.All(results, result => Assert.Equal(3, result.VacationDaysUsed));
+        Assert.All(results, result => Assert.All(result.Ranges, range => Assert.InRange(range.TotalDaysOff, 3, 4)));
+    }
+
+    [Fact]
+    public void GenerateMaxAttemptResults_FullFeasibleBudget_IsUsedByEveryAlternative()
+    {
+        var request = CreateOptimizeRequest(minimumDaysPerRange: 3, maximumDaysPerRange: 21);
+
+        var results = _optimizer.GenerateMaxAttemptResults(request, [], "full-budget-test");
+
+        Assert.Equal(OptimizationDefaults.MaxUsedResultTokens, results.Count);
+        Assert.All(results, result => Assert.Equal(DefaultBudget, result.VacationDaysUsed));
+    }
+
+    [Fact]
+    public void GenerateMaxAttemptResults_MonthlyCap_DoesNotCauseAvoidableUnusedBudget()
+    {
+        var request = CreateOptimizeRequest(
+            minimumDaysPerRange: 3,
+            maximumDaysPerRange: 21,
+            maxNumberOfVacationsPerMonth: new Dictionary<Month, int> { [Month.January] = 1 });
+
+        var results = _optimizer.GenerateMaxAttemptResults(request, [], "monthly-cap-full-budget-test");
+
+        Assert.Equal(OptimizationDefaults.MaxUsedResultTokens, results.Count);
+        Assert.All(results, result =>
+        {
+            Assert.Equal(DefaultBudget, result.VacationDaysUsed);
+            Assert.True(result.SelectedVacationDays.Count(date => date.Month == 1) <= 1);
+        });
+    }
+
+    [Fact]
+    public void GenerateMaxAttemptResults_RanksByDaysOffThenVacationDaysUsed()
+    {
+        var request = CreateOptimizeRequest(minimumDaysPerRange: 3, maximumDaysPerRange: 21);
+
+        var results = _optimizer.GenerateMaxAttemptResults(request, [], "ranking-test");
+
+        for (var index = 1; index < results.Count; index++)
+        {
+            var previous = results[index - 1];
+            var current = results[index];
+            Assert.True(
+                previous.TotalDaysOff > current.TotalDaysOff ||
+                (previous.TotalDaysOff == current.TotalDaysOff && previous.VacationDaysUsed >= current.VacationDaysUsed),
+                $"Result {index - 1} was not ranked before result {index}.");
+        }
+
+        Assert.Equal(results.Max(result => result.TotalDaysOff), results[0].TotalDaysOff);
+        Assert.Equal(0, _resultTokenService.ParseToken(results[0].ResultToken).Attempt);
+    }
+
+    [Fact]
+    public void OptimizeCalendar_MonthlyVacationLimit_UsesAvailablePartialCandidate()
     {
         var nextYear = DateTime.Now.Year + 1;
         var calendar = new CalendarData(new List<CalendarDay>
@@ -390,7 +527,36 @@ public class VacationOptimizerServiceTests
                 MaxNumberOfVacationsPerMonth: new Dictionary<Month, int> { [Month.January] = 1 }),
             new Random(0));
 
-        Assert.Empty(result.SelectedVacationDays);
+        Assert.Single(result.SelectedVacationDays);
+        Assert.Equal(1, result.VacationDaysUsed);
+    }
+
+    [Fact]
+    public void OptimizeCalendar_MonthlyVacationLimit_UsesRemainingBudgetInOtherMonths()
+    {
+        var nextYear = DateTime.Now.Year + 1;
+        var calendar = new CalendarData(new List<CalendarDay>
+        {
+            CreateCalendarDay(new DateOnly(nextYear, 1, 30), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 1, 31), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 2, 1), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 2, 2), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 2, 3), DayType.Weekend),
+            CreateCalendarDay(new DateOnly(nextYear, 2, 4), DayType.WorkDay),
+            CreateCalendarDay(new DateOnly(nextYear, 2, 5), DayType.Weekend),
+        });
+
+        var result = InvokeOptimizeCalendar(
+            calendar,
+            new OptimizeRequest(
+                Country: DefaultCountry,
+                Year: nextYear,
+                VacationDays: 2,
+                MaxNumberOfVacationsPerMonth: new Dictionary<Month, int> { [Month.January] = 1 }),
+            new Random(0));
+
+        Assert.Equal(2, result.VacationDaysUsed);
+        Assert.True(result.SelectedVacationDays.Count(date => date.Month == 1) <= 1);
     }
 
     [Fact]

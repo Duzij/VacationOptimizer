@@ -74,16 +74,27 @@ public class VacationOptimizerService
             request.StartDate,
             request.EndDate);
 
-        for (int attempt = 0; attempt < OptimizationDefaults.MaxUsedResultTokens; attempt++)
+        var rankedResults = new List<OptimizeResult>();
+        for (int generationAttempt = 0; generationAttempt < OptimizationDefaults.MaxUsedResultTokens; generationAttempt++)
         {
             var calendar = CloneCalendar(initialCalendar);
-            var rng = new Random(attempt);
-            var result = OptimizeCalendar(calendar, request, rng);
+            var rng = new Random(generationAttempt);
+            rankedResults.Add(OptimizeCalendar(calendar, request, rng));
+        }
+
+        var orderedResults = rankedResults
+            .OrderByDescending(result => result.TotalDaysOff)
+            .ThenByDescending(result => result.VacationDaysUsed)
+            .ThenBy(result => ComputeOutputSeed(result), StringComparer.Ordinal);
+
+        var attempt = 0;
+        foreach (var result in orderedResults)
+        {
             var outputSeed = ComputeOutputSeed(result);
             var resultToken = _resultTokenService.CreateToken(attempt, outputSeed, requestFingerprint);
             var plannerSeed = _calendarSeed.GetCalendarSeed(result.Calendar.Days);
-            result = result with { ResultToken = resultToken, PlannerSeed = plannerSeed };
-            generatedResults.Add(result);
+            generatedResults.Add(result with { ResultToken = resultToken, PlannerSeed = plannerSeed });
+            attempt++;
         }
 
         return generatedResults;
@@ -106,7 +117,7 @@ public class VacationOptimizerService
 
         while (remainingBudget > 0)
         {
-            var candidates = FindBridgeCandidates(calendar.Days)
+            var candidates = FindOptimizationCandidates(calendar.Days)
                 .Where(c => c.WorkDaysCount <= remainingBudget)
                 .Where(c => c.TotalDaysOff >= request.MinimumDaysPerRange && c.TotalDaysOff <= request.MaximumDaysPerRange)
                 .Where(c => FitsMonthlyVacationLimits(calendar.Days, c, vacationDaysByMonth, monthlyVacationLimits))
@@ -162,6 +173,27 @@ public class VacationOptimizerService
             if (gapContainsNeverVacationDay)
             {
                 AddBridgeCandidate(calendar, candidates, candidateKeys, left.Start, right.End);
+            }
+        }
+
+        return candidates;
+    }
+
+    private static List<BridgeCandidate> FindOptimizationCandidates(List<CalendarDay> calendar)
+    {
+        var candidates = FindBridgeCandidates(calendar);
+        var candidateKeys = candidates
+            .Select(candidate => (candidate.StartIndex, candidate.EndIndex))
+            .ToHashSet();
+
+        foreach (var segment in FindContiguousSegments(calendar, IsWorkDay))
+        {
+            for (var startIndex = segment.Start; startIndex <= segment.End; startIndex++)
+            {
+                for (var endIndex = startIndex; endIndex <= segment.End; endIndex++)
+                {
+                    AddBridgeCandidate(calendar, candidates, candidateKeys, startIndex, endIndex);
+                }
             }
         }
 

@@ -18,6 +18,7 @@ namespace VacationOptimizer.Test;
 public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private const string DatabaseSecurityHealthAccessToken = "e144dedc-25cf-4f29-ba36-ff6e9f2b0eb1";
+    private static readonly int FutureHolidayYear = DateTime.Now.Year + 1;
     private readonly WebApplicationFactory<Program> _factory;
 
     public ApiIntegrationTests(WebApplicationFactory<Program> factory)
@@ -93,6 +94,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
                 db.Holidays.Add(new Holiday { Id = 1002, CountryId = 1001, StateId = null, Date = new DateOnly(2026, 10, 12), Name = "National Day of Spain" });
                 db.Holidays.Add(new Holiday { Id = 1003, CountryId = 1001, StateId = 1001, Date = new DateOnly(2026, 9, 11), Name = "Catalan National Day" });
                 db.Holidays.Add(new Holiday { Id = 1004, CountryId = 1001, StateId = 1002, Date = new DateOnly(2026, 9, 24), Name = "Mare de Deu de la Merce" });
+                db.Holidays.Add(new Holiday { Id = 1005, CountryId = 999, StateId = null, Date = new DateOnly(FutureHolidayYear, 9, 1), Name = "Future National Test Day" });
 
                 db.SaveChanges();
             });
@@ -501,7 +503,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var payload = JsonContent.Create(new
         {
             country = "XX",
-            year = 2026,
+            year = FutureHolidayYear,
             vacationDays = 5,
             minimumDaysPerRange = 1,
             maximumDaysPerRange = 14,

@@ -10,8 +10,8 @@ public static class ShowcaseDefaults
     public const int VacationDays = 25;
     // Mirrors the planner defaults (optimizerDefaults.ts) so the showcased
     // number matches what the planner produces out of the box.
-    public const int MinimumDaysPerRange = 4;
-    public const int MaximumDaysPerRange = 14;
+    public const int MinimumDaysPerRange = 3;
+    public const int MaximumDaysPerRange = 21;
     // Region-requiring countries get a hardcoded default region for the showcase.
     public const string DefaultIndiaStateCode = "IN-KA";
     public const string DefaultSwitzerlandCantonCode = "CH-ZH";

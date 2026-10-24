@@ -17,7 +17,7 @@ The generic API group is `/api/vacations`:
 
 `OptimizeRequest` supports a country, year, vacation budget, range bounds, regional state, custom days, ignored holidays, never-vacation days, locked vacation days, result history, and a seed token. Preserve the meaning of each field: calendar edits are user intent and must survive a compatible shuffle or restored session.
 
-`VacationOptimizerService` deterministically creates up to `OptimizationDefaults.MaxUsedResultTokens` (currently 50) alternatives from a request fingerprint. Never weaken result-token validation, reuse a token for another request, or return a result without a matching `plannerSeed`.
+`VacationOptimizerService` deterministically creates up to `OptimizationDefaults.MaxUsedResultTokens` (currently 50) alternatives from a request fingerprint. It considers partial and single-day bridge candidates to use the full feasible budget, then ranks results by `TotalDaysOff` and `VacationDaysUsed` descending before assigning result-token attempts. Monthly caps and explicit range limits remain hard constraints. Never weaken result-token validation, reuse a token for another request, or return a result without a matching `plannerSeed`.
 
 ## Country and holiday rules
 

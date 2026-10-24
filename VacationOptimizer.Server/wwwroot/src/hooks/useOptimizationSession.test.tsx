@@ -67,8 +67,8 @@ describe("useOptimizationSession", () => {
         country: "DE",
         year: getDefaultYear(),
         vacationDays: 25,
-        minimumDaysPerRange: 4,
-        maximumDaysPerRange: 14,
+        minimumDaysPerRange: 3,
+        maximumDaysPerRange: 21,
       });
     });
   });
@@ -93,8 +93,8 @@ describe("useOptimizationSession", () => {
         country: "DE",
         year: getDefaultYear(),
         vacationDays: 25,
-        minimumDaysPerRange: 4,
-        maximumDaysPerRange: 14,
+        minimumDaysPerRange: 3,
+        maximumDaysPerRange: 21,
       });
     });
   });
