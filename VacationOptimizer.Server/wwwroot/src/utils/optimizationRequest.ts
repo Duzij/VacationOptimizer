@@ -5,9 +5,11 @@ import {
   type OptimizeRequest,
 } from "../types/models";
 import {
+  isCanadaOptimizeRequest,
   isIndiaOptimizeRequest,
   isSpainOptimizeRequest,
   isSwitzerlandOptimizeRequest,
+  type CanadaOptimizeRequest,
   type IndiaOptimizeRequest,
   type SpainOptimizeRequest,
   type SwitzerlandOptimizeRequest,
@@ -240,6 +242,16 @@ function normalizeDateString(value: string | undefined) {
   return trimmed;
 }
 
+function normalizeCanadaRequest(request: CanadaOptimizeRequest): CanadaOptimizeRequest {
+  const normalized = normalizeBaseFields(request);
+
+  return {
+    ...normalized,
+    country: "CA",
+    provinceCode: request.provinceCode?.trim().toUpperCase() ?? "",
+  };
+}
+
 function normalizeIndiaRequest(request: IndiaOptimizeRequest): IndiaOptimizeRequest {
   const normalized = normalizeBaseFields(request);
 
@@ -272,6 +284,10 @@ function normalizeSwitzerlandRequest(request: SwitzerlandOptimizeRequest): Switz
 }
 
 export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequest {
+  if (isCanadaOptimizeRequest(request)) {
+    return normalizeCanadaRequest(request);
+  }
+
   if (isIndiaOptimizeRequest(request)) {
     return normalizeIndiaRequest(request);
   }
@@ -305,6 +321,30 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
 
   if (!country) {
     return null;
+  }
+
+  if (country === "CA") {
+    const provinceCode = params.get("provinceCode")?.trim().toUpperCase();
+    if (!provinceCode) {
+      return null;
+    }
+
+    return normalizeCanadaRequest({
+      country: "CA",
+      provinceCode,
+      year: parseNumber(params.get("year"), currentYear),
+      vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
+      minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
+      maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+      maxNumberOfVacationsPerMonth: parseMonthlyVacationLimits(params.get("monthlyCaps")),
+      customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
+      ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+      neverHolidayDates: parseDateList(params.get("neverHolidays")),
+      lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
+      seedToken: params.get("seed") ?? undefined,
+      startDate: parseDate(params.get("startDate")),
+      endDate: parseDate(params.get("endDate")),
+    });
   }
 
   if (country === "IN") {
@@ -411,7 +451,9 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
     params.set("vacationDays", String(normalizedRequest.vacationDays));
   }
 
-  if (isIndiaOptimizeRequest(normalizedRequest)) {
+  if (isCanadaOptimizeRequest(normalizedRequest)) {
+    params.set("provinceCode", normalizedRequest.provinceCode);
+  } else if (isIndiaOptimizeRequest(normalizedRequest)) {
     params.set("stateCode", normalizedRequest.stateCode);
   } else if (isSpainOptimizeRequest(normalizedRequest)) {
     if (normalizedRequest.stateCode) {
@@ -472,6 +514,10 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
 }
 
 function getScopeCode(request: OptimizeRequest) {
+  if (isCanadaOptimizeRequest(request)) {
+    return request.provinceCode ?? "";
+  }
+
   if (isIndiaOptimizeRequest(request)) {
     return request.stateCode;
   }

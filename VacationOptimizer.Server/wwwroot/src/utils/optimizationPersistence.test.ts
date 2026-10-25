@@ -127,6 +127,19 @@ describe("optimizationPersistence", () => {
     expect(window.location.search).toBe("?country=US");
   });
 
+  it("restores Canada requests from the provinceCode query param", () => {
+    window.history.replaceState({}, "", "/app?country=CA&provinceCode=ca-on&year=2027");
+
+    expect(parseRequestFromUrl()).toEqual({
+      country: "CA",
+      provinceCode: "CA-ON",
+      year: 2027,
+      vacationDays: defaultVacationDays,
+      minimumDaysPerRange: defaultMinimumDaysPerRange,
+      maximumDaysPerRange: defaultMaximumDaysPerRange,
+    });
+  });
+
   it("restores India requests from the new stateCode query param", () => {
     window.history.replaceState({}, "", "/app?country=IN&stateCode=IN-KA&year=2027");
 

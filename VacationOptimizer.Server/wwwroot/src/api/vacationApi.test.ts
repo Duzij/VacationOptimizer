@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { decodeSeed } from "./vacationApi";
+import { decodeSeed, optimizeVacation } from "./vacationApi";
 import { DayType } from "../types/models";
 
 describe("vacationApi", () => {
@@ -11,6 +11,24 @@ describe("vacationApi", () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
+    });
+
+    describe("optimizeVacation", () => {
+        it("dispatches Canada requests to the province endpoint without the form country field", async () => {
+            const mockResponse = { countryCode: "CA", scope: { type: "province", provinceCode: "CA-ON", provinceName: "Ontario" } };
+            globalThis.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve(mockResponse),
+            });
+
+            await optimizeVacation({ country: "CA", provinceCode: "CA-ON", year: 2026, vacationDays: 25 });
+
+            expect(globalThis.fetch).toHaveBeenCalledWith("/api/vacations/countries/CA/optimize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ provinceCode: "CA-ON", year: 2026, vacationDays: 25 }),
+            });
+        });
     });
 
     describe("decodeSeed", () => {

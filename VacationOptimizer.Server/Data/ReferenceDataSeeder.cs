@@ -8,6 +8,7 @@ public static class ReferenceDataSeeder
 {
     public static void SeedCountryReferenceData(AppDbContext dbContext)
     {
+        SeedCountry(dbContext, CanadaSeedData.Country, CanadaSeedData.States, CanadaSeedData.Holidays);
         SeedCountry(dbContext, IndiaSeedData.Country, IndiaSeedData.States, IndiaSeedData.Holidays);
         SeedCountry(dbContext, SpainSeedData.Country, SpainSeedData.States, SpainSeedData.Holidays);
         SeedCountry(dbContext, IndonesiaSeedData.Country, IndonesiaSeedData.States, IndonesiaSeedData.Holidays);

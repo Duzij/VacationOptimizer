@@ -6,6 +6,7 @@ import useScrollDirection from "../hooks/useScrollDirection";
 
 interface Props {
     isLoading?: boolean;
+    revealKey?: unknown;
     formattedDate: string;
     dateTime?: string;
     label: string;
@@ -16,8 +17,8 @@ interface Props {
     onSettings?: () => void;
 }
 
-export default function DetailsLipDesktop({ isLoading = false, formattedDate, dateTime, label, detail, sharedDetail, actions, onClose, onSettings }: Props) {
-    const visible = useScrollDirection(isLoading);
+export default function DetailsLipDesktop({ isLoading = false, revealKey, formattedDate, dateTime, label, detail, sharedDetail, actions, onClose, onSettings }: Props) {
+    const visible = useScrollDirection(isLoading, revealKey);
 
     const content = (
         <div className={`pointer-events-none fixed inset-x-4 bottom-6 z-20 hidden transition-transform duration-300 ease-in-out sm:block ${visible ? "translate-y-0" : "translate-y-[calc(100%+1.5rem)]"}`}>

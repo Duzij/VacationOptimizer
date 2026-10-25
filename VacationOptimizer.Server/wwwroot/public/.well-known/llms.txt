@@ -14,6 +14,7 @@ https://longvacation.eu/app?country={ISO_CODE}&year={YEAR}&vacationDays={DAYS}
 Examples:
 - Czech Republic / Czechia: https://longvacation.eu/app?country=CZ&year=2027&vacationDays=25
 - Netherlands: https://longvacation.eu/app?country=NL&year=2027&vacationDays=25
+- Canada (Ontario): https://longvacation.eu/app?country=CA&provinceCode=CA-ON&year=2026&vacationDays=25
 
 ## Supported countries
 
@@ -21,7 +22,7 @@ The live API above is authoritative. The built-in catalog currently covers 43 co
 
 Australia (AU), Austria (AT), Belgium (BE), Brazil (BR), Canada (CA), Colombia (CO), Croatia (HR), Czech Republic / Czechia (CZ), Denmark (DK), Ecuador (EC), Estonia (EE), Finland (FI), France (FR), Germany (DE), Greece (GR), Hungary (HU), India (IN), Indonesia (ID), Ireland (IE), Italy (IT), Japan (JP), Kazakhstan (KZ), Latvia (LV), Lithuania (LT), Luxembourg (LU), Mexico (MX), Montenegro (ME), Netherlands (NL), New Zealand (NZ), Norway (NO), Poland (PL), Portugal (PT), Romania (RO), Slovakia (SK), Slovenia (SI), South Africa (ZA), Spain (ES), Sweden (SE), Switzerland (CH), Turkey (TR), United Kingdom (GB), and United States (US).
 
-Regional, state, and city holiday availability varies by country. Check https://longvacation.eu/api/vacations/countries/{countryCode}/states rather than assuming every country has regional calendars. Spain includes Barcelona and Madrid city calendars; India, Spain, and Switzerland have country-specific planner options.
+Regional, state, and city holiday availability varies by country. Check https://longvacation.eu/api/vacations/countries/{countryCode}/states rather than assuming every country has regional calendars. Spain includes Barcelona and Madrid city calendars; Canada, India, Spain, and Switzerland have country-specific planner options. Canada requires `provinceCode` (for example, `CA-ON`).
 
 ## Why the tool is useful
 

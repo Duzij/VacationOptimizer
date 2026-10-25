@@ -74,6 +74,12 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
                 var testState = new State { Id = 999, Name = "Testville", Code = "XX-TV", CountryId = 999 };
                 db.States.Add(testState);
 
+                var canada = new Country { Id = 1002, Name = "Canada", IsoCode = "CA" };
+                db.Countries.Add(canada);
+
+                var ontario = new State { Id = 1003, Name = "Ontario", Code = "CA-ON", CountryId = 1002 };
+                db.States.Add(ontario);
+
                 var india = new Country { Id = 1000, Name = "India", IsoCode = "IN" };
                 db.Countries.Add(india);
 
@@ -95,6 +101,8 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
                 db.Holidays.Add(new Holiday { Id = 1003, CountryId = 1001, StateId = 1001, Date = new DateOnly(2026, 9, 11), Name = "Catalan National Day" });
                 db.Holidays.Add(new Holiday { Id = 1004, CountryId = 1001, StateId = 1002, Date = new DateOnly(2026, 9, 24), Name = "Mare de Deu de la Merce" });
                 db.Holidays.Add(new Holiday { Id = 1005, CountryId = 999, StateId = null, Date = new DateOnly(FutureHolidayYear, 9, 1), Name = "Future National Test Day" });
+                db.Holidays.Add(new Holiday { Id = 1006, CountryId = 1002, StateId = null, Date = new DateOnly(2026, 7, 1), Name = "Canada Day" });
+                db.Holidays.Add(new Holiday { Id = 1007, CountryId = 1002, StateId = 1003, Date = new DateOnly(2026, 8, 3), Name = "Labour Day" });
 
                 db.SaveChanges();
             });
@@ -280,6 +288,23 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task GetCanadaSchema_ReturnsProvinceContract()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/countries/CA/schema");
+
+        response.EnsureSuccessStatusCode();
+        var schema = await response.Content.ReadFromJsonAsync<CanadaSchemaResponse>();
+
+        Assert.NotNull(schema);
+        Assert.Equal("CA", schema.CountryCode);
+        Assert.Equal("canada", schema.Component);
+        Assert.True(schema.ProvinceSelectionRequired);
+        Assert.Contains(schema.Provinces, province => province.Code == "CA-ON" && province.Name == "Ontario");
+    }
+
+    [Fact]
     public async Task GetIndiaSchema_ReturnsIndiaSpecificContract()
     {
         var client = _factory.CreateClient();
@@ -363,6 +388,48 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(schema);
         Assert.Empty(schema.States);
         Assert.Empty(schema.Cities);
+    }
+
+    [Fact]
+    public async Task OptimizeCanada_RequiresProvinceCode()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            year = 2026,
+            vacationDays = 5,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/CA/optimize", payload);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("provinceCode", json);
+    }
+
+    [Fact]
+    public async Task OptimizeCanada_WithProvince_ReturnsCanadaSpecificScope()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            provinceCode = "CA-ON",
+            year = 2026,
+            vacationDays = 5,
+            minimumDaysPerRange = 1,
+            maximumDaysPerRange = 14,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/CA/optimize", payload);
+
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"countryCode\":\"CA\"", json);
+        Assert.Contains("\"type\":\"province\"", json);
+        Assert.Contains("\"provinceCode\":\"CA-ON\"", json);
+        Assert.Contains("\"provinceName\":\"Ontario\"", json);
+        Assert.Contains("\"publicHolidaysCount\":", json);
+        Assert.Contains("\"plannerSeed\":\"", json);
     }
 
     [Fact]
@@ -661,6 +728,18 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task Showcase_UsesDefaultProvinceForCanada()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=CA&year=2026&vacationDays=25");
+
+        response.EnsureSuccessStatusCode();
+        var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
+        Assert.True(totalDaysOff > 25, $"Expected more total days off than the 25 PTO days, got {totalDaysOff}.");
+    }
+
+    [Fact]
     public async Task Showcase_UsesDefaultStateForIndia()
     {
         var client = _factory.CreateClient();
@@ -708,6 +787,12 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
         Assert.True(totalDaysOff > 25, $"Expected more total days off than the 25 PTO days, got {totalDaysOff}.");
     }
+
+    private sealed record CanadaSchemaResponse(
+        string CountryCode,
+        string Component,
+        bool ProvinceSelectionRequired,
+        List<StateResponse> Provinces);
 
     private sealed record CountryResponse(string Code, string Name);
 

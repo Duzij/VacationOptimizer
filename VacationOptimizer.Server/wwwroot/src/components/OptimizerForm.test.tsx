@@ -4,9 +4,23 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import OptimizerForm from "./OptimizerForm";
 
 const countries = [
+  { code: "CA", name: "Canada" },
   { code: "DE", name: "Germany" },
   { code: "IN", name: "India" },
 ];
+
+const canadaSchema = {
+  countryCode: "CA" as const,
+  component: "canada" as const,
+  yearRange: { min: 2026, max: 2031 },
+  defaults: {
+    vacationDays: 25,
+    minimumDaysPerRange: 4,
+    maximumDaysPerRange: 14,
+  },
+  provinceSelectionRequired: true as const,
+  provinces: [{ code: "CA-ON", name: "Ontario" }],
+};
 
 const indiaSchema = {
   countryCode: "IN" as const,
@@ -43,6 +57,10 @@ vi.mock("../api/vacationApi", () => ({
 }));
 
 vi.mock("../features/countrySpecific/countrySpecificApi", () => ({
+  useCanadaSchema: () => ({
+    data: canadaSchema,
+    isLoading: false,
+  }),
   useIndiaSchema: () => ({
     data: indiaSchema,
     isLoading: false,
@@ -75,6 +93,13 @@ vi.mock("../features/countrySpecific/countrySpecificApi", () => ({
       cantonSelectionRequired: true,
       cantons: [],
     },
+    isLoading: false,
+  }),
+}));
+
+vi.mock("../features/countrySpecific/canada/api", () => ({
+  useCanadaSchema: () => ({
+    data: canadaSchema,
     isLoading: false,
   }),
 }));
@@ -142,6 +167,30 @@ describe("OptimizerForm", () => {
     expect(screen.getByLabelText("Country")).toBeTruthy();
     expect(screen.queryByLabelText("Year")).toBeNull();
     expect(screen.queryByLabelText("State / Region")).toBeNull();
+  });
+
+  it("mounts the Canada form and requires a province before submit", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <OptimizerForm
+        onResult={vi.fn()}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={null}
+      />,
+    );
+
+    await user.selectOptions(screen.getByLabelText("Country"), "CA");
+
+    expect(screen.getByLabelText("Province / Territory")).toBeTruthy();
+    expect((screen.getAllByRole("button", { name: /Optimize/i })[0] as HTMLButtonElement).disabled).toBe(true);
+
+    await user.selectOptions(screen.getByLabelText("Province / Territory"), "CA-ON");
+
+    const optimizeButton = screen.getAllByRole("button", { name: /Optimize/i })[0];
+    expect((optimizeButton as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("mounts the India form and requires a state before submit", async () => {

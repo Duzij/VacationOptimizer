@@ -78,6 +78,48 @@ public class HolidayYearSupportTests
             && holiday.Name == holidayName);
     }
 
+    [Fact]
+    public void GetHolidays_2027_IsSupportedForEveryCanadaProvinceScope()
+    {
+        var provinces = _holidayService.GetStates("CA");
+
+        Assert.Equal(13, provinces.Count);
+        foreach (var province in provinces)
+        {
+            var holidays = _holidayService.GetHolidays("CA", SupportedYear, province.Code);
+
+            Assert.NotEmpty(holidays);
+            Assert.All(holidays, holiday => Assert.Equal(SupportedYear, holiday.Date.Year));
+            Assert.DoesNotContain(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 25));
+            Assert.DoesNotContain(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 26));
+        }
+    }
+
+    [Theory]
+    [InlineData("CA-AB", "2027-08-02", "Heritage Day")]
+    [InlineData("CA-BC", "2027-08-02", "British Columbia Day")]
+    [InlineData("CA-MB", "2027-08-02", "Terry Fox Day")]
+    [InlineData("CA-NL", "2027-07-01", "Memorial Day")]
+    [InlineData("CA-NB", "2027-08-02", "New Brunswick Day")]
+    [InlineData("CA-NT", "2027-06-21", "National Indigenous Peoples Day")]
+    [InlineData("CA-NS", "2027-08-02", "Natal Day")]
+    [InlineData("CA-NU", "2027-07-09", "Nunavut Day")]
+    [InlineData("CA-ON", "2027-02-15", "Family Day")]
+    [InlineData("CA-PE", "2027-02-15", "Islander Day")]
+    [InlineData("CA-QC", "2027-05-24", "National Patriots' Day")]
+    [InlineData("CA-SK", "2027-08-02", "Saskatchewan Day")]
+    [InlineData("CA-YT", "2027-08-16", "Discovery Day")]
+    public void GetHolidays_CanadaProvinceScope_IncludesProvincialHoliday_2027(string provinceCode, string date, string holidayName)
+    {
+        var holidays = _holidayService.GetHolidays("CA", SupportedYear, provinceCode);
+
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == DateOnly.Parse(date)
+            && holiday.Name == holidayName);
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 27));
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 28));
+    }
+
     [Theory]
     [InlineData("CH-ZH")]
     [InlineData("CH-LU")]

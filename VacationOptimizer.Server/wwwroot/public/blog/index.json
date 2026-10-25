@@ -1,6 +1,23 @@
 {
   "posts": [
     {
+      "title": "Plan Canadian PTO Around Your Province or Territory",
+      "date": "2026-10-25",
+      "author": "Team",
+      "slug": "canada-holiday-planner",
+      "language": "en",
+      "summary": "Canada has province- and territory-specific vacation planning, with curated 2027 holidays for all 13 provinces and territories.",
+      "tags": [
+        "feature",
+        "canada",
+        "pto",
+        "public-holidays",
+        "2027",
+        "vacation-planning"
+      ],
+      "wordCount": 238
+    },
+    {
       "title": "Better Vacation Plans: Use Your Allowance and See the Best Option First",
       "date": "2026-10-24",
       "author": "Team",

@@ -21,8 +21,8 @@ The generic API group is `/api/vacations`:
 
 ## Country and holiday rules
 
-- Generic countries use the legacy optimize endpoint. `IN`, `ES`, and `CH` must use `POST /api/vacations/countries/{code}/optimize` and expose `GET .../{code}/schema`.
-- India requires a valid `stateCode`; Switzerland requires a valid `cantonCode`.
+- Generic countries use the legacy optimize endpoint. `CA`, `IN`, `ES`, and `CH` must use `POST /api/vacations/countries/{code}/optimize` and expose `GET .../{code}/schema`.
+- Canada requires a valid `provinceCode`; India requires a valid `stateCode`; Switzerland requires a valid `cantonCode`.
 - Spain supports national, state, and city scope. Barcelona (`ES-CT-BCN`) inherits Catalonia; Madrid (`ES-MD-MAD`) inherits Madrid. Keep this mapping synchronized between `SpainVacationEndpoints` and `PublicHolidayService`.
 - Curated records are seeded from `Data/SeedData`. When the database has a calendar for a country/year it takes precedence; otherwise the `PublicHoliday` provider is used. A seeded country with no calendar for a future year intentionally returns no holidays until that calendar is added.
 - `CalendarService` marks past days, today, user-protected days, custom free days, holidays, weekends, then workdays in that precedence order. Protect this ordering with tests whenever calendar logic changes.

@@ -1,3 +1,4 @@
+using VacationOptimizer.Server.CountrySpecific.Canada;
 using VacationOptimizer.Server.CountrySpecific.India;
 using VacationOptimizer.Server.CountrySpecific.Spain;
 using VacationOptimizer.Server.CountrySpecific.Switzerland;
@@ -8,6 +9,7 @@ public static class CountrySpecificVacationEndpoints
 {
     public static readonly IReadOnlySet<string> CountryCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
+        "CA",
         "IN",
         "ES",
         "CH",
@@ -23,6 +25,7 @@ public static class CountrySpecificVacationEndpoints
 
     public static RouteGroupBuilder MapCountrySpecificVacationEndpoints(this RouteGroupBuilder api)
     {
+        api.MapCanadaVacationEndpoints();
         api.MapIndiaVacationEndpoints();
         api.MapSpainVacationEndpoints();
         api.MapSwitzerlandVacationEndpoints();

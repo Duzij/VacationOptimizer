@@ -8,6 +8,7 @@ interface Props {
     canNavigateNext: boolean;
     hasReachedShuffleLimit?: boolean;
     hasLockedBudgetLimit?: boolean;
+    revealKey?: unknown;
     onShuffle: () => void;
     onPrevious: () => void;
     onNext: () => void;
@@ -19,11 +20,12 @@ export default function DesktopResultControls({
     canNavigateNext,
     hasReachedShuffleLimit,
     hasLockedBudgetLimit,
+    revealKey,
     onShuffle,
     onPrevious,
     onNext,
 }: Props) {
-    const visible = useScrollDirection(isLoading);
+    const visible = useScrollDirection(isLoading, revealKey);
 
     const content = (
         <div className={`pointer-events-none fixed inset-x-4 bottom-6 z-30 hidden transition-transform duration-300 ease-in-out sm:block ${visible ? "translate-y-0" : "translate-y-[calc(100%+1.5rem)]"}`}>

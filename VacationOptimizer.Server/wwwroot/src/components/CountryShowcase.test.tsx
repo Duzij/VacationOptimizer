@@ -50,7 +50,8 @@ describe("buildShowcasePlannerPath", () => {
         expect(buildShowcasePlannerPath("de")).toBe("/app?country=DE&year=2026&vacationDays=25");
     });
 
-    it("includes the default region for India and Switzerland", () => {
+    it("includes the default region for custom countries that require one", () => {
+        expect(buildShowcasePlannerPath("CA")).toBe("/app?country=CA&provinceCode=CA-ON&year=2026&vacationDays=25");
         expect(buildShowcasePlannerPath("IN")).toBe("/app?country=IN&stateCode=IN-KA&year=2026&vacationDays=25");
         expect(buildShowcasePlannerPath("CH")).toBe("/app?country=CH&cantonCode=CH-ZH&year=2026&vacationDays=25");
     });

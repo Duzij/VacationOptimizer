@@ -1,8 +1,15 @@
 import type { OptimizeRequest, OptimizeResult } from "../../types/models";
+import type { CanadaOptimizeRequest, CanadaOptimizeResult } from "./canada/models";
 import type { IndiaOptimizeRequest, IndiaOptimizeResult } from "./india/models";
 import type { SpainOptimizeRequest, SpainOptimizeResult } from "./spain/models";
 import type { SwitzerlandOptimizeRequest, SwitzerlandOptimizeResult } from "./switzerland/models";
 
+export type {
+    CanadaCountrySchema,
+    CanadaOptimizeRequest,
+    CanadaOptimizeResult,
+    CanadaOptimizeScope,
+} from "./canada/models";
 export type {
     IndiaCountrySchema,
     IndiaOptimizeRequest,
@@ -24,6 +31,10 @@ export type {
 } from "./switzerland/models";
 export type { OptimizationFormDefaults, OptimizationYearRange } from "./shared/models";
 
+export function isCanadaOptimizeRequest(request: OptimizeRequest | null | undefined): request is CanadaOptimizeRequest {
+    return request?.country === "CA";
+}
+
 export function isIndiaOptimizeRequest(request: OptimizeRequest | null | undefined): request is IndiaOptimizeRequest {
     return request?.country === "IN";
 }
@@ -34,6 +45,10 @@ export function isSpainOptimizeRequest(request: OptimizeRequest | null | undefin
 
 export function isSwitzerlandOptimizeRequest(request: OptimizeRequest | null | undefined): request is SwitzerlandOptimizeRequest {
     return request?.country === "CH";
+}
+
+export function isCanadaOptimizeResult(result: OptimizeResult | null | undefined): result is CanadaOptimizeResult {
+    return result?.countryCode === "CA";
 }
 
 export function isIndiaOptimizeResult(result: OptimizeResult | null | undefined): result is IndiaOptimizeResult {
@@ -51,6 +66,10 @@ export function isSwitzerlandOptimizeResult(result: OptimizeResult | null | unde
 export function getOptimizeRequestScopeCode(request: OptimizeRequest | null | undefined) {
     if (!request) {
         return "";
+    }
+
+    if (isCanadaOptimizeRequest(request)) {
+        return request.provinceCode ?? "";
     }
 
     if (isIndiaOptimizeRequest(request)) {

@@ -1,8 +1,45 @@
 import { describe, expect, it } from "vitest";
-import { buildSearchParamsFromRequest, ensureMonthlyCapsFitLockedDays, normalizeOptimizeRequest, parseRequestFromSearchParams, requestsMatch } from "./optimizationRequest";
+import { buildSearchParamsFromRequest, ensureMonthlyCapsFitLockedDays, hasSameHolidayScope, normalizeOptimizeRequest, parseRequestFromSearchParams, requestsMatch } from "./optimizationRequest";
 import { getDefaultYear } from "../optimizerDefaults";
 
 describe("optimizationRequest", () => {
+  it("round-trips Canada province requests through search params", () => {
+    const request = normalizeOptimizeRequest({
+      country: "CA",
+      provinceCode: " ca-on ",
+      year: getDefaultYear(),
+      vacationDays: 25,
+    });
+    const params = buildSearchParamsFromRequest(request);
+
+    expect(request).toMatchObject({ country: "CA", provinceCode: "CA-ON" });
+    expect(params.get("provinceCode")).toBe("CA-ON");
+    expect(parseRequestFromSearchParams(params)).toEqual(request);
+  });
+
+  it("treats Canada requests for different provinces as different holiday scopes", () => {
+    const baseRequest = { country: "CA" as const, year: getDefaultYear(), vacationDays: 25 };
+
+    expect(hasSameHolidayScope(
+      { ...baseRequest, provinceCode: "CA-ON" },
+      { ...baseRequest, provinceCode: "CA-QC" },
+    )).toBe(false);
+    expect(hasSameHolidayScope(
+      { ...baseRequest, provinceCode: "CA-ON" },
+      { ...baseRequest, provinceCode: "CA-ON" },
+    )).toBe(true);
+  });
+
+  it("normalizes old Canada runtime objects without a province safely", () => {
+    const oldRequest = {
+      country: "CA",
+      year: getDefaultYear(),
+      vacationDays: 25,
+    } as unknown as Parameters<typeof normalizeOptimizeRequest>[0];
+
+    expect(normalizeOptimizeRequest(oldRequest)).toMatchObject({ country: "CA", provinceCode: "" });
+  });
+
   it("preserves empty custom free day titles", () => {
     const request = normalizeOptimizeRequest({
       country: "DE",

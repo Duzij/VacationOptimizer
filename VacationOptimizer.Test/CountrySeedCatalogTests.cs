@@ -5,6 +5,23 @@ namespace VacationOptimizer.Test;
 public class CountrySeedCatalogTests
 {
     [Fact]
+    public void BuildHolidays_NormalizesCanadaNationalAndProvincialScopes()
+    {
+        var nationalCanadaDay = CountrySeedCatalog.Holidays.Single(holiday =>
+            holiday.CountryId == CanadaSeedData.Country.Id
+            && holiday.StateId == null
+            && holiday.Date == new DateOnly(2026, 7, 1));
+        var yukon = CountrySeedCatalog.States.Single(state => state.Code == "CA-YT");
+        var discoveryDay = CountrySeedCatalog.Holidays.Single(holiday =>
+            holiday.CountryId == CanadaSeedData.Country.Id
+            && holiday.Date == new DateOnly(2026, 8, 17));
+
+        Assert.Null(nationalCanadaDay.StateId);
+        Assert.Equal(yukon.Id, discoveryDay.StateId);
+        Assert.Equal("Discovery Day", discoveryDay.Name);
+    }
+
+    [Fact]
     public void BuildHolidays_NormalizesIndiaNationalHolidaysToCountryScope()
     {
         var republicDay = CountrySeedCatalog.Holidays

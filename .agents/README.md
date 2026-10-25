@@ -17,7 +17,7 @@ Use the guide that owns the primary change. A change that crosses a boundary mus
 VacationOptimizer.Server/
   Program.cs                     API composition, endpoints, SPA/static hosting
   Services/                      optimizer, calendar, holiday, tokens, security report
-  CountrySpecific/               India, Spain, and Switzerland API extensions
+  CountrySpecific/               Canada, India, Spain, and Switzerland API extensions
   Data/ and Data/SeedData/       EF Core model and curated holiday data
   wwwroot/                       React/Vite source, static assets, and content
 VacationOptimizer.Test/          xUnit unit and API integration tests
@@ -31,5 +31,5 @@ docker-compose*.yaml             production and hot-reload development stacks
 
 - The deployed planner lives at `/app`; the Vite development entry point is `/`. Public content lives at `/`, `/about`, `/contact`, `/privacy`, and `/terms`.
 - Treat an optimization response, its `resultToken`, and its `plannerSeed` as a compatible set. Result tokens are signed server-side and are used for shuffle history and deep-link restoration.
-- Country-specific clients must call their own optimize/schema endpoints: `IN`, `ES`, and `CH` are rejected by the legacy `POST /api/vacations/optimize` route.
+- Country-specific clients must call their own optimize/schema endpoints: `CA`, `IN`, `ES`, and `CH` are rejected by the legacy `POST /api/vacations/optimize` route.
 - Do not commit `.env`, generated `wwwroot/dist` output, certificates, or credentials. Share required environment keys and deployment steps in the handoff instead.

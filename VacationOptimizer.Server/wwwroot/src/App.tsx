@@ -624,6 +624,7 @@ function PlannerPage() {
           canNavigateNext={canNavigateNext}
           hasReachedShuffleLimit={hasReachedShuffleLimit}
           hasLockedBudgetLimit={hasLockedBudgetLimit}
+          revealKey={selectedDayDetails}
           onShuffle={handleShuffleOptimization}
           onPrevious={handleNavigatePreviousResult}
           onNext={handleNavigateNextResult}
@@ -647,6 +648,7 @@ function PlannerPage() {
       {selectedDayDetails && result && !hasUnsubmittedPeriodChanges && (
         <DetailsLipDesktop
           isLoading={isUserOptimizing}
+          revealKey={selectedDayDetails}
           formattedDate={selectedDayDetails.formattedDate}
           dateTime={selectedDayDetails.dateTime}
           label={selectedDayDetails.label}

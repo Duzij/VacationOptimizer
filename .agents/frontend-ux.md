@@ -21,8 +21,8 @@ The app uses React Router, TanStack Query, Tailwind utility classes alongside pr
 
 ## API and country-specific behavior
 
-- Generic countries use `POST /api/vacations/optimize`. India, Spain, and Switzerland dispatch through `features/countrySpecific/` to their individual schema and optimize endpoints; do not route those requests to the legacy endpoint.
-- India requires a state selector, Switzerland requires a canton selector, and Spain supports national/state/city selection. Update the respective form, `models.ts`, client API, and server contract in the same change.
+- Generic countries use `POST /api/vacations/optimize`. Canada, India, Spain, and Switzerland dispatch through `features/countrySpecific/` to their individual schema and optimize endpoints; do not route those requests to the legacy endpoint.
+- Canada requires a province/territory selector, India requires a state selector, Switzerland requires a canton selector, and Spain supports national/state/city selection. Update the respective form, `models.ts`, client API, and server contract in the same change.
 - Keep API failures as `ApiError` with status codes so a `409` remains recognizable as no further shuffle result. Preserve type-safe serialized dates (`YYYY-MM-DD`) and DayType values in `src/types/models.ts`.
 - Country/holiday scope changes intentionally reset incompatible ignored, never-holiday, and locked-day state. Do not accidentally carry those selections to another country, region, or year.
 

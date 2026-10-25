@@ -4,6 +4,7 @@ import { type CustomFreeDay, type DetectedCountry, type OptimizeRequest } from "
 import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear } from "../optimizerDefaults";
 import { isIndiaOptimizeRequest } from "../features/countrySpecific/models";
 import { readSavedRequest } from "../utils/optimizationPersistence";
+import CanadaCountryOptimizerForm from "../features/countrySpecific/canada/CanadaCountryOptimizerForm";
 import IndiaCountryOptimizerForm from "../features/countrySpecific/india/IndiaCountryOptimizerForm";
 import SpainCountryOptimizerForm from "../features/countrySpecific/spain/SpainCountryOptimizerForm";
 import SwitzerlandCountryOptimizerForm from "../features/countrySpecific/switzerland/SwitzerlandCountryOptimizerForm";
@@ -153,6 +154,22 @@ export default function OptimizerForm({
                 )}
             </div>
 
+            {country === "CA" && (
+                <CanadaCountryOptimizerForm
+                    key={country}
+                    country={country}
+                    onResult={onResult}
+                    isLoading={isLoading}
+                    customFreeDays={customFreeDays}
+                    onCustomFreeDaysChange={onCustomFreeDaysChange}
+                    initialRequest={initialRequest}
+                    sharedDraft={sharedDraft}
+                    onSharedDraftChange={setSharedDraft}
+                    lockedVacationDaysCount={lockedVacationDaysCount}
+                    onResetLockedDays={onResetLockedDays}
+                    onCustomPeriodChanged={onCustomPeriodChanged}
+                />
+            )}
             {country === "IN" && (
                 <IndiaCountryOptimizerForm
                     key={country}
@@ -201,7 +218,7 @@ export default function OptimizerForm({
                     onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
-            {country && !["IN", "ES", "CH"].includes(country) && (
+            {country && !["CA", "IN", "ES", "CH"].includes(country) && (
                 <LegacyCountryOptimizerForm
                     key={country}
                     country={country}

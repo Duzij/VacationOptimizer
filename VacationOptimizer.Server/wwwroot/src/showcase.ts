@@ -7,6 +7,7 @@ export const SHOWCASE_VACATION_DAYS = 25;
 export const FEATURED_COUNTRY_CODES = ["DE", "US", "GB", "FR", "ES", "NL", "AU", "JP"] as const;
 
 const SHOWCASE_DEFAULT_REGION_PARAMS: Record<string, string> = {
+    CA: "provinceCode=CA-ON",
     IN: "stateCode=IN-KA",
     CH: "cantonCode=CH-ZH",
 };

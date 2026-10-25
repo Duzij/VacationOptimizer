@@ -72,6 +72,48 @@ public class PublicHolidayServiceTests
     }
 
     [Fact]
+    public void GetStates_Canada_ReturnsSeededProvincesAndTerritories()
+    {
+        var states = _holidayService.GetStates("CA");
+
+        Assert.Equal(13, states.Count);
+        Assert.Contains(states, state => state.Code == "CA-ON" && state.Name == "Ontario");
+        Assert.Contains(states, state => state.Code == "CA-YT" && state.Name == "Yukon");
+    }
+
+    [Fact]
+    public void GetHolidays_CanadaWithoutProvince_ReturnsNationalHolidaysOnly()
+    {
+        var holidays = _holidayService.GetHolidays("CA", 2026);
+
+        Assert.Equal(13, holidays.Count);
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2026, 7, 1) && holiday.Name == "Canada Day");
+        Assert.DoesNotContain(holidays, holiday => holiday.Name == "Discovery Day");
+    }
+
+    [Fact]
+    public void GetHolidays_Canada2027_ReturnsChristmasAndBoxingDaySubstitutes()
+    {
+        var holidays = _holidayService.GetHolidays("CA", 2027);
+
+        Assert.Equal(2, holidays.Count);
+        Assert.DoesNotContain(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 25));
+        Assert.DoesNotContain(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 26));
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 27) && holiday.Name == "Christmas Day (Substitute Day)");
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 28) && holiday.Name == "Boxing Day (Substitute Day)");
+    }
+
+    [Fact]
+    public void GetHolidays_CanadaWithProvince_ReturnsNationalAndProvincialHolidays()
+    {
+        var holidays = _holidayService.GetHolidays("CA", 2026, "CA-YT");
+
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2026, 7, 1) && holiday.Name == "Canada Day");
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2026, 8, 17) && holiday.Name == "Discovery Day");
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2026, 6, 21) && holiday.Name == "National Indigenous Peoples Day");
+    }
+
+    [Fact]
     public void GetStates_Switzerland_ReturnsPackageBackedCantons()
     {
         var states = _holidayService.GetStates("CH");
