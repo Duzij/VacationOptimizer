@@ -15,6 +15,7 @@ export default function SpainCountryOptimizerForm({
     onSharedDraftChange,
     lockedVacationDaysCount,
     onResetLockedDays,
+    onCustomPeriodChanged,
 }: CountryOptimizerFormProps<"ES">) {
     const [stateCode, setStateCode] = useState(
         initialRequest && isSpainOptimizeRequest(initialRequest) && initialRequest.country === country
@@ -98,6 +99,7 @@ export default function SpainCountryOptimizerForm({
             <SharedOptimizerControls
                 sharedDraft={sharedDraft}
                 onSharedDraftChange={onSharedDraftChange}
+                onCustomPeriodChanged={onCustomPeriodChanged}
                 customFreeDays={customFreeDays}
                 onCustomFreeDaysChange={onCustomFreeDaysChange}
                 isLoading={isLoading}

@@ -23,8 +23,10 @@ public class CalendarService
     {
         var ignoredHolidayDateSet = ignoredHolidayDates?.ToHashSet() ?? new HashSet<DateOnly>();
         var neverHolidayDateSet = neverHolidayDates?.ToHashSet() ?? new HashSet<DateOnly>();
-        var start = startDate ?? new DateOnly(year, 1, 1);
-        var end = endDate ?? new DateOnly(year, 12, 31);
+        var rangeStart = startDate ?? new DateOnly(year, 1, 1);
+        var rangeEnd = endDate ?? new DateOnly(year, 12, 31);
+        var start = new DateOnly(rangeStart.Year, 1, 1);
+        var end = new DateOnly(rangeEnd.Year, 12, 31);
 
         var holidays = new List<HolidayInfo>();
         for (int y = start.Year; y <= end.Year; y++)
@@ -51,7 +53,11 @@ public class CalendarService
             string? holidayName = null;
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            if(date < today)
+            if (date < rangeStart || date > rangeEnd)
+            {
+                type = DayType.OutOfRange;
+            }
+            else if (date < today)
             {
                 type = DayType.PassedDay;
             }

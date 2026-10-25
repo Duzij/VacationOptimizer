@@ -162,3 +162,9 @@
   background-color: var(--calendar-past-line);
   pointer-events: none;
 }
+
+.bg-out-of-range {
+  background-color: var(--calendar-past-bg);
+  color: var(--calendar-past-text);
+  opacity: 0.45;
+}

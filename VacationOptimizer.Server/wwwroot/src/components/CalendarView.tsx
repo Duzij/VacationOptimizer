@@ -52,7 +52,10 @@ function buildDateSetForRanges(ranges: VacationRange[]) {
 }
 
 function isConnectedRangeDay(day: CalendarDay) {
-    return day.type !== DayType.WorkDay && day.type !== DayType.NeverHoliday;
+    return day.type !== DayType.WorkDay
+        && day.type !== DayType.NeverHoliday
+        && day.type !== DayType.PassedDay
+        && day.type !== DayType.OutOfRange;
 }
 
 function buildConnectedRanges(calendar: CalendarDay[]) {
@@ -128,7 +131,7 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
 
         const connectedCalendar = calendar.map((day, index) => ({
             ...day,
-            type: sharedDays[index] ?? day.type,
+            type: day.type === DayType.OutOfRange ? day.type : sharedDays[index] ?? day.type,
             sharedType: undefined,
             sharedMatchedRange: undefined,
             isLockedVacationDay: false,
@@ -153,7 +156,7 @@ export default function CalendarView({ calendar, ranges = [], year, country, loc
         }
 
         return calendar.map((day, index) => {
-            const sharedType = sharedDays?.[index];
+            const sharedType = day.type === DayType.OutOfRange ? undefined : sharedDays?.[index];
             const holidayRange = holidayRangesByDate.get(day.date);
 
             if (!sharedType && !holidayRange) {

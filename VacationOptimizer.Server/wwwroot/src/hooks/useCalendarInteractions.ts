@@ -23,6 +23,7 @@ export interface ConfirmDayState {
   date: string;
   mode: "generalActions" | "holidayActions" | "vacationActions" | "remove" | "removeNeverHoliday";
   isLockedVacationDay?: boolean;
+  isWeekend?: boolean;
   holidayName?: string | null;
 }
 
@@ -34,6 +35,11 @@ function formatReportDate(date: string) {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+function isWeekendDate(date: string) {
+  const dayOfWeek = new Date(`${date}T00:00:00Z`).getUTCDay();
+  return dayOfWeek === 0 || dayOfWeek === 6;
 }
 
 async function submitHolidayReport(message: string) {
@@ -118,7 +124,7 @@ export function useCalendarInteractions({
   };
 
   const handleDayLongPress = (day: CalendarDay) => {
-    if (day.type === DayType.PassedDay) {
+    if (day.type === DayType.PassedDay || day.type === DayType.OutOfRange) {
       return;
     }
 
@@ -137,12 +143,17 @@ export function useCalendarInteractions({
         date: day.date,
         mode: "vacationActions",
         isLockedVacationDay: day.isLockedVacationDay,
+        isWeekend: day.type === DayType.Weekend || isWeekendDate(day.date),
       });
       return;
     }
 
     const isExisting = customFreeDays.some((item) => item.date === day.date);
-    setConfirmDay({ date: day.date, mode: isExisting ? "remove" : "generalActions" });
+    setConfirmDay({
+      date: day.date,
+      mode: isExisting ? "remove" : "generalActions",
+      isWeekend: day.type === DayType.Weekend || isWeekendDate(day.date),
+    });
   };
 
   const handleConfirmCustomDay = () => {
@@ -213,7 +224,10 @@ export function useCalendarInteractions({
       return;
     }
 
-    if (confirmDay.mode !== "generalActions" && confirmDay.mode !== "vacationActions") {
+    if (
+      (confirmDay.mode !== "generalActions" && confirmDay.mode !== "vacationActions")
+      || (confirmDay.isWeekend && !confirmDay.isLockedVacationDay)
+    ) {
       return;
     }
 

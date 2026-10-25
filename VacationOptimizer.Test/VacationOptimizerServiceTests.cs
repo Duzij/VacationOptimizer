@@ -798,15 +798,17 @@ public class VacationOptimizerServiceTests
 
         var result = _optimizer.Optimize(request);
 
-        Assert.Equal(new DateOnly(DefaultYear, 5, 1), result.Calendar.Days.First().Date);
-        Assert.Equal(new DateOnly(DefaultYear + 2, 4, 30), result.Calendar.Days.Last().Date);
+        Assert.Equal(new DateOnly(DefaultYear, 1, 1), result.Calendar.Days.First().Date);
+        Assert.Equal(new DateOnly(DefaultYear + 2, 12, 31), result.Calendar.Days.Last().Date);
+        Assert.Equal(DayType.OutOfRange, result.Calendar.Days.Single(day => day.Date == start.AddDays(-1)).Type);
+        Assert.Equal(DayType.OutOfRange, result.Calendar.Days.Single(day => day.Date == end.AddDays(1)).Type);
     }
 
     [Fact]
-    public void Optimize_NormalizesCustomPeriodToMonthBoundaries()
+    public void Optimize_UsesExactCustomPeriodBoundaries()
     {
-        var start = new DateOnly(DefaultYear, 5, 15);
-        var end = new DateOnly(DefaultYear, 8, 10);
+        var start = new DateOnly(DefaultYear, 1, 31);
+        var end = new DateOnly(DefaultYear, 2, 15);
         var request = CreateOptimizeRequest() with
         {
             StartDate = start,
@@ -815,8 +817,12 @@ public class VacationOptimizerServiceTests
 
         var result = _optimizer.Optimize(request);
 
-        Assert.Equal(new DateOnly(DefaultYear, 5, 1), result.Calendar.Days.First().Date);
-        Assert.Equal(new DateOnly(DefaultYear, 8, 31), result.Calendar.Days.Last().Date);
+        Assert.Equal(new DateOnly(DefaultYear, 1, 1), result.Calendar.Days.First().Date);
+        Assert.Equal(new DateOnly(DefaultYear, 12, 31), result.Calendar.Days.Last().Date);
+        Assert.Equal(DayType.OutOfRange, result.Calendar.Days.Single(day => day.Date == new DateOnly(DefaultYear, 1, 1)).Type);
+        Assert.Equal(DayType.OutOfRange, result.Calendar.Days.Single(day => day.Date == new DateOnly(DefaultYear, 1, 2)).Type);
+        Assert.NotEqual(DayType.OutOfRange, result.Calendar.Days.Single(day => day.Date == start).Type);
+        Assert.NotEqual(DayType.OutOfRange, result.Calendar.Days.Single(day => day.Date == end).Type);
     }
 
     [Fact]

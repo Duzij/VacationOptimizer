@@ -12,7 +12,7 @@ public class CalendarServiceTests
     private readonly CalendarService _calendarService;
 
     private const string DefaultCountry = "ES";
-    private readonly int DefaultYear = DateTime.Now.Year + 1;
+    private readonly int DefaultYear = 2027;
 
     public CalendarServiceTests()
     {
@@ -98,10 +98,10 @@ public class CalendarServiceTests
     }
 
     [Fact]
-    public void BuildCalendar_CustomPeriodSpansYearsAndIncludesHolidaysFromBoth()
+    public void BuildCalendar_CustomPeriodSpansYearsAndMarksOutsideDatesOutOfRange()
     {
-        var start = new DateOnly(DefaultYear, 12, 25);
-        var end = new DateOnly(DefaultYear + 1, 1, 1);
+        var start = new DateOnly(DefaultYear, 1, 31);
+        var end = new DateOnly(DefaultYear + 1, 1, 30);
 
         var calendar = _calendarService.BuildCalendar(
             DefaultCountry,
@@ -109,10 +109,11 @@ public class CalendarServiceTests
             startDate: start,
             endDate: end);
 
-        Assert.Equal(8, calendar.Days.Count);
-        Assert.Equal(start, calendar.Days.First().Date);
-        Assert.Equal(end, calendar.Days.Last().Date);
-        Assert.Equal(DayType.PublicHoliday, GetDayFromCalendar(calendar.Days, end).Type);
+        Assert.Equal(new DateOnly(DefaultYear, 1, 1), calendar.Days.First().Date);
+        Assert.Equal(new DateOnly(DefaultYear + 1, 12, 31), calendar.Days.Last().Date);
+        Assert.Equal(DayType.OutOfRange, GetDayFromCalendar(calendar.Days, start.AddDays(-1)).Type);
+        Assert.Equal(DayType.OutOfRange, GetDayFromCalendar(calendar.Days, end.AddDays(1)).Type);
+        Assert.NotEqual(DayType.OutOfRange, GetDayFromCalendar(calendar.Days, end).Type);
     }
 
     private static void AssertDayType(List<CalendarDay> calendar, DateOnly date, DayType expectedType) =>

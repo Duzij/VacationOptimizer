@@ -14,6 +14,7 @@ export default function IndiaCountryOptimizerForm({
     onSharedDraftChange,
     lockedVacationDaysCount,
     onResetLockedDays,
+    onCustomPeriodChanged,
 }: CountryOptimizerFormProps<"IN">) {
     const [stateCode, setStateCode] = useState(
         initialRequest && isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
@@ -58,6 +59,7 @@ export default function IndiaCountryOptimizerForm({
             <SharedOptimizerControls
                 sharedDraft={sharedDraft}
                 onSharedDraftChange={onSharedDraftChange}
+                onCustomPeriodChanged={onCustomPeriodChanged}
                 customFreeDays={customFreeDays}
                 onCustomFreeDaysChange={onCustomFreeDaysChange}
                 isLoading={isLoading}

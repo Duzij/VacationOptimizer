@@ -7,6 +7,7 @@ export default function Legend() {
             <LegendItem color="bg-holiday" label="Public Holiday" tooltip="Vacation day for everyone" />
             <LegendItem color="bg-weekend" label="Weekend" tooltip="Weekend" />
             <LegendItem color="bg-never-holiday" label="Never Vacation" tooltip="Day excluded from the algorithm" />
+            <LegendItem color="bg-out-of-range" label="Outside period" tooltip="Outside the selected period and excluded from optimization" />
             <LegendItem color="bg-surface" label="Work Day" tooltip="Work day" />
         </div>
     );

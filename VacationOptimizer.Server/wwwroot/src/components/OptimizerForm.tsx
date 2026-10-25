@@ -24,6 +24,7 @@ interface Props {
     detectedCountry?: DetectedCountry | null;
     lockedVacationDaysCount?: number;
     onResetLockedDays?: () => void;
+    onCustomPeriodChanged?: () => void;
 }
 
 function getInitialSharedDraft(initialRequest: OptimizeRequest | null | undefined, currentYear: number): SharedDraft {
@@ -72,6 +73,7 @@ export default function OptimizerForm({
     detectedCountry,
     lockedVacationDaysCount,
     onResetLockedDays,
+    onCustomPeriodChanged,
 }: Props) {
     const currentYear = getDefaultYear();
     const [country, setCountry] = useState(initialRequest?.country ?? "");
@@ -164,6 +166,7 @@ export default function OptimizerForm({
                     onSharedDraftChange={setSharedDraft}
                     lockedVacationDaysCount={lockedVacationDaysCount}
                     onResetLockedDays={onResetLockedDays}
+                    onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
             {country === "ES" && (
@@ -179,6 +182,7 @@ export default function OptimizerForm({
                     onSharedDraftChange={setSharedDraft}
                     lockedVacationDaysCount={lockedVacationDaysCount}
                     onResetLockedDays={onResetLockedDays}
+                    onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
             {country === "CH" && (
@@ -194,6 +198,7 @@ export default function OptimizerForm({
                     onSharedDraftChange={setSharedDraft}
                     lockedVacationDaysCount={lockedVacationDaysCount}
                     onResetLockedDays={onResetLockedDays}
+                    onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
             {country && !["IN", "ES", "CH"].includes(country) && (
@@ -209,6 +214,7 @@ export default function OptimizerForm({
                     onSharedDraftChange={setSharedDraft}
                     lockedVacationDaysCount={lockedVacationDaysCount}
                     onResetLockedDays={onResetLockedDays}
+                    onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
         </div>
@@ -226,6 +232,7 @@ function LegacyCountryOptimizerForm({
     onSharedDraftChange,
     lockedVacationDaysCount,
     onResetLockedDays,
+    onCustomPeriodChanged,
 }: {
     country: string;
     onResult: (req: OptimizeRequest) => void;
@@ -237,6 +244,7 @@ function LegacyCountryOptimizerForm({
     onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
     lockedVacationDaysCount?: number;
     onResetLockedDays?: () => void;
+    onCustomPeriodChanged?: () => void;
 }) {
     const [state, setState] = useState(
         initialRequest && !isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
@@ -278,6 +286,7 @@ function LegacyCountryOptimizerForm({
             <SharedOptimizerControls
                 sharedDraft={sharedDraft}
                 onSharedDraftChange={onSharedDraftChange}
+                onCustomPeriodChanged={onCustomPeriodChanged}
                 customFreeDays={customFreeDays}
                 onCustomFreeDaysChange={onCustomFreeDaysChange}
                 isLoading={isLoading}

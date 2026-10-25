@@ -180,6 +180,7 @@ function PlannerPage() {
   const { capture } = useAnalytics();
   const { data: detectedCountry, isLoading: detectedCountryLoading } = useDetectedCountry();
   const [shouldScrollResults, setShouldScrollResults] = useState(false);
+  const [hasUnsubmittedPeriodChanges, setHasUnsubmittedPeriodChanges] = useState(false);
   const [selectedDayDetails, setSelectedDayDetails] = useState<DayLipDetails | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
@@ -283,8 +284,12 @@ function PlannerPage() {
     });
     setShouldScrollResults(true);
     setSelectedDayDetails(null);
-    runOptimization(req);
+    void runOptimization(req).then(() => setHasUnsubmittedPeriodChanges(false));
   }, [runOptimization]);
+  const handleCustomPeriodChanged = useCallback(() => {
+    setHasUnsubmittedPeriodChanges(true);
+    setSelectedDayDetails(null);
+  }, []);
 
   const handleShuffleOptimization = useCallback(() => {
     capture("optimization_shuffled");
@@ -471,7 +476,13 @@ function PlannerPage() {
               initialRequest={activeRequest ?? initialRequest}
               lockedVacationDaysCount={lockedVacationDates.length}
               onResetLockedDays={handleResetLockedDays}
+              onCustomPeriodChanged={handleCustomPeriodChanged}
             />
+            {hasUnsubmittedPeriodChanges && (
+              <p className="text-sm text-text-muted" role="status">
+                Period changed. Optimize again to see updated suggestions.
+              </p>
+            )}
 
             <details className="content-panel group xl:hidden">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-base font-semibold text-text">
@@ -535,7 +546,7 @@ function PlannerPage() {
       </section>
 
       {optimize.isError && (
-        result ? (
+        result && !hasUnsubmittedPeriodChanges ? (
           <ErrorLip
             error={optimize.error.message}
             onClose={() => optimize.reset()}
@@ -568,7 +579,7 @@ function PlannerPage() {
         )
       )}
 
-      {result && (
+      {result && !hasUnsubmittedPeriodChanges && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <ResultsSummary result={result} shouldScroll={shouldScrollResults}>
             <div className="w-full max-w-6xl mx-auto">
@@ -606,7 +617,7 @@ function PlannerPage() {
         </div>
       )}
 
-      {result && (
+      {result && !hasUnsubmittedPeriodChanges && (
         <DesktopResultControls
           isLoading={isUserOptimizing}
           canNavigatePrevious={canNavigatePrevious}
@@ -619,7 +630,7 @@ function PlannerPage() {
         />
       )}
 
-      {result && (
+      {result && !hasUnsubmittedPeriodChanges && (
         <DetailsLipMobile
           isLoading={isUserOptimizing}
           onShuffle={handleShuffleOptimization}
@@ -633,8 +644,9 @@ function PlannerPage() {
         />
       )}
 
-      {selectedDayDetails && result && (
+      {selectedDayDetails && result && !hasUnsubmittedPeriodChanges && (
         <DetailsLipDesktop
+          isLoading={isUserOptimizing}
           formattedDate={selectedDayDetails.formattedDate}
           dateTime={selectedDayDetails.dateTime}
           label={selectedDayDetails.label}
@@ -652,6 +664,7 @@ function PlannerPage() {
           date={confirmDay.date}
           mode={confirmDay.mode}
           isLockedVacationDay={confirmDay.isLockedVacationDay}
+          isWeekend={confirmDay.isWeekend}
           isLockDisabled={hasLockedBudgetLimit}
           holidayName={confirmDay.holidayName}
           onConfirmCustomDay={handleConfirmCustomDay}
@@ -661,7 +674,7 @@ function PlannerPage() {
           onCancel={() => setConfirmDay(null)}
         />
       )}
-      {showShareModal && result && (
+      {showShareModal && result && !hasUnsubmittedPeriodChanges && (
         <ShareCalendarModal
           plannerSeed={normalizedPlannerSeed}
           plannerYear={activeRequest?.year ?? currentYear}
@@ -700,7 +713,7 @@ function getDayLipDetails(day: CalendarDay, onSettings?: () => void): DayLipDeta
     sharedDetail: shouldShowSharedDetail
       ? `Partner: ${getDayLabel({ ...day, type: day.sharedType } as CalendarDay).toLowerCase()}` 
       : null,
-    onSettings: day.type !== DayType.PassedDay ? onSettings : undefined,
+    onSettings: day.type !== DayType.PassedDay && day.type !== DayType.OutOfRange ? onSettings : undefined,
   };
 }
 
@@ -723,6 +736,8 @@ function getDayLabel(day: CalendarDay): string {
       return "Weekend";
     case DayType.PassedDay:
       return "Past day";
+    case DayType.OutOfRange:
+      return "Outside selected period";
     case DayType.Today:
       return "Today";
     case DayType.NeverHoliday:

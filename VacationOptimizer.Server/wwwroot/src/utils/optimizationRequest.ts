@@ -67,7 +67,8 @@ export function ensureMonthlyCapsFitLockedDays<T extends { lockedVacationDates?:
   let nextLimits: MonthlyVacationLimits | undefined;
   for (const [month, lockedCount] of lockedDaysByMonth) {
     const monthKey = month as keyof MonthlyVacationLimits;
-    if ((currentLimits[monthKey] ?? 0) < lockedCount) {
+    const currentLimit = currentLimits[monthKey];
+    if (currentLimit !== undefined && currentLimit > 0 && currentLimit < lockedCount) {
       nextLimits ??= { ...currentLimits };
       nextLimits[monthKey] = lockedCount;
     }

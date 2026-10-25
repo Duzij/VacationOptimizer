@@ -29,6 +29,7 @@ function getDayClass(type: DayType | string): string {
         case "CollectiveLeave": return "bg-collective-leave";
         case "Weekend": return "bg-weekend";
         case "PassedDay": return "bg-past";
+        case "OutOfRange": return "bg-out-of-range";
         case "Today": return "bg-today";
         case "NeverHoliday": return "bg-never-holiday";
         case "WorkDay": return "bg-workday opacity-70";
@@ -157,6 +158,8 @@ function getDayTypeTitle(day: CalendarDay): string {
             return "Weekend";
         case DayType.PassedDay:
             return "Past day";
+        case DayType.OutOfRange:
+            return "Outside selected period";
         case DayType.Today:
             return "Today";
         case DayType.WorkDay:
@@ -177,7 +180,7 @@ function DayCell({
     onDaySelect?: (day: CalendarDay) => void;
 }) {
     // const isLongPressEnabled = day.type !== "PassedDay";
-    const isLongPressEnabled = true;
+    const isLongPressEnabled = day.type !== DayType.OutOfRange;
 
     const [isFlashing, setIsFlashing] = useState(false);
     const prevTypeRef = useRef(day.type);

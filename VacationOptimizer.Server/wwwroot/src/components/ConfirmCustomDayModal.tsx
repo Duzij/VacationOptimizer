@@ -12,6 +12,7 @@ interface Props {
     date: string;
     mode: "generalActions" | "holidayActions" | "vacationActions" | "remove" | "removeNeverHoliday";
     isLockedVacationDay?: boolean;
+    isWeekend?: boolean;
     isLockDisabled?: boolean;
     holidayName?: string | null;
     onConfirmCustomDay: () => void;
@@ -25,6 +26,7 @@ export default function ConfirmCustomDayModal({
     date,
     mode,
     isLockedVacationDay = false,
+    isWeekend = false,
     isLockDisabled = false,
     holidayName,
     onConfirmCustomDay,
@@ -187,28 +189,32 @@ export default function ConfirmCustomDayModal({
                                 >
                                     Custom vacation
                                 </Button>
-                                <Button
-                                    type="button"
-                                    onClick={onConfirmLockedVacationDay}
-                                    disabled={isLockDisabled}
-                                    className="flex-1"
-                                    title="Lock a vacation day on this date so it stays fixed across all optimizations"
-                                >
-                                    Lock vacation
-                                </Button>
+                                {!isWeekend && (
+                                    <Button
+                                        type="button"
+                                        onClick={onConfirmLockedVacationDay}
+                                        disabled={isLockDisabled}
+                                        className="flex-1"
+                                        title="Lock a vacation day on this date so it stays fixed across all optimizations"
+                                    >
+                                        Lock vacation
+                                    </Button>
+                                )}
                             </>
                         ) : isVacationActions ? (
                             <>
-                                <Button
-                                    type="button"
-                                    onClick={onConfirmLockedVacationDay}
-                                    variant={isLockedVacationDay ? "danger" : "primary"}
-                                    disabled={!isLockedVacationDay && isLockDisabled}
-                                    className="flex-1"
-                                    title={isLockedVacationDay ? "Unlock this vacation day so the optimizer can move it" : "Lock this vacation day so it stays fixed across all optimizations"}
-                                >
-                                    {isLockedVacationDay ? "Unlock vacation" : "Lock vacation"}
-                                </Button>
+                                {(isLockedVacationDay || !isWeekend) && (
+                                    <Button
+                                        type="button"
+                                        onClick={onConfirmLockedVacationDay}
+                                        variant={isLockedVacationDay ? "danger" : "primary"}
+                                        disabled={!isLockedVacationDay && isLockDisabled}
+                                        className="flex-1"
+                                        title={isLockedVacationDay ? "Unlock this vacation day so the optimizer can move it" : "Lock this vacation day so it stays fixed across all optimizations"}
+                                    >
+                                        {isLockedVacationDay ? "Unlock vacation" : "Lock vacation"}
+                                    </Button>
+                                )}
                                 <Button
                                     type="button"
                                     onClick={onConfirmNeverHoliday}

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { buildSearchParamsFromRequest, ensureMonthlyCapsFitLockedDays, normalizeOptimizeRequest, parseRequestFromSearchParams, requestsMatch } from "./optimizationRequest";
-import type { MonthlyVacationLimits } from "../types/models";
 import { getDefaultYear } from "../optimizerDefaults";
 
 describe("optimizationRequest", () => {
@@ -117,15 +116,15 @@ describe("optimizationRequest", () => {
     expect(adjusted.maxNumberOfVacationsPerMonth).toEqual({ July: 2 });
   });
 
-  it("adds a monthly cap when locked days exist but no cap is set", () => {
+  it("does not add a monthly cap when locked days exist but no cap is set", () => {
     const adjusted = ensureMonthlyCapsFitLockedDays({
       country: "DE",
       year: getDefaultYear(),
       vacationDays: 25,
-      lockedVacationDates: ["2027-07-01", "2027-07-02", "2027-07-03"],
+      lockedVacationDates: ["2027-07-01"],
     });
 
-    expect((adjusted as { maxNumberOfVacationsPerMonth?: MonthlyVacationLimits }).maxNumberOfVacationsPerMonth).toEqual({ July: 3 });
+    expect(adjusted.maxNumberOfVacationsPerMonth).toBeUndefined();
   });
 
   it("leaves caps unchanged when they already fit locked days", () => {

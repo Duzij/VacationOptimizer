@@ -30,7 +30,6 @@ public class VacationOptimizerService
 
         ValidateMonthlyVacationLimits(request.MaxNumberOfVacationsPerMonth);
         ValidateCustomPeriodDates(request.StartDate, request.EndDate);
-        request = NormalizeCustomPeriodDates(request);
 
         var requestFingerprint = ComputeRequestFingerprint(request);
         var seedToken = ParseMatchingSeedToken(request.SeedToken, requestFingerprint);
@@ -549,21 +548,6 @@ public class VacationOptimizerService
 
     }
 
-    private static OptimizeRequest NormalizeCustomPeriodDates(OptimizeRequest request)
-    {
-        if (!request.StartDate.HasValue || !request.EndDate.HasValue)
-        {
-            return request;
-        }
-
-        var start = request.StartDate.Value;
-        var end = request.EndDate.Value;
-        var normalizedStart = new DateOnly(start.Year, start.Month, 1);
-        var normalizedEnd = new DateOnly(end.Year, end.Month, DateTime.DaysInMonth(end.Year, end.Month));
-
-        return request with { StartDate = normalizedStart, EndDate = normalizedEnd };
-    }
-
     private static Dictionary<Month, int> GetVacationDaysByMonth(IEnumerable<CalendarDay> calendar)
     {
         return calendar
@@ -647,7 +631,10 @@ public class VacationOptimizerService
 
     private static bool IsNeverVacationDay(CalendarDay day) => day.Type == DayType.NeverHoliday;
 
-    private static bool IsRangeDay(CalendarDay day) => !IsWorkDay(day) && !IsNeverVacationDay(day);
+    private static bool IsRangeDay(CalendarDay day) =>
+        !IsWorkDay(day)
+        && !IsNeverVacationDay(day)
+        && day.Type is not (DayType.PassedDay or DayType.OutOfRange);
 }
 
 public record BridgeCandidate(

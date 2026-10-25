@@ -89,6 +89,7 @@ export interface CountryOptimizerFormProps<TCountry extends string> {
     onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
     lockedVacationDaysCount?: number;
     onResetLockedDays?: () => void;
+    onCustomPeriodChanged?: () => void;
 }
 
 export function StateSelectField({
@@ -138,6 +139,7 @@ export function StateSelectField({
 export function SharedOptimizerControls({
     sharedDraft,
     onSharedDraftChange,
+    onCustomPeriodChanged,
     customFreeDays,
     onCustomFreeDaysChange,
     isLoading,
@@ -151,6 +153,7 @@ export function SharedOptimizerControls({
 }: {
     sharedDraft: SharedDraft;
     onSharedDraftChange: React.Dispatch<React.SetStateAction<SharedDraft>>;
+    onCustomPeriodChanged?: () => void;
     customFreeDays: CustomFreeDay[];
     onCustomFreeDaysChange: (days: CustomFreeDay[]) => void;
     isLoading: boolean;
@@ -178,6 +181,7 @@ export function SharedOptimizerControls({
         if (!isValidDateString(startDate)) {
             return;
         }
+        onCustomPeriodChanged?.();
         const start = new Date(startDate);
         onSharedDraftChange((draft) => ({
             ...draft,
@@ -192,10 +196,12 @@ export function SharedOptimizerControls({
         if (!isValidDateString(endDate)) {
             return;
         }
+        onCustomPeriodChanged?.();
         onSharedDraftChange((draft) => ({ ...draft, endDate }));
     };
 
     const toggleCustomPeriod = () => {
+        onCustomPeriodChanged?.();
         if (isCustomPeriod) {
             setIsCustomPeriod(false);
             onSharedDraftChange((draft) => ({ ...draft, startDate: undefined, endDate: undefined }));

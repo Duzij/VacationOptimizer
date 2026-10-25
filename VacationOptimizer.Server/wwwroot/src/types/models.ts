@@ -32,6 +32,7 @@ export const DayType = {
     Vacation: "Vacation",
     Today: "Today",
     PassedDay: "PassedDay",
+    OutOfRange: "OutOfRange",
     NeverHoliday: "NeverHoliday",
 } as const;
 

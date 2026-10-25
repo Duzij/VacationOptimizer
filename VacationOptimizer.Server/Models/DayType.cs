@@ -14,5 +14,6 @@ public enum DayType
     Today,
     PassedDay,
     NeverHoliday,
-    CollectiveLeave
+    CollectiveLeave,
+    OutOfRange
 }

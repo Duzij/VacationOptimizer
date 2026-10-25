@@ -433,6 +433,62 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task OptimizeSpain_WithCityAndCustomPeriod_ExcludesJanuaryRangesBeforeStartDate()
+    {
+        var client = _factory.CreateClient();
+        var startDate = new DateOnly(2027, 1, 31);
+        var endDate = new DateOnly(2027, 12, 31);
+
+        async Task<JsonDocument> Optimize(string[]? usedResultTokens = null)
+        {
+            var payload = JsonContent.Create(new
+            {
+                stateCode = "ES-CT",
+                cityCode = "ES-CT-BCN",
+                year = 2027,
+                vacationDays = 25,
+                minimumDaysPerRange = 3,
+                maximumDaysPerRange = 14,
+                startDate = "2027-01-31",
+                endDate = "2027-12-31",
+                usedResultTokens,
+            });
+
+            var response = await client.PostAsync("/api/vacations/countries/ES/optimize", payload);
+            response.EnsureSuccessStatusCode();
+            return JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        }
+
+        static void AssertRangesRespectStart(JsonDocument response, DateOnly startDate, DateOnly endDate)
+        {
+            var ranges = response.RootElement.GetProperty("ranges").EnumerateArray()
+                .Select(range => (
+                    Start: DateOnly.Parse(range.GetProperty("start").GetString()!),
+                    End: DateOnly.Parse(range.GetProperty("end").GetString()!)))
+                .ToList();
+
+            Assert.NotEmpty(ranges);
+            Assert.All(ranges, range =>
+            {
+                Assert.True(range.Start >= startDate, $"Range starts before the selected period: {range.Start}.");
+                Assert.True(range.End <= endDate, $"Range ends after the selected period: {range.End}.");
+            });
+
+            var calendarDays = response.RootElement.GetProperty("calendar").GetProperty("days").EnumerateArray().ToList();
+            Assert.Equal("2027-01-01", calendarDays.First().GetProperty("date").GetString());
+            Assert.Equal("2027-12-31", calendarDays.Last().GetProperty("date").GetString());
+            Assert.Equal("OutOfRange", calendarDays.First().GetProperty("type").GetString());
+            Assert.NotEqual("OutOfRange", calendarDays.Last().GetProperty("type").GetString());
+        }
+
+        using var firstResult = await Optimize();
+        AssertRangesRespectStart(firstResult, startDate, endDate);
+
+        using var shuffledResult = await Optimize([firstResult.RootElement.GetProperty("resultToken").GetString()!]);
+        AssertRangesRespectStart(shuffledResult, startDate, endDate);
+    }
+
+    [Fact]
     public async Task OptimizeSwitzerland_WithCanton_ReturnsSwitzerlandSpecificScope()
     {
         var client = _factory.CreateClient();
