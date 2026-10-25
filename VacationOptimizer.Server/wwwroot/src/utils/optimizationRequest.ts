@@ -43,7 +43,7 @@ export function uniqueDates(values: string[]) {
 // the month cap automatically raised to accommodate the locked vacation days
 export function ensureMonthlyCapsFitLockedDays<T extends { lockedVacationDates?: string[]; maxNumberOfVacationsPerMonth?: MonthlyVacationLimits }>(
   request: T,
-): T {
+): T & { maxNumberOfVacationsPerMonth?: MonthlyVacationLimits } {
   const lockedDates = request.lockedVacationDates;
   if (!lockedDates || lockedDates.length === 0) {
     return request;
