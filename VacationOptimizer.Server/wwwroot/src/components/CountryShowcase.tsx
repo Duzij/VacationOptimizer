@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { CalendarDays, CalendarPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchShowcaseDaysOff, useCountries, useShowcaseDaysOff } from "../api/vacationApi";
 import {
@@ -156,12 +156,12 @@ export default function CountryShowcase() {
 
                 <Link
                     to={plannerPath}
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--landing-accent)_18%,var(--color-border))] bg-[color-mix(in_srgb,var(--landing-accent)_88%,black)] px-5 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,123,131,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--landing-accent)_96%,black)] hover:shadow-[0_14px_30px_rgba(15,123,131,0.22)]"
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--landing-accent)_18%,var(--color-border))] bg-[color-mix(in_srgb,var(--landing-accent)_88%,black)] px-5 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,123,131,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--landing-accent)_96%,black)]"
                 >
                     {showcaseQuery.isError
                         ? `Start planning in ${selectedName}`
                         : `In ${selectedName} from ${SHOWCASE_VACATION_DAYS} days to ${typeof totalDaysOff === "number" ? totalDaysOff : "…"} overall days`}
-                    <ArrowRight className="h-4 w-4 shrink-0" />
+                    <CalendarPlus className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </Link>
             </div>
         </div>

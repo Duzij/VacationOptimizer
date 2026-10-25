@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import CountryShowcase from "./CountryShowcase";
 import HtmlFragment from "./HtmlFragment";
@@ -29,20 +29,21 @@ export default function LandingContent() {
                     </h2>
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-nowrap gap-2">
                     <Link
                       to="/app"
-                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--landing-accent)_18%,var(--color-border))] bg-[color-mix(in_srgb,var(--landing-accent)_88%,black)] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,123,131,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,var(--landing-accent)_96%,black)] hover:shadow-[0_14px_30px_rgba(15,123,131,0.22)]"
+                      className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--landing-accent)_18%,var(--color-border))] bg-[color-mix(in_srgb,var(--landing-accent)_88%,black)] px-3 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,123,131,0.18)] sm:px-6"
                     >
                       Start planning
-                      <ArrowRight className="h-4 w-4" />
+                      <CalendarPlus className="h-4 w-4" aria-hidden="true" />
                     </Link>
 
                     <Link
                       to="/about"
-                      className="inline-flex min-h-12 items-center justify-center rounded-full border bg-background px-6 py-3 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
+                      className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border bg-background px-3 py-3 text-sm font-medium text-text sm:px-6"
                     >
-                      How the vacation optimizer works
+                      <span className="sm:hidden">How it works</span>
+                      <span className="hidden sm:inline">How the vacation optimizer works</span>
                     </Link>
                   </div>
                 </div>
@@ -119,7 +120,7 @@ export default function LandingContent() {
           <div className="closing-cta__actions">
             <Link to="/app" className="btn-pill btn-pill--primary">
               Open the free planner
-              <ArrowRight aria-hidden="true" />
+              <CalendarPlus aria-hidden="true" />
             </Link>
             <a href="/blog/" className="btn-pill btn-pill--ghost">
               Read planning guides

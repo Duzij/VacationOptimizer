@@ -60,14 +60,15 @@
         href="/icons/icon-192.png"
       />
       <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+      <link rel="stylesheet" href="/site-shell-colors.css?v=e684a933" />
       <style>
         html {
-          background: #ffffff;
+          background: var(--color-background);
           color-scheme: light;
         }
   
         html.dark {
-          background: #222222;
+          background: var(--color-background);
           color-scheme: dark;
         }
   
@@ -89,7 +90,7 @@
           } catch (e) {}
         })();
       </script>
-      <link rel="stylesheet" href="/site-shell.css?v=78daae95" />
+      <link rel="stylesheet" href="/site-shell.css?v=43207ff3" />
       <script src="/cookie-consent.js" defer></script>
   
       <!-- Keep Inter, but load its stylesheet and font without blocking first render. -->
@@ -184,14 +185,17 @@
           <a class="site-nav-pill" href="/about">About</a>
           </nav>
 
-          <button class="site-theme-toggle site-theme-toggle--desktop" type="button" aria-label="Toggle dark mode">
+          <div class="site-header__actions">
+          <button class="site-theme-toggle" type="button" aria-label="Toggle dark mode">
             <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
 
-          <button class="site-hamburger" aria-expanded="false" aria-controls="mobile-site-menu" aria-label="Toggle navigation menu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          <button class="site-hamburger" aria-expanded="false" aria-controls="mobile-site-menu" aria-label="Open navigation menu" type="button">
+            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            <svg class="close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
           </button>
+          </div>
         </div>
 
         <nav id="mobile-site-menu" class="site-mobile-menu" aria-hidden="true" aria-label="Mobile">
@@ -201,13 +205,6 @@
           <a class="site-nav-pill site-nav-pill--mobile" href="/privacy"><span>Privacy</span></a>
           <a class="site-nav-pill site-nav-pill--mobile" href="/terms"><span>Terms</span></a>
           <a class="site-nav-pill site-nav-pill--mobile" href="/about"><span>About</span></a>
-          <div style="display: flex; align-items: center; justify-content: space-between; border:1px solid var(--color-border); border-radius:1rem; padding:0.75rem 1rem;">
-            <span style="font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted);">Theme</span>
-            <button class="site-theme-toggle site-theme-toggle--mobile" type="button" aria-label="Toggle dark mode" style="margin: 0;">
-              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </button>
-          </div>
         </nav>
       </div>
     </header>

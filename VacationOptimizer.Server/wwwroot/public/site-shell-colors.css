@@ -1,0 +1,51 @@
+/* Shared color tokens for the React app and generated static pages. */
+:root,
+.light {
+  --color-border: #e0e0e0;
+  --color-text: #222222;
+  --color-text-muted: rgba(0, 0, 0, 0.75);
+  --color-surface: #f7f7f7;
+  --color-surface-hover: #ededed;
+  --color-background: #ffffff;
+  --color-background-glass: rgba(255, 255, 255, 0.96);
+  --color-accent: #0f7b83;
+  --color-primary: #222222;
+  --color-primary-hover: #444444;
+
+  --site-shell-white: #ffffff;
+  --site-shell-transparent: transparent;
+  --site-shell-glass-background: rgba(255, 255, 255, 0.64);
+  --site-shell-glass-border: color-mix(in srgb, var(--color-text) 15%, var(--site-shell-transparent));
+  --site-shell-hover-background: color-mix(in srgb, var(--color-text) 9%, var(--site-shell-transparent));
+  --site-shell-nav-active-border: rgba(134, 211, 217, 0.48);
+  --site-shell-nav-active-background: linear-gradient(180deg, rgba(134, 211, 217, 0.28), rgba(134, 211, 217, 0.15));
+  --site-shell-nav-active-text: #0d565c;
+  --site-shell-action-border: rgba(255, 255, 255, 0.04);
+  --site-shell-action-background: rgba(255, 255, 255, 0.085);
+  --site-shell-action-hover: rgba(255, 255, 255, 0.15);
+  --site-shell-menu-open-background: #ffffff;
+  --site-shell-backdrop: rgba(8, 13, 14, 0.48);
+  --site-shell-cookie-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+  --site-shell-footer-muted: color-mix(in srgb, var(--color-text-muted) 60%, var(--site-shell-transparent));
+  --site-shell-blog-card-background: color-mix(in srgb, var(--color-surface) 72%, var(--site-shell-transparent));
+  --site-shell-danger-text: #ffffff;
+  --site-shell-danger-background: #ef4444;
+  --site-shell-danger-hover: #dc2626;
+}
+
+.dark {
+  --color-border: #444444;
+  --color-text: #f9fafb;
+  --color-text-muted: #ffffffcc;
+  --color-surface: #2a2a2a;
+  --color-surface-hover: #444444;
+  --color-background: #222222;
+  --color-background-glass: rgba(34, 34, 34, 0.96);
+  --color-accent: #888888;
+  --color-primary: #f9fafb;
+  --color-primary-hover: #888888;
+
+  --site-shell-glass-background: rgba(255, 255, 255, 0.075);
+  --site-shell-nav-active-text: #c9f4f7;
+  --site-shell-menu-open-background: color-mix(in srgb, #2a2a2a 72%, transparent);
+}

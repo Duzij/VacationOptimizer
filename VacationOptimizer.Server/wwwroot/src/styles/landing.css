@@ -432,10 +432,6 @@
   border: 1px solid var(--color-border);
   border-radius: 1.5rem;
   background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
 }
 
 .landing-box--alt {
@@ -491,14 +487,6 @@
   font-size: 0.9rem;
   line-height: 1.6;
   color: var(--color-text-muted);
-}
-
-@media (hover: hover) {
-  .landing-box:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--landing-accent) 35%, var(--color-border));
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-  }
 }
 
 /* ── How it works ─────────────────────────────────────────────── */
@@ -707,8 +695,7 @@
     transition: none;
   }
 
-  .btn-pill--primary:hover,
-  .landing-box:hover {
+  .btn-pill--primary:hover {
     transform: none;
   }
 }

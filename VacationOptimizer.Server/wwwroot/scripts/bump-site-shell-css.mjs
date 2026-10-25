@@ -5,38 +5,42 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, "..");
-const cssPath = path.join(projectRoot, "public", "site-shell.css");
 const blogDir = path.join(projectRoot, "public", "blog");
-const referencePattern = /\/site-shell\.css(?:\?v=[A-Za-z0-9_-]+)?(?=")/g;
+const stylesheets = ["site-shell.css", "site-shell-colors.css"];
+const versions = new Map();
 
-const cssContent = await fs.readFile(cssPath);
-const version = crypto.createHash("sha256").update(cssContent).digest("hex").slice(0, 8);
-const replacement = `/site-shell.css?v=${version}`;
-
-let updated = 0;
-let alreadyCurrent = 0;
-let skipped = 0;
-
-for (const htmlPath of await collectHtmlFiles()) {
-  const html = await fs.readFile(htmlPath, "utf8");
-  if (!html.match(referencePattern)) {
-    skipped++;
-    continue;
-  }
-
-  if (html.includes(replacement)) {
-    alreadyCurrent++;
-    continue;
-  }
-
-  await fs.writeFile(htmlPath, html.replace(referencePattern, replacement), "utf8");
-  console.log(`Updated ${path.relative(projectRoot, htmlPath)} -> ${replacement}`);
-  updated++;
+for (const stylesheet of stylesheets) {
+  const stylesheetPath = path.join(projectRoot, "public", stylesheet);
+  const content = await fs.readFile(stylesheetPath);
+  versions.set(
+    stylesheet,
+    crypto.createHash("sha256").update(content).digest("hex").slice(0, 8),
+  );
 }
 
-console.log(
-  `site-shell.css cache buster: v=${version} (${updated} updated, ${alreadyCurrent} up to date, ${skipped} without reference)`,
-);
+let updated = 0;
+for (const htmlPath of await collectHtmlFiles()) {
+  let html = await fs.readFile(htmlPath, "utf8");
+  let changed = false;
+
+  for (const stylesheet of stylesheets) {
+    const version = versions.get(stylesheet);
+    const pattern = new RegExp(`/${stylesheet.replace(".", "\\.")}(?:\\?v=[A-Za-z0-9_-]+)?(?=")`, "g");
+    const replacement = `/${stylesheet}?v=${version}`;
+    if (pattern.test(html) && !html.includes(replacement)) {
+      html = html.replace(pattern, replacement);
+      changed = true;
+    }
+    pattern.lastIndex = 0;
+  }
+
+  if (changed) {
+    await fs.writeFile(htmlPath, html, "utf8");
+    updated++;
+  }
+}
+
+console.log(`Updated stylesheet cache versions in ${updated} HTML files.`);
 
 async function collectHtmlFiles() {
   return [path.join(projectRoot, "index.html"), ...(await walk(blogDir))];
