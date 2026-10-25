@@ -143,7 +143,7 @@ export function useCalendarInteractions({
         date: day.date,
         mode: "vacationActions",
         isLockedVacationDay: day.isLockedVacationDay,
-        isWeekend: day.type === DayType.Weekend || isWeekendDate(day.date),
+        isWeekend: isWeekendDate(day.date),
       });
       return;
     }
