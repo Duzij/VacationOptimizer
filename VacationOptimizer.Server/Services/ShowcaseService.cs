@@ -14,6 +14,7 @@ public static class ShowcaseDefaults
     public const int MaximumDaysPerRange = 21;
     // Region-requiring countries get a hardcoded default region for the showcase.
     public const string DefaultCanadaProvinceCode = "CA-ON";
+    public const string DefaultGermanyStateCode = "DE-BE";
     public const string DefaultIndiaStateCode = "IN-KA";
     public const string DefaultSwitzerlandCantonCode = "CH-ZH";
 }
@@ -56,6 +57,7 @@ public class ShowcaseService(
     private string? ResolveDefaultState(string countryCode) => countryCode switch
     {
         "CA" => ResolveStateOrThrow("CA", ShowcaseDefaults.DefaultCanadaProvinceCode),
+        "DE" => ResolveStateOrThrow("DE", ShowcaseDefaults.DefaultGermanyStateCode),
         "IN" => ResolveStateOrThrow("IN", ShowcaseDefaults.DefaultIndiaStateCode),
         "CH" => ResolveStateOrThrow("CH", ShowcaseDefaults.DefaultSwitzerlandCantonCode),
         _ => null,

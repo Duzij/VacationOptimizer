@@ -1,5 +1,6 @@
 import type { OptimizeRequest, OptimizeResult } from "../../types/models";
 import type { CanadaOptimizeRequest, CanadaOptimizeResult } from "./canada/models";
+import type { GermanyOptimizeRequest, GermanyOptimizeResult } from "./germany/models";
 import type { IndiaOptimizeRequest, IndiaOptimizeResult } from "./india/models";
 import type { SpainOptimizeRequest, SpainOptimizeResult } from "./spain/models";
 import type { SwitzerlandOptimizeRequest, SwitzerlandOptimizeResult } from "./switzerland/models";
@@ -10,6 +11,12 @@ export type {
     CanadaOptimizeResult,
     CanadaOptimizeScope,
 } from "./canada/models";
+export type {
+    GermanyCountrySchema,
+    GermanyOptimizeRequest,
+    GermanyOptimizeResult,
+    GermanyOptimizeScope,
+} from "./germany/models";
 export type {
     IndiaCountrySchema,
     IndiaOptimizeRequest,
@@ -35,6 +42,10 @@ export function isCanadaOptimizeRequest(request: OptimizeRequest | null | undefi
     return request?.country === "CA";
 }
 
+export function isGermanyOptimizeRequest(request: OptimizeRequest | null | undefined): request is GermanyOptimizeRequest {
+    return request?.country === "DE";
+}
+
 export function isIndiaOptimizeRequest(request: OptimizeRequest | null | undefined): request is IndiaOptimizeRequest {
     return request?.country === "IN";
 }
@@ -49,6 +60,10 @@ export function isSwitzerlandOptimizeRequest(request: OptimizeRequest | null | u
 
 export function isCanadaOptimizeResult(result: OptimizeResult | null | undefined): result is CanadaOptimizeResult {
     return result?.countryCode === "CA";
+}
+
+export function isGermanyOptimizeResult(result: OptimizeResult | null | undefined): result is GermanyOptimizeResult {
+    return result?.countryCode === "DE";
 }
 
 export function isIndiaOptimizeResult(result: OptimizeResult | null | undefined): result is IndiaOptimizeResult {
@@ -72,8 +87,8 @@ export function getOptimizeRequestScopeCode(request: OptimizeRequest | null | un
         return request.provinceCode ?? "";
     }
 
-    if (isIndiaOptimizeRequest(request)) {
-        return request.stateCode;
+    if (isGermanyOptimizeRequest(request) || isIndiaOptimizeRequest(request)) {
+        return request.stateCode ?? "";
     }
 
     if (isSpainOptimizeRequest(request)) {

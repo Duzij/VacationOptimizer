@@ -120,6 +120,47 @@ public class HolidayYearSupportTests
         Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 28));
     }
 
+    [Fact]
+    public void GetHolidays_2027_IsSupportedForEveryGermanyStateScope()
+    {
+        var states = _holidayService.GetStates("DE");
+
+        Assert.Equal(16, states.Count);
+        foreach (var state in states)
+        {
+            var holidays = _holidayService.GetHolidays("DE", SupportedYear, state.Code);
+
+            Assert.NotEmpty(holidays);
+            Assert.All(holidays, holiday => Assert.Equal(SupportedYear, holiday.Date.Year));
+        }
+    }
+
+    [Theory]
+    [InlineData("DE-BW", "2027-11-01", "All Saints' Day")]
+    [InlineData("DE-BY", "2027-08-15", "Assumption Day")]
+    [InlineData("DE-BE", "2027-03-08", "International Women's Day")]
+    [InlineData("DE-BB", "2027-03-28", "Easter Sunday")]
+    [InlineData("DE-HB", "2027-10-31", "Reformation Day")]
+    [InlineData("DE-HH", "2027-10-31", "Reformation Day")]
+    [InlineData("DE-HE", "2027-05-27", "Corpus Christi")]
+    [InlineData("DE-MV", "2027-03-08", "International Women's Day")]
+    [InlineData("DE-NI", "2027-10-31", "Reformation Day")]
+    [InlineData("DE-NW", "2027-11-01", "All Saints' Day")]
+    [InlineData("DE-RP", "2027-05-27", "Corpus Christi")]
+    [InlineData("DE-SL", "2027-08-15", "Assumption Day")]
+    [InlineData("DE-SN", "2027-11-17", "Day of Prayer and Repentance")]
+    [InlineData("DE-ST", "2027-01-06", "Epiphany")]
+    [InlineData("DE-SH", "2027-10-31", "Reformation Day")]
+    [InlineData("DE-TH", "2027-09-20", "World Children's Day")]
+    public void GetHolidays_GermanyStateScope_IncludesRegionalHoliday_2027(string stateCode, string date, string holidayName)
+    {
+        var holidays = _holidayService.GetHolidays("DE", SupportedYear, stateCode);
+
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == DateOnly.Parse(date)
+            && holiday.Name == holidayName);
+    }
+
     [Theory]
     [InlineData("CH-ZH")]
     [InlineData("CH-LU")]

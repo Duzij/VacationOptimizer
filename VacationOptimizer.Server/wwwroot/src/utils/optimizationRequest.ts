@@ -6,10 +6,12 @@ import {
 } from "../types/models";
 import {
   isCanadaOptimizeRequest,
+  isGermanyOptimizeRequest,
   isIndiaOptimizeRequest,
   isSpainOptimizeRequest,
   isSwitzerlandOptimizeRequest,
   type CanadaOptimizeRequest,
+  type GermanyOptimizeRequest,
   type IndiaOptimizeRequest,
   type SpainOptimizeRequest,
   type SwitzerlandOptimizeRequest,
@@ -252,6 +254,16 @@ function normalizeCanadaRequest(request: CanadaOptimizeRequest): CanadaOptimizeR
   };
 }
 
+function normalizeGermanyRequest(request: GermanyOptimizeRequest): GermanyOptimizeRequest {
+  const normalized = normalizeBaseFields(request);
+
+  return {
+    ...normalized,
+    country: "DE",
+    stateCode: request.stateCode?.trim().toUpperCase() ?? "",
+  };
+}
+
 function normalizeIndiaRequest(request: IndiaOptimizeRequest): IndiaOptimizeRequest {
   const normalized = normalizeBaseFields(request);
 
@@ -286,6 +298,10 @@ function normalizeSwitzerlandRequest(request: SwitzerlandOptimizeRequest): Switz
 export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequest {
   if (isCanadaOptimizeRequest(request)) {
     return normalizeCanadaRequest(request);
+  }
+
+  if (isGermanyOptimizeRequest(request)) {
+    return normalizeGermanyRequest(request);
   }
 
   if (isIndiaOptimizeRequest(request)) {
@@ -332,6 +348,30 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     return normalizeCanadaRequest({
       country: "CA",
       provinceCode,
+      year: parseNumber(params.get("year"), currentYear),
+      vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
+      minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
+      maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+      maxNumberOfVacationsPerMonth: parseMonthlyVacationLimits(params.get("monthlyCaps")),
+      customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
+      ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+      neverHolidayDates: parseDateList(params.get("neverHolidays")),
+      lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
+      seedToken: params.get("seed") ?? undefined,
+      startDate: parseDate(params.get("startDate")),
+      endDate: parseDate(params.get("endDate")),
+    });
+  }
+
+  if (country === "DE") {
+    const stateCode = params.get("stateCode")?.trim().toUpperCase();
+    if (!stateCode) {
+      return null;
+    }
+
+    return normalizeGermanyRequest({
+      country: "DE",
+      stateCode,
       year: parseNumber(params.get("year"), currentYear),
       vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
       minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
@@ -453,7 +493,7 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
 
   if (isCanadaOptimizeRequest(normalizedRequest)) {
     params.set("provinceCode", normalizedRequest.provinceCode);
-  } else if (isIndiaOptimizeRequest(normalizedRequest)) {
+  } else if (isGermanyOptimizeRequest(normalizedRequest) || isIndiaOptimizeRequest(normalizedRequest)) {
     params.set("stateCode", normalizedRequest.stateCode);
   } else if (isSpainOptimizeRequest(normalizedRequest)) {
     if (normalizedRequest.stateCode) {
@@ -518,8 +558,8 @@ function getScopeCode(request: OptimizeRequest) {
     return request.provinceCode ?? "";
   }
 
-  if (isIndiaOptimizeRequest(request)) {
-    return request.stateCode;
+  if (isGermanyOptimizeRequest(request) || isIndiaOptimizeRequest(request)) {
+    return request.stateCode ?? "";
   }
 
   if (isSpainOptimizeRequest(request)) {

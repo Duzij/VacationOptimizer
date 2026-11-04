@@ -2,6 +2,8 @@ import { capitalizeFirstLetter } from "../utils/text";
 import type {
     CanadaOptimizeRequest,
     CanadaOptimizeResult,
+    GermanyOptimizeRequest,
+    GermanyOptimizeResult,
     IndiaOptimizeRequest,
     IndiaOptimizeResult,
     SpainOptimizeRequest,
@@ -117,7 +119,7 @@ export interface LegacyOptimizeResult extends OptimizationResultBase {
     scope?: undefined;
 }
 
-export type OptimizeResult = LegacyOptimizeResult | CanadaOptimizeResult | IndiaOptimizeResult | SpainOptimizeResult | SwitzerlandOptimizeResult;
+export type OptimizeResult = LegacyOptimizeResult | CanadaOptimizeResult | GermanyOptimizeResult | IndiaOptimizeResult | SpainOptimizeResult | SwitzerlandOptimizeResult;
 
 export interface SharedOptimizeRequestFields {
     country: string;
@@ -142,4 +144,4 @@ export interface LegacyOptimizeRequest extends SharedOptimizeRequestFields {
     provinceCode?: never;
 }
 
-export type OptimizeRequest = LegacyOptimizeRequest | CanadaOptimizeRequest | IndiaOptimizeRequest | SpainOptimizeRequest | SwitzerlandOptimizeRequest;
+export type OptimizeRequest = LegacyOptimizeRequest | CanadaOptimizeRequest | GermanyOptimizeRequest | IndiaOptimizeRequest | SpainOptimizeRequest | SwitzerlandOptimizeRequest;

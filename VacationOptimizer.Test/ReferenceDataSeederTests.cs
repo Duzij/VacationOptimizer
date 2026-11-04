@@ -18,10 +18,15 @@ public class ReferenceDataSeederTests
         dbContext.Database.EnsureCreated();
 
         var canadaCountry = Assert.Single(dbContext.Countries.Where(country => country.IsoCode == "CA"));
+        var germanyCountry = Assert.Single(dbContext.Countries.Where(country => country.IsoCode == "DE"));
         var indiaCountry = Assert.Single(dbContext.Countries.Where(country => country.IsoCode == "IN"));
         var spainCountry = Assert.Single(dbContext.Countries.Where(country => country.IsoCode == "ES"));
         var indonesiaCountry = Assert.Single(dbContext.Countries.Where(country => country.IsoCode == "ID"));
 
+        Assert.Equal(16, dbContext.States.Count(state => state.CountryId == germanyCountry.Id));
+        Assert.Contains(dbContext.States, state => state.Code == "DE-BE");
+        Assert.Contains(dbContext.Holidays, holiday => holiday.CountryId == germanyCountry.Id && holiday.StateId == null);
+        Assert.Contains(dbContext.Holidays, holiday => holiday.CountryId == germanyCountry.Id && holiday.StateId != null);
         Assert.Equal(13, dbContext.States.Count(state => state.CountryId == canadaCountry.Id));
         Assert.Contains(dbContext.States, state => state.Code == "CA-ON");
         Assert.Contains(dbContext.States, state => state.Code == "IN-KA");

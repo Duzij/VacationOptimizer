@@ -305,6 +305,24 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task GetGermanySchema_ReturnsStateContract()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/countries/DE/schema");
+
+        response.EnsureSuccessStatusCode();
+        var schema = await response.Content.ReadFromJsonAsync<GermanySchemaResponse>();
+
+        Assert.NotNull(schema);
+        Assert.Equal("DE", schema.CountryCode);
+        Assert.Equal("germany", schema.Component);
+        Assert.True(schema.StateSelectionRequired);
+        Assert.Equal(16, schema.States.Count);
+        Assert.Contains(schema.States, state => state.Code == "DE-BE" && state.Name == "Berlin");
+    }
+
+    [Fact]
     public async Task GetIndiaSchema_ReturnsIndiaSpecificContract()
     {
         var client = _factory.CreateClient();
@@ -428,6 +446,48 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"type\":\"province\"", json);
         Assert.Contains("\"provinceCode\":\"CA-ON\"", json);
         Assert.Contains("\"provinceName\":\"Ontario\"", json);
+        Assert.Contains("\"publicHolidaysCount\":", json);
+        Assert.Contains("\"plannerSeed\":\"", json);
+    }
+
+    [Fact]
+    public async Task OptimizeGermany_RequiresStateCode()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            year = 2027,
+            vacationDays = 5,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/DE/optimize", payload);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("stateCode", json);
+    }
+
+    [Fact]
+    public async Task OptimizeGermany_WithState_ReturnsGermanySpecificScope()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            stateCode = "DE-BE",
+            year = 2027,
+            vacationDays = 5,
+            minimumDaysPerRange = 1,
+            maximumDaysPerRange = 14,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/DE/optimize", payload);
+
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"countryCode\":\"DE\"", json);
+        Assert.Contains("\"type\":\"state\"", json);
+        Assert.Contains("\"stateCode\":\"DE-BE\"", json);
+        Assert.Contains("\"stateName\":\"Berlin\"", json);
         Assert.Contains("\"publicHolidaysCount\":", json);
         Assert.Contains("\"plannerSeed\":\"", json);
     }
@@ -740,6 +800,18 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task Showcase_UsesDefaultStateForGermany()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=DE&year=2027&vacationDays=25");
+
+        response.EnsureSuccessStatusCode();
+        var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
+        Assert.True(totalDaysOff > 25, $"Expected more total days off than the 25 PTO days, got {totalDaysOff}.");
+    }
+
+    [Fact]
     public async Task Showcase_UsesDefaultStateForIndia()
     {
         var client = _factory.CreateClient();
@@ -793,6 +865,12 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         string Component,
         bool ProvinceSelectionRequired,
         List<StateResponse> Provinces);
+
+    private sealed record GermanySchemaResponse(
+        string CountryCode,
+        string Component,
+        bool StateSelectionRequired,
+        List<StateResponse> States);
 
     private sealed record CountryResponse(string Code, string Name);
 

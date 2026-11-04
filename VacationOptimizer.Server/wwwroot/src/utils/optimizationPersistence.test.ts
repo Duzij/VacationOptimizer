@@ -30,7 +30,7 @@ const yearScopedStorageKey = (key: string, year: number) => `${key}.${year}`;
 
 function makeRequest(year: number, overrides: Partial<LegacyOptimizeRequest> = {}): LegacyOptimizeRequest {
   return {
-    country: "DE",
+    country: "US",
     year,
     vacationDays: defaultVacationDays,
     minimumDaysPerRange: defaultMinimumDaysPerRange,
@@ -60,10 +60,10 @@ describe("optimizationPersistence", () => {
   });
 
   it("falls back to real defaults when query params are present but empty", () => {
-    window.history.replaceState({}, "", "/app?country=DE&year=&vacationDays=&minDays=&maxDays=");
+    window.history.replaceState({}, "", "/app?country=US&year=&vacationDays=&minDays=&maxDays=");
 
     expect(parseRequestFromUrl()).toEqual({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: defaultVacationDays,
       minimumDaysPerRange: defaultMinimumDaysPerRange,
@@ -73,14 +73,14 @@ describe("optimizationPersistence", () => {
 
   it("omits default values from the restored bookmark URL", () => {
     updateUrlFromRequest({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: defaultVacationDays,
       minimumDaysPerRange: defaultMinimumDaysPerRange,
       maximumDaysPerRange: defaultMaximumDaysPerRange,
     });
 
-    expect(window.location.search).toBe("?country=DE");
+    expect(window.location.search).toBe("?country=US");
   });
 
   it("preserves connected calendar params in the app URL", () => {
@@ -89,14 +89,14 @@ describe("optimizationPersistence", () => {
     window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarYear", String(getDefaultYear()));
 
     updateUrlFromRequest({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: defaultVacationDays,
       minimumDaysPerRange: defaultMinimumDaysPerRange,
       maximumDaysPerRange: defaultMaximumDaysPerRange,
     });
 
-    expect(window.location.search).toBe(`?country=DE&connectedToken=partner-seed&connectedCalendarName=Friends&connectedCalendarYear=${getDefaultYear()}`);
+    expect(window.location.search).toBe(`?country=US&connectedToken=partner-seed&connectedCalendarName=Friends&connectedCalendarYear=${getDefaultYear()}`);
   });
 
   it("normalizes nested production app paths back to /app while preserving the query string", () => {
@@ -133,6 +133,19 @@ describe("optimizationPersistence", () => {
     expect(parseRequestFromUrl()).toEqual({
       country: "CA",
       provinceCode: "CA-ON",
+      year: 2027,
+      vacationDays: defaultVacationDays,
+      minimumDaysPerRange: defaultMinimumDaysPerRange,
+      maximumDaysPerRange: defaultMaximumDaysPerRange,
+    });
+  });
+
+  it("restores Germany requests from the stateCode query param", () => {
+    window.history.replaceState({}, "", "/app?country=DE&stateCode=de-be&year=2027");
+
+    expect(parseRequestFromUrl()).toEqual({
+      country: "DE",
+      stateCode: "DE-BE",
       year: 2027,
       vacationDays: defaultVacationDays,
       minimumDaysPerRange: defaultMinimumDaysPerRange,
@@ -220,7 +233,7 @@ describe("optimizationPersistence", () => {
     const savedResultForUrlYear = makeResult("next-year-seed", {
       selectedVacationDays: [`${nextYear}-09-21`],
     });
-    window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(makeRequest(currentYear, { country: "DE" })));
+    window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(makeRequest(currentYear, { country: "US" })));
     window.localStorage.setItem(savedResultStorageKey, JSON.stringify(makeResult("legacy-seed")));
     window.localStorage.setItem(yearScopedStorageKey(savedRequestStorageKey, nextYear), JSON.stringify(savedRequestForUrlYear));
     window.localStorage.setItem(yearScopedStorageKey(savedResultStorageKey, nextYear), JSON.stringify(savedResultForUrlYear));
@@ -240,7 +253,7 @@ describe("optimizationPersistence", () => {
     });
     window.localStorage.setItem(savedRequestStorageKey, JSON.stringify(request));
     window.localStorage.setItem(savedResultStorageKey, JSON.stringify(result));
-    window.history.replaceState({}, "", `/app?country=DE&year=${nextYear}&vacationDays=19`);
+    window.history.replaceState({}, "", `/app?country=US&year=${nextYear}&vacationDays=19`);
 
     const initialState = getInitialOptimizationState();
 

@@ -58,13 +58,13 @@ describe("useOptimizationSession", () => {
       resultToken: "",
       plannerSeed: "",
     });
-    window.history.replaceState({}, "", "/app?country=DE");
+    window.history.replaceState({}, "", "/app?country=US");
 
     render(<HookHarness />);
 
     await waitFor(() => {
       expect(mutateAsync).toHaveBeenCalledWith({
-        country: "DE",
+        country: "US",
         year: getDefaultYear(),
         vacationDays: 25,
         minimumDaysPerRange: 3,
@@ -84,13 +84,13 @@ describe("useOptimizationSession", () => {
       resultToken: "",
       plannerSeed: "",
     });
-    window.history.replaceState({}, "", "/app?country=DE&vacationDays=&minDays=&maxDays=");
+    window.history.replaceState({}, "", "/app?country=US&vacationDays=&minDays=&maxDays=");
 
     render(<HookHarness />);
 
     await waitFor(() => {
       expect(mutateAsync).toHaveBeenCalledWith({
-        country: "DE",
+        country: "US",
         year: getDefaultYear(),
         vacationDays: 25,
         minimumDaysPerRange: 3,
@@ -101,7 +101,7 @@ describe("useOptimizationSession", () => {
 
   it("bundles remembered result tokens for repeated optimizations and shuffle", async () => {
     const request: OptimizeRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,
@@ -142,7 +142,7 @@ describe("useOptimizationSession", () => {
 
   it("navigates between remembered results without calling the api", async () => {
     const request: OptimizeRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,
@@ -188,7 +188,7 @@ describe("useOptimizationSession", () => {
 
   it("shuffles from an older result by sending all known tokens and selecting the new latest result", async () => {
     const request: OptimizeRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,
@@ -232,7 +232,7 @@ describe("useOptimizationSession", () => {
 
   it("clears result history and tokens when the effective request changes", async () => {
     const firstRequest: OptimizeRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,
@@ -240,7 +240,7 @@ describe("useOptimizationSession", () => {
     };
     const secondRequest: OptimizeRequest = {
       ...firstRequest,
-      country: "US",
+      country: "FR",
     };
 
     mutateAsync
@@ -266,7 +266,7 @@ describe("useOptimizationSession", () => {
 
   it("does not append duplicate calendar outputs when a new token has identical content", async () => {
     const request: OptimizeRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,
@@ -306,7 +306,7 @@ describe("useOptimizationSession", () => {
 
   it("marks shuffle as exhausted when optimize returns 409", async () => {
     const request: OptimizeRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,
@@ -335,7 +335,7 @@ describe("useOptimizationSession", () => {
 
   it("raises monthly caps to fit locked vacation days when running optimization", async () => {
     const request: OptimizeRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       minimumDaysPerRange: 4,

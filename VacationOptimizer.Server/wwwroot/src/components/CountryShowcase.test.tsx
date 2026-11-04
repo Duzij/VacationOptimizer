@@ -47,11 +47,12 @@ function renderShowcase() {
 
 describe("buildShowcasePlannerPath", () => {
     it("builds a planner deep link for a generic country", () => {
-        expect(buildShowcasePlannerPath("de")).toBe("/app?country=DE&year=2026&vacationDays=25");
+        expect(buildShowcasePlannerPath("us")).toBe("/app?country=US&year=2026&vacationDays=25");
     });
 
     it("includes the default region for custom countries that require one", () => {
         expect(buildShowcasePlannerPath("CA")).toBe("/app?country=CA&provinceCode=CA-ON&year=2026&vacationDays=25");
+        expect(buildShowcasePlannerPath("de")).toBe("/app?country=DE&stateCode=DE-BE&year=2026&vacationDays=25");
         expect(buildShowcasePlannerPath("IN")).toBe("/app?country=IN&stateCode=IN-KA&year=2026&vacationDays=25");
         expect(buildShowcasePlannerPath("CH")).toBe("/app?country=CH&cantonCode=CH-ZH&year=2026&vacationDays=25");
     });
@@ -73,7 +74,7 @@ describe("CountryShowcase", () => {
 
         expect(container.querySelector("img.showcase-flag")?.getAttribute("src")).toContain("flag-icons-de");
         const cta = await screen.findByRole("link", { name: /In Germany from 25 days to 42 overall days/i });
-        expect(cta.getAttribute("href")).toBe("/app?country=DE&year=2026&vacationDays=25");
+        expect(cta.getAttribute("href")).toBe("/app?country=DE&stateCode=DE-BE&year=2026&vacationDays=25");
         expect(screen.getByText("42 days off")).toBeTruthy();
     });
 
@@ -119,6 +120,6 @@ describe("CountryShowcase", () => {
         renderShowcase();
 
         const cta = await screen.findByRole("link", { name: /Start planning in Germany/i });
-        expect(cta.getAttribute("href")).toBe("/app?country=DE&year=2026&vacationDays=25");
+        expect(cta.getAttribute("href")).toBe("/app?country=DE&stateCode=DE-BE&year=2026&vacationDays=25");
     });
 });

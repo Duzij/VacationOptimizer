@@ -72,6 +72,43 @@ public class PublicHolidayServiceTests
     }
 
     [Fact]
+    public void GetStates_Germany_ReturnsAllFederalStates()
+    {
+        var states = _holidayService.GetStates("DE");
+
+        Assert.Equal(16, states.Count);
+        Assert.Contains(states, state => state.Code == "DE-BE" && state.Name == "Berlin");
+        Assert.Contains(states, state => state.Code == "DE-BY" && state.Name == "Bavaria");
+    }
+
+    [Fact]
+    public void GetHolidays_Germany2027WithoutState_ReturnsNationalHolidaysOnly()
+    {
+        var holidays = _holidayService.GetHolidays("DE", 2027);
+
+        Assert.Equal(10, holidays.Count);
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2027, 10, 3) && holiday.Name == "Day of German Unity");
+        Assert.Contains(holidays, holiday => holiday.Date == new DateOnly(2027, 5, 16) && holiday.Name == "Whit Sunday");
+        Assert.DoesNotContain(holidays, holiday => holiday.Name == "Epiphany");
+        Assert.DoesNotContain(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 24));
+        Assert.DoesNotContain(holidays, holiday => holiday.Date == new DateOnly(2027, 12, 31));
+    }
+
+    [Fact]
+    public void GetHolidays_Germany2027WithState_ReturnsNationalAndRegionalHolidays()
+    {
+        var bavaria = _holidayService.GetHolidays("DE", 2027, "DE-BY");
+        var berlin = _holidayService.GetHolidays("DE", 2027, "DE-BE");
+
+        Assert.Contains(bavaria, holiday => holiday.Date == new DateOnly(2027, 1, 1) && holiday.Name == "New Year's Day");
+        Assert.Contains(bavaria, holiday => holiday.Date == new DateOnly(2027, 1, 6) && holiday.Name == "Epiphany");
+        Assert.Contains(bavaria, holiday => holiday.Date == new DateOnly(2027, 5, 27) && holiday.Name == "Corpus Christi");
+        Assert.Contains(bavaria, holiday => holiday.Date == new DateOnly(2027, 8, 15) && holiday.Name == "Assumption Day");
+        Assert.Contains(berlin, holiday => holiday.Date == new DateOnly(2027, 3, 8) && holiday.Name == "International Women's Day");
+        Assert.DoesNotContain(berlin, holiday => holiday.Name == "Epiphany");
+    }
+
+    [Fact]
     public void GetStates_Canada_ReturnsSeededProvincesAndTerritories()
     {
         var states = _holidayService.GetStates("CA");

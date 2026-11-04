@@ -14,6 +14,23 @@ describe("vacationApi", () => {
     });
 
     describe("optimizeVacation", () => {
+        it("dispatches Germany requests to the state endpoint without the form country field", async () => {
+            const mockResponse = { countryCode: "DE", scope: { type: "state", stateCode: "DE-BE", stateName: "Berlin" } };
+            globalThis.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve(mockResponse),
+            });
+
+            const result = await optimizeVacation({ country: "DE", stateCode: "DE-BE", year: 2026, vacationDays: 25 });
+
+            expect(globalThis.fetch).toHaveBeenCalledWith("/api/vacations/countries/DE/optimize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stateCode: "DE-BE", year: 2026, vacationDays: 25 }),
+            });
+            expect(result).toEqual(mockResponse);
+        });
+
         it("dispatches Canada requests to the province endpoint without the form country field", async () => {
             const mockResponse = { countryCode: "CA", scope: { type: "province", provinceCode: "CA-ON", provinceName: "Ontario" } };
             globalThis.fetch = vi.fn().mockResolvedValue({

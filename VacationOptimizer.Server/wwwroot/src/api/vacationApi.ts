@@ -9,12 +9,14 @@ import {
 } from "../types/models";
 import {
     isCanadaOptimizeRequest,
+    isGermanyOptimizeRequest,
     isIndiaOptimizeRequest,
     isSpainOptimizeRequest,
     isSwitzerlandOptimizeRequest,
 } from "../features/countrySpecific/models";
 import {
     optimizeCanadaVacation,
+    optimizeGermanyVacation,
     optimizeIndiaVacation,
     optimizeSpainVacation,
     optimizeSwitzerlandVacation,
@@ -87,13 +89,15 @@ async function optimizeLegacyVacation(request: OptimizeRequest): Promise<Optimiz
 export async function optimizeVacation(request: OptimizeRequest): Promise<OptimizeResult> {
     return isCanadaOptimizeRequest(request)
         ? optimizeCanadaVacation(request)
-        : isIndiaOptimizeRequest(request)
-            ? optimizeIndiaVacation(request)
-            : isSpainOptimizeRequest(request)
-                ? optimizeSpainVacation(request)
-                : isSwitzerlandOptimizeRequest(request)
-                    ? optimizeSwitzerlandVacation(request)
-                    : optimizeLegacyVacation(request);
+        : isGermanyOptimizeRequest(request)
+            ? optimizeGermanyVacation(request)
+            : isIndiaOptimizeRequest(request)
+                ? optimizeIndiaVacation(request)
+                : isSpainOptimizeRequest(request)
+                    ? optimizeSpainVacation(request)
+                    : isSwitzerlandOptimizeRequest(request)
+                        ? optimizeSwitzerlandVacation(request)
+                        : optimizeLegacyVacation(request);
 }
 
 export function useCountries() {

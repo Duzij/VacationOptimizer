@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useCountries, useStates } from "../api/vacationApi";
 import { type CustomFreeDay, type DetectedCountry, type OptimizeRequest } from "../types/models";
 import { defaultMaximumDaysPerRange, defaultMinimumDaysPerRange, defaultVacationDays, getDefaultYear } from "../optimizerDefaults";
-import { isIndiaOptimizeRequest } from "../features/countrySpecific/models";
+import { isGermanyOptimizeRequest, isIndiaOptimizeRequest } from "../features/countrySpecific/models";
 import { readSavedRequest } from "../utils/optimizationPersistence";
 import CanadaCountryOptimizerForm from "../features/countrySpecific/canada/CanadaCountryOptimizerForm";
+import GermanyCountryOptimizerForm from "../features/countrySpecific/germany/GermanyCountryOptimizerForm";
 import IndiaCountryOptimizerForm from "../features/countrySpecific/india/IndiaCountryOptimizerForm";
 import SpainCountryOptimizerForm from "../features/countrySpecific/spain/SpainCountryOptimizerForm";
 import SwitzerlandCountryOptimizerForm from "../features/countrySpecific/switzerland/SwitzerlandCountryOptimizerForm";
@@ -170,6 +171,22 @@ export default function OptimizerForm({
                     onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
+            {country === "DE" && (
+                <GermanyCountryOptimizerForm
+                    key={country}
+                    country={country}
+                    onResult={onResult}
+                    isLoading={isLoading}
+                    customFreeDays={customFreeDays}
+                    onCustomFreeDaysChange={onCustomFreeDaysChange}
+                    initialRequest={initialRequest}
+                    sharedDraft={sharedDraft}
+                    onSharedDraftChange={setSharedDraft}
+                    lockedVacationDaysCount={lockedVacationDaysCount}
+                    onResetLockedDays={onResetLockedDays}
+                    onCustomPeriodChanged={onCustomPeriodChanged}
+                />
+            )}
             {country === "IN" && (
                 <IndiaCountryOptimizerForm
                     key={country}
@@ -218,7 +235,7 @@ export default function OptimizerForm({
                     onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
-            {country && !["CA", "IN", "ES", "CH"].includes(country) && (
+            {country && !["CA", "DE", "IN", "ES", "CH"].includes(country) && (
                 <LegacyCountryOptimizerForm
                     key={country}
                     country={country}
@@ -264,7 +281,7 @@ function LegacyCountryOptimizerForm({
     onCustomPeriodChanged?: () => void;
 }) {
     const [state, setState] = useState(
-        initialRequest && !isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
+        initialRequest && !isGermanyOptimizeRequest(initialRequest) && !isIndiaOptimizeRequest(initialRequest) && initialRequest.country === country
             ? (initialRequest.state ?? "")
             : ""
     );

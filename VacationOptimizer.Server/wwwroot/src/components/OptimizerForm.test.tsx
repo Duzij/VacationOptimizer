@@ -7,6 +7,7 @@ const countries = [
   { code: "CA", name: "Canada" },
   { code: "DE", name: "Germany" },
   { code: "IN", name: "India" },
+  { code: "US", name: "United States" },
 ];
 
 const canadaSchema = {
@@ -20,6 +21,19 @@ const canadaSchema = {
   },
   provinceSelectionRequired: true as const,
   provinces: [{ code: "CA-ON", name: "Ontario" }],
+};
+
+const germanySchema = {
+  countryCode: "DE" as const,
+  component: "germany" as const,
+  yearRange: { min: 2026, max: 2031 },
+  defaults: {
+    vacationDays: 25,
+    minimumDaysPerRange: 4,
+    maximumDaysPerRange: 14,
+  },
+  stateSelectionRequired: true as const,
+  states: [{ code: "DE-BE", name: "Berlin" }],
 };
 
 const indiaSchema = {
@@ -61,6 +75,10 @@ vi.mock("../features/countrySpecific/countrySpecificApi", () => ({
     data: canadaSchema,
     isLoading: false,
   }),
+  useGermanySchema: () => ({
+    data: germanySchema,
+    isLoading: false,
+  }),
   useIndiaSchema: () => ({
     data: indiaSchema,
     isLoading: false,
@@ -100,6 +118,13 @@ vi.mock("../features/countrySpecific/countrySpecificApi", () => ({
 vi.mock("../features/countrySpecific/canada/api", () => ({
   useCanadaSchema: () => ({
     data: canadaSchema,
+    isLoading: false,
+  }),
+}));
+
+vi.mock("../features/countrySpecific/germany/api", () => ({
+  useGermanySchema: () => ({
+    data: germanySchema,
     isLoading: false,
   }),
 }));
@@ -193,6 +218,30 @@ describe("OptimizerForm", () => {
     expect((optimizeButton as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it("mounts the Germany form and requires a state before submit", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <OptimizerForm
+        onResult={vi.fn()}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={null}
+      />,
+    );
+
+    await user.selectOptions(screen.getByLabelText("Country"), "DE");
+
+    expect(screen.getByLabelText("State / Region")).toBeTruthy();
+    expect((screen.getAllByRole("button", { name: /Optimize/i })[0] as HTMLButtonElement).disabled).toBe(true);
+
+    await user.selectOptions(screen.getByLabelText("State / Region"), "DE-BE");
+
+    const optimizeButton = screen.getAllByRole("button", { name: /Optimize/i })[0];
+    expect((optimizeButton as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it("mounts the India form and requires a state before submit", async () => {
     const user = userEvent.setup();
     const onResult = vi.fn();
@@ -232,7 +281,7 @@ describe("OptimizerForm", () => {
       />,
     );
 
-    await user.selectOptions(screen.getByLabelText("Country"), "DE");
+    await user.selectOptions(screen.getByLabelText("Country"), "US");
     await user.click(screen.getByRole("button", { name: "Advanced constraints" }));
     await user.selectOptions(screen.getByLabelText("Add monthly vacation-day cap"), "January");
     const increaseJanuaryCap = screen.getByRole("button", { name: /Increase January/i });
@@ -249,7 +298,7 @@ describe("OptimizerForm", () => {
     window.localStorage.setItem(
       "vacationOptimizer.v2.savedRequest.2027",
       JSON.stringify({
-        country: "DE",
+        country: "US",
         year: 2027,
         vacationDays: 25,
         minimumDaysPerRange: 4,
@@ -268,7 +317,7 @@ describe("OptimizerForm", () => {
         customFreeDays={[]}
         onCustomFreeDaysChange={vi.fn()}
         initialRequest={{
-          country: "DE",
+          country: "US",
           year: 2026,
           vacationDays: 25,
           minimumDaysPerRange: 4,
@@ -300,7 +349,7 @@ describe("OptimizerForm", () => {
         isLoading={false}
         customFreeDays={[]}
         onCustomFreeDaysChange={vi.fn()}
-        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+        initialRequest={{ country: "US", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
       />
     );
     expect(screen.queryByLabelText("Custom Period")).toBeNull();
@@ -320,7 +369,7 @@ describe("OptimizerForm", () => {
         isLoading={false}
         customFreeDays={[]}
         onCustomFreeDaysChange={vi.fn()}
-        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+        initialRequest={{ country: "US", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
       />
     );
     await user.click(screen.getByRole("button", { name: "Edit" }));
@@ -341,7 +390,7 @@ describe("OptimizerForm", () => {
         isLoading={false}
         customFreeDays={[]}
         onCustomFreeDaysChange={vi.fn()}
-        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+        initialRequest={{ country: "US", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
       />
     );
     await user.click(screen.getByRole("button", { name: "Edit" }));
@@ -366,7 +415,7 @@ describe("OptimizerForm", () => {
         isLoading={false}
         customFreeDays={[]}
         onCustomFreeDaysChange={vi.fn()}
-        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+        initialRequest={{ country: "US", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
       />
     );
     await user.click(screen.getByRole("button", { name: "Edit" }));
@@ -389,7 +438,7 @@ describe("OptimizerForm", () => {
         isLoading={false}
         customFreeDays={[]}
         onCustomFreeDaysChange={vi.fn()}
-        initialRequest={{ country: "DE", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
+        initialRequest={{ country: "US", year: 2026, vacationDays: 25, minimumDaysPerRange: 1, maximumDaysPerRange: 14 }}
       />
     );
     await user.click(screen.getByRole("button", { name: "Edit" }));

@@ -1,6 +1,23 @@
 {
   "posts": [
     {
+      "title": "Plan 2027 PTO Around Your German Federal State",
+      "date": "2026-11-04",
+      "author": "Team",
+      "slug": "germany-holiday-planner",
+      "language": "en",
+      "summary": "Germany now has state-specific vacation planning, with curated national and regional public holidays for year 2027 for all 16 federal states.",
+      "tags": [
+        "feature",
+        "germany",
+        "pto",
+        "public-holidays",
+        "2027",
+        "vacation-planning"
+      ],
+      "wordCount": 208
+    },
+    {
       "title": "Plan Canadian PTO Around Your Province or Territory",
       "date": "2026-10-25",
       "author": "Team",
@@ -15,7 +32,7 @@
         "2027",
         "vacation-planning"
       ],
-      "wordCount": 238
+      "wordCount": 239
     },
     {
       "title": "Better Vacation Plans: Use Your Allowance and See the Best Option First",

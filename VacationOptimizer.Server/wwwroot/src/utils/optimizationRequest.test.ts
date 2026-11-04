@@ -40,9 +40,46 @@ describe("optimizationRequest", () => {
     expect(normalizeOptimizeRequest(oldRequest)).toMatchObject({ country: "CA", provinceCode: "" });
   });
 
-  it("preserves empty custom free day titles", () => {
+  it("round-trips Germany state requests through search params", () => {
     const request = normalizeOptimizeRequest({
       country: "DE",
+      stateCode: " de-be ",
+      year: getDefaultYear(),
+      vacationDays: 25,
+    });
+    const params = buildSearchParamsFromRequest(request);
+
+    expect(request).toMatchObject({ country: "DE", stateCode: "DE-BE" });
+    expect(params.get("stateCode")).toBe("DE-BE");
+    expect(parseRequestFromSearchParams(params)).toEqual(request);
+  });
+
+  it("treats Germany requests for different states as different holiday scopes", () => {
+    const baseRequest = { country: "DE" as const, year: getDefaultYear(), vacationDays: 25 };
+
+    expect(hasSameHolidayScope(
+      { ...baseRequest, stateCode: "DE-BE" },
+      { ...baseRequest, stateCode: "DE-BY" },
+    )).toBe(false);
+    expect(hasSameHolidayScope(
+      { ...baseRequest, stateCode: "DE-BE" },
+      { ...baseRequest, stateCode: "DE-BE" },
+    )).toBe(true);
+  });
+
+  it("normalizes old Germany runtime objects without a state safely", () => {
+    const oldRequest = {
+      country: "DE",
+      year: getDefaultYear(),
+      vacationDays: 25,
+    } as unknown as Parameters<typeof normalizeOptimizeRequest>[0];
+
+    expect(normalizeOptimizeRequest(oldRequest)).toMatchObject({ country: "DE", stateCode: "" });
+  });
+
+  it("preserves empty custom free day titles", () => {
+    const request = normalizeOptimizeRequest({
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       customFreeDays: [{ date: `${getDefaultYear()}-04-10`, title: "" }],
@@ -55,7 +92,7 @@ describe("optimizationRequest", () => {
 
   it("compares custom free day titles when matching requests", () => {
     const baseRequest = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
     };
@@ -69,7 +106,7 @@ describe("optimizationRequest", () => {
   it("normalizes and compares never holiday dates", () => {
     const date = `${getDefaultYear()}-05-12`;
     const request = normalizeOptimizeRequest({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       neverHolidayDates: [date, date],
@@ -77,15 +114,15 @@ describe("optimizationRequest", () => {
 
     expect(request.neverHolidayDates).toEqual([date]);
     expect(requestsMatch(
-      { country: "DE", year: getDefaultYear(), vacationDays: 25 },
-      { country: "DE", year: getDefaultYear(), vacationDays: 25, neverHolidayDates: [date] },
+      { country: "US", year: getDefaultYear(), vacationDays: 25 },
+      { country: "US", year: getDefaultYear(), vacationDays: 25, neverHolidayDates: [date] },
     )).toBe(false);
   });
 
   it("round-trips never holiday dates through search params", () => {
     const date = `${getDefaultYear()}-05-12`;
     const params = buildSearchParamsFromRequest({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       neverHolidayDates: [date],
@@ -98,7 +135,7 @@ describe("optimizationRequest", () => {
   it("normalizes, compares, and round-trips locked vacation dates", () => {
     const date = `${getDefaultYear()}-05-12`;
     const request = normalizeOptimizeRequest({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       lockedVacationDates: [date, date],
@@ -109,14 +146,14 @@ describe("optimizationRequest", () => {
     expect(params.get("lockedVacationDays")).toBe(date);
     expect(parseRequestFromSearchParams(params)?.lockedVacationDates).toEqual([date]);
     expect(requestsMatch(
-      { country: "DE", year: getDefaultYear(), vacationDays: 25 },
+      { country: "US", year: getDefaultYear(), vacationDays: 25 },
       request,
     )).toBe(false);
   });
 
   it("normalizes, compares, and round-trips monthly vacation caps", () => {
     const request = normalizeOptimizeRequest({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       maxNumberOfVacationsPerMonth: {
@@ -136,14 +173,14 @@ describe("optimizationRequest", () => {
       July: 3,
     });
     expect(requestsMatch(
-      { country: "DE", year: getDefaultYear(), vacationDays: 25 },
+      { country: "US", year: getDefaultYear(), vacationDays: 25 },
       request,
     )).toBe(false);
   });
 
   it("raises monthly caps to fit locked vacation days", () => {
     const adjusted = ensureMonthlyCapsFitLockedDays({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       maxNumberOfVacationsPerMonth: { July: 1 },
@@ -155,7 +192,7 @@ describe("optimizationRequest", () => {
 
   it("does not add a monthly cap when locked days exist but no cap is set", () => {
     const adjusted = ensureMonthlyCapsFitLockedDays({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       lockedVacationDates: ["2027-07-01"],
@@ -166,7 +203,7 @@ describe("optimizationRequest", () => {
 
   it("leaves caps unchanged when they already fit locked days", () => {
     const request = {
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       maxNumberOfVacationsPerMonth: { July: 5 },
@@ -178,7 +215,7 @@ describe("optimizationRequest", () => {
 
   it("round-trips the planner seed through search params without affecting request matching", () => {
     const request = normalizeOptimizeRequest({
-      country: "DE",
+      country: "US",
       year: getDefaultYear(),
       vacationDays: 25,
       seedToken: "  seed-token-value  ",
@@ -189,7 +226,7 @@ describe("optimizationRequest", () => {
     expect(params.get("seed")).toBe("seed-token-value");
     expect(parseRequestFromSearchParams(params)?.seedToken).toBe("seed-token-value");
     expect(requestsMatch(
-      { country: "DE", year: getDefaultYear(), vacationDays: 25 },
+      { country: "US", year: getDefaultYear(), vacationDays: 25 },
       request,
     )).toBe(true);
   });

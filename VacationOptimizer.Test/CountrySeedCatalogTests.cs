@@ -22,6 +22,24 @@ public class CountrySeedCatalogTests
     }
 
     [Fact]
+    public void BuildHolidays_NormalizesGermanyNationalAndRegionalScopes()
+    {
+        var germanUnity = CountrySeedCatalog.Holidays.Single(holiday =>
+            holiday.CountryId == GermanySeedData.Country.Id
+            && holiday.StateId == null
+            && holiday.Date == new DateOnly(2027, 10, 3));
+        var bavaria = CountrySeedCatalog.States.Single(state => state.Code == "DE-BY");
+        var epiphany = CountrySeedCatalog.Holidays
+            .Where(holiday => holiday.CountryId == GermanySeedData.Country.Id && holiday.Date == new DateOnly(2027, 1, 6))
+            .ToList();
+
+        Assert.Null(germanUnity.StateId);
+        Assert.Equal(3, epiphany.Count);
+        Assert.Contains(epiphany, holiday => holiday.StateId == bavaria.Id);
+        Assert.All(epiphany, holiday => Assert.NotNull(holiday.StateId));
+    }
+
+    [Fact]
     public void BuildHolidays_NormalizesIndiaNationalHolidaysToCountryScope()
     {
         var republicDay = CountrySeedCatalog.Holidays

@@ -9,6 +9,7 @@ import {
 import {
   getOptimizeRequestScopeCode,
   isCanadaOptimizeRequest,
+  isGermanyOptimizeRequest,
   isIndiaOptimizeRequest,
 } from "../features/countrySpecific/models";
 import { useAnalytics } from "../posthog";
@@ -109,7 +110,7 @@ export function useCalendarInteractions({
   const createHolidayReportMessage = (day: CalendarDay, isIgnoredInApp = ignoredHolidayDates.includes(day.date)) => {
     const country = activeRequest?.country ?? "unknown";
     const scopeCode = getOptimizeRequestScopeCode(activeRequest);
-    const state = isIndiaOptimizeRequest(activeRequest)
+    const state = isGermanyOptimizeRequest(activeRequest) || isIndiaOptimizeRequest(activeRequest)
       ? (scopeCode || "required state not selected")
       : isCanadaOptimizeRequest(activeRequest)
         ? (scopeCode || "required province not selected")

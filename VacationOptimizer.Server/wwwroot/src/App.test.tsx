@@ -53,7 +53,7 @@ vi.mock("./components/OptimizerForm", () => ({
         <button
           type="button"
           onClick={() => onResult({
-            country: initialRequest?.country ?? "DE",
+            country: initialRequest?.country ?? "US",
             year,
             vacationDays: initialRequest?.vacationDays ?? 25,
             minimumDaysPerRange: initialRequest?.minimumDaysPerRange ?? 4,
@@ -112,7 +112,7 @@ vi.mock("./components/ConfirmCustomDayModal", () => ({
 
 function createSavedRequest() {
   return {
-    country: "DE",
+    country: "US",
     year: getDefaultYear(),
     vacationDays: 25,
     minimumDaysPerRange: 3,
@@ -166,7 +166,7 @@ describe("App loading state", () => {
 
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult()));
-    window.history.replaceState({}, "", "/app?country=DE");
+    window.history.replaceState({}, "", "/app?country=US");
 
     render(<App />);
 
@@ -184,7 +184,7 @@ describe("App loading state", () => {
 
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult()));
-    window.history.replaceState({}, "", "/app?country=DE");
+    window.history.replaceState({}, "", "/app?country=US");
 
     render(<App />);
 
@@ -199,7 +199,7 @@ describe("App loading state", () => {
   it("raises monthly caps to fit locked vacation days on restore", async () => {
     mutateAsync.mockResolvedValue(createSavedResult());
 
-    window.history.replaceState({}, "", "/app?country=DE&year=2027&monthlyCaps=7:1&lockedVacationDays=2027-07-01,2027-07-02");
+    window.history.replaceState({}, "", "/app?country=US&year=2027&monthlyCaps=7:1&lockedVacationDays=2027-07-01,2027-07-02");
 
     render(<App />);
 
@@ -217,7 +217,7 @@ describe("App loading state", () => {
   it("does not adjust monthly caps when they already fit locked days", async () => {
     mutateAsync.mockResolvedValue(createSavedResult());
 
-    window.history.replaceState({}, "", "/app?country=DE&year=2027&monthlyCaps=7:2&lockedVacationDays=2027-07-01,2027-07-02");
+    window.history.replaceState({}, "", "/app?country=US&year=2027&monthlyCaps=7:2&lockedVacationDays=2027-07-01,2027-07-02");
 
     render(<App />);
 
@@ -311,7 +311,7 @@ describe("App loading state", () => {
     window.localStorage.setItem("vacationOptimizer.v2.connectedToken", "partner-seed");
     window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarName", "Friends");
     window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarYear", String(defaultYear));
-    window.history.replaceState({}, "", `/app?country=DE&connectedToken=partner-seed&connectedCalendarName=Friends&connectedCalendarYear=${defaultYear}`);
+    window.history.replaceState({}, "", `/app?country=US&connectedToken=partner-seed&connectedCalendarName=Friends&connectedCalendarYear=${defaultYear}`);
 
     render(<App />);
 
@@ -335,7 +335,7 @@ describe("App loading state", () => {
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("planner-seed-1")));
     window.localStorage.setItem("vacationOptimizer.v2.calendarName", "Friends");
-    window.history.replaceState({}, "", "/app?country=DE");
+    window.history.replaceState({}, "", "/app?country=US");
 
     render(<App />);
 
@@ -387,7 +387,7 @@ describe("App loading state", () => {
       ...createSavedResult(),
       plannerSeed: "undefined",
     }));
-    window.history.replaceState({}, "", "/app?country=DE");
+    window.history.replaceState({}, "", "/app?country=US");
 
     render(<App />);
 
@@ -401,7 +401,7 @@ describe("App loading state", () => {
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("planner-seed-1")));
     window.localStorage.setItem("vacationOptimizer.v2.connectedToken", "partner-seed");
     window.localStorage.setItem("vacationOptimizer.v2.connectedCalendarName", "Friends");
-    window.history.replaceState({}, "", "/app?country=DE&connectedToken=partner-seed&connectedCalendarName=Friends");
+    window.history.replaceState({}, "", "/app?country=US&connectedToken=partner-seed&connectedCalendarName=Friends");
 
     render(<App />);
 
@@ -419,7 +419,7 @@ describe("App loading state", () => {
   it("opens day settings modal when day lip settings button is clicked on day select", async () => {
     window.localStorage.setItem("vacationOptimizer.v2.savedRequest", JSON.stringify(createSavedRequest()));
     window.localStorage.setItem("vacationOptimizer.v2.savedResult", JSON.stringify(createSavedResult("planner-seed-1")));
-    window.history.replaceState({}, "", "/app?country=DE");
+    window.history.replaceState({}, "", "/app?country=US");
 
     render(<App />);
 
