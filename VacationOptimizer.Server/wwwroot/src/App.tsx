@@ -485,10 +485,10 @@ function PlannerPage() {
               </p>
             )}
 
-            <aside className="content-panel space-y-5">
+            <aside className="content-panel">
               <AdSenseUnit slot="8853837284" />
 
-              <div className="hidden space-y-3 border-t border-border pt-5 xl:block">
+              <div className="hidden space-y-3 pt-5 xl:block">
                 <h3 className="text-base font-semibold text-text">Need help or spotted something off?</h3>
                 <p className="text-sm leading-6 text-text-muted">
                   Share feedback if you notice incorrect holiday data, confusing behavior, or a missing planning detail we should support.
