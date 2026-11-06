@@ -11,6 +11,7 @@ import FeedbackModal from "./components/FeedbackModal";
 import ConfirmCustomDayModal from "./components/ConfirmCustomDayModal";
 import DetailsLipDesktop from "./components/DetailsLipDesktop";
 import ErrorLip from "./components/ErrorLip";
+import AdSenseUnit from "./components/AdSenseUnit";
 import AppHeader from "./components/AppHeader";
 import {
   AboutPage,
@@ -484,47 +485,10 @@ function PlannerPage() {
               </p>
             )}
 
-            <details className="content-panel group xl:hidden">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-base font-semibold text-text">
-                <span>How to use the planner well</span>
-                <span className="text-sm font-medium text-text-muted group-open:hidden">Show</span>
-                <span className="hidden text-sm font-medium text-text-muted group-open:inline">Hide</span>
-              </summary>
-              <div className="mt-4 space-y-4">
-                <div className="space-y-3 text-sm leading-6 text-text-muted">
-                  <p>Start with holiday clusters, decide whether you want one long break or several smaller ones, then add local context such as office closures or school schedules.</p>
-                  <p>Use the planner to compare real date combinations instead of guessing, then verify the best option against approvals, cost, team coverage, and travel constraints.</p>
-                </div>
+            <aside className="content-panel space-y-5">
+              <AdSenseUnit slot="8853837284" />
 
-                <div className="space-y-3 border-t border-border pt-4">
-                  <h3 className="text-base font-semibold text-text">Need help or spotted something off?</h3>
-                  <p className="text-sm leading-6 text-text-muted">
-                    Share feedback if you notice incorrect holiday data, confusing behavior, or a missing planning detail we should support.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setFeedbackDraft({
-                      title: "Share feedback",
-                      message: "",
-                    })}
-                    className="inline-flex items-center justify-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover cursor-pointer"
-                  >
-                    Share feedback
-                  </button>
-                </div>
-              </div>
-            </details>
-
-            <aside className="content-panel hidden space-y-5 xl:block">
-              <div className="space-y-3">
-                <h2 className="text-xl font-semibold text-text">How to use the planner well</h2>
-                <div className="space-y-3 text-sm leading-6 text-text-muted">
-                  <p>Start with holiday clusters, decide whether you want one long break or several smaller ones, then add local context such as office closures or school schedules.</p>
-                  <p>Use the planner to compare real date combinations instead of guessing, then verify the best option against approvals, cost, team coverage, and travel constraints.</p>
-                </div>
-              </div>
-
-              <div className="space-y-3 border-t border-border pt-5">
+              <div className="hidden space-y-3 border-t border-border pt-5 xl:block">
                 <h3 className="text-base font-semibold text-text">Need help or spotted something off?</h3>
                 <p className="text-sm leading-6 text-text-muted">
                   Share feedback if you notice incorrect holiday data, confusing behavior, or a missing planning detail we should support.
@@ -540,6 +504,29 @@ function PlannerPage() {
                   Share feedback
                 </button>
               </div>
+
+              <details className="group border-t border-border pt-4 xl:hidden">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-base font-semibold text-text">
+                  <span>Need help or spotted something off?</span>
+                  <span className="text-sm font-medium text-text-muted group-open:hidden">Show</span>
+                  <span className="hidden text-sm font-medium text-text-muted group-open:inline">Hide</span>
+                </summary>
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm leading-6 text-text-muted">
+                    Share feedback if you notice incorrect holiday data, confusing behavior, or a missing planning detail we should support.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFeedbackDraft({
+                      title: "Share feedback",
+                      message: "",
+                    })}
+                    className="inline-flex items-center justify-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-hover cursor-pointer"
+                  >
+                    Share feedback
+                  </button>
+                </div>
+              </details>
             </aside>
           </div>
         </div>

@@ -304,8 +304,55 @@ function requireStringArray(value, fieldName, fileName) {
   return normalized.map((entry) => entry.trim());
 }
 
+function renderAdUnit() {
+  return `
+    <aside class="blog-ad-unit" aria-label="Advertisement" style="grid-column:1 / -1;margin:1.5rem 0;text-align:center">
+      <span style="display:block;margin-bottom:.5rem;font-size:.75rem">Advertisement</span>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-9485445500768000"
+           data-ad-slot="8119340115"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+        (function () {
+          var ad = document.currentScript.previousElementSibling;
+          if (!ad) return;
+
+          function requestAd() {
+            var consentApi = window.VacationOptimizerCookieConsent;
+            var consent = consentApi && consentApi.getConsent();
+            if (!consent || consent.advertising !== true || ad.dataset.adsenseInitialized) return;
+
+            ad.dataset.adsenseInitialized = "true";
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          }
+
+          window.addEventListener("vacationOptimizer:cookie-consent-change", requestAd);
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", requestAd, { once: true });
+          } else {
+            requestAd();
+          }
+        })();
+      </script>
+    </aside>
+  `;
+}
+
+function insertAdBeforeFinalParagraph(html) {
+  const paragraphs = [...html.matchAll(/<p(?:\s[^>]*)?>/gi)];
+  const finalParagraph = paragraphs[paragraphs.length - 1];
+  if (!finalParagraph || finalParagraph.index === undefined) {
+    return `${html}\n${renderAdUnit()}`;
+  }
+
+  return `${html.slice(0, finalParagraph.index)}${renderAdUnit()}\n${html.slice(finalParagraph.index)}`;
+}
+
 function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
-  const cards = posts.map((post) => `
+  const adAfterPostIndex = Math.floor(posts.length / 2) - 1;
+  const cards = posts.map((post, index) => `
     <article class="blog-card">
       <div class="blog-meta">
         <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
@@ -326,6 +373,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
         </a>
       </div>
     </article>
+    ${posts.length > 1 && index === adAfterPostIndex ? renderAdUnit() : ""}
   `).join("").replace(/\n[ \t]+\n/g, "\n\n");
 
   return renderDocument({
@@ -393,7 +441,7 @@ function renderBlogPostPage(post, posts, appIndexHtml, siteData, footerHtml) {
   .replace(/<table>/g, '<div class="blog-table"><table>')
   .replace(/<\/table>/g, '</table></div>');
 
-  post.html = tablePreProcessor;
+  const postHtml = insertAdBeforeFinalParagraph(tablePreProcessor);
 
   return renderDocument({
     appIndexHtml,
@@ -428,8 +476,9 @@ ${renderLanguageSwitcher(post, posts)}
               <p class="blog-summary blog-summary--large">${escapeHtml(post.summary)}</p>
               <div class="blog-tags">${post.tags.map(renderTag).join("")}</div>
             </header>
+            ${renderAdUnit()}
             <article class="blog-post-content">
-              ${post.html}
+              ${postHtml}
             </article>
           </section>
         </main>
