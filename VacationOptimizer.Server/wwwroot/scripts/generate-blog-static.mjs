@@ -306,8 +306,7 @@ function requireStringArray(value, fieldName, fileName) {
 
 function renderAdUnit() {
   return `
-    <aside class="blog-ad-unit" aria-label="Advertisement" style="grid-column:1 / -1;margin:1.5rem 0;text-align:center">
-      <span style="display:block;margin-bottom:.5rem;font-size:.75rem">Advertisement</span>
+    <div class="blog-ad-unit" style="grid-column:1 / -1;margin:1.5rem 0;text-align:center">
       <ins class="adsbygoogle"
            style="display:block"
            data-ad-client="ca-pub-9485445500768000"
@@ -336,7 +335,7 @@ function renderAdUnit() {
           }
         })();
       </script>
-    </aside>
+    </div>
   `;
 }
 

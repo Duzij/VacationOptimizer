@@ -37,8 +37,7 @@ export default function AdSenseUnit({ slot }: { slot: string }) {
   }, []);
 
   return (
-    <div className="space-y-2 text-center">
-      <span className="block text-xs text-text-muted">Advertisement</span>
+    <div className="text-center">
       <ins
         ref={adRef}
         className="adsbygoogle"
