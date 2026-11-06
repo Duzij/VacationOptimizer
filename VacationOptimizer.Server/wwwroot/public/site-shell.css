@@ -621,12 +621,15 @@ body {
 /* ── Post grid & cards ── */
 .blog-post-grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+  min-width: 0;
 }
 
 .blog-card {
   display: grid;
   gap: 0.9rem;
+  min-width: 0;
   border: 1px solid var(--color-border);
   border-radius: 1.5rem;
   background: var(--site-shell-blog-card-background);

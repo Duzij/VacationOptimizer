@@ -306,13 +306,13 @@ function requireStringArray(value, fieldName, fileName) {
 
 function renderAdUnit() {
   return `
-    <div class="blog-ad-unit" style="grid-column:1 / -1;margin:1.5rem 0;text-align:center">
+    <div class="blog-ad-unit" style="grid-column:1 / -1;width:100%;min-width:0;max-width:100%;margin:1.5rem 0;text-align:center">
       <ins class="adsbygoogle"
-           style="display:block"
+           style="display:block;max-width:100%"
            data-ad-client="ca-pub-9485445500768000"
            data-ad-slot="8119340115"
            data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+           data-full-width-responsive="false"></ins>
       <script>
         (function () {
           var ad = document.currentScript.previousElementSibling;
@@ -339,14 +339,19 @@ function renderAdUnit() {
   `;
 }
 
-function insertAdBeforeFinalParagraph(html) {
+function insertAdBeforeFinalSection(html) {
   const paragraphs = [...html.matchAll(/<p(?:\s[^>]*)?>/gi)];
   const finalParagraph = paragraphs[paragraphs.length - 1];
   if (!finalParagraph || finalParagraph.index === undefined) {
     return `${html}\n${renderAdUnit()}`;
   }
 
-  return `${html.slice(0, finalParagraph.index)}${renderAdUnit()}\n${html.slice(finalParagraph.index)}`;
+  const contentBeforeFinalParagraph = html.slice(0, finalParagraph.index);
+  const sectionHeadings = [...contentBeforeFinalParagraph.matchAll(/<h2(?:\s[^>]*)?>/gi)];
+  const finalSectionHeading = sectionHeadings[sectionHeadings.length - 1];
+  const insertionIndex = finalSectionHeading?.index ?? finalParagraph.index;
+
+  return `${html.slice(0, insertionIndex)}${renderAdUnit()}\n${html.slice(insertionIndex)}`;
 }
 
 function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
@@ -440,7 +445,7 @@ function renderBlogPostPage(post, posts, appIndexHtml, siteData, footerHtml) {
   .replace(/<table>/g, '<div class="blog-table"><table>')
   .replace(/<\/table>/g, '</table></div>');
 
-  const postHtml = insertAdBeforeFinalParagraph(tablePreProcessor);
+  const postHtml = insertAdBeforeFinalSection(tablePreProcessor);
 
   return renderDocument({
     appIndexHtml,
