@@ -485,8 +485,8 @@ function PlannerPage() {
               </p>
             )}
 
-            <aside className="content-panel">
-              <AdSenseUnit slot="8853837284" />
+            <aside className="content-panel min-w-0">
+              <AdSenseUnit slot="8853837284" desktopOnly />
 
               <div className="hidden space-y-3 pt-5 xl:block">
                 <h3 className="text-base font-semibold text-text">Need help or spotted something off?</h3>
@@ -505,7 +505,7 @@ function PlannerPage() {
                 </button>
               </div>
 
-              <details className="group border-t border-border pt-4 xl:hidden">
+              <details className="group xl:hidden">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-base font-semibold text-text">
                   <span>Need help or spotted something off?</span>
                   <span className="text-sm font-medium text-text-muted group-open:hidden">Show</span>
