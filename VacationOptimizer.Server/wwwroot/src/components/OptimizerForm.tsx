@@ -329,6 +329,7 @@ function LegacyCountryOptimizerForm({
                     onChange={setState}
                     disabled={statesLoading}
                     includeEmptyOption
+                    isInvalid={!states.some((entry) => entry.code === state)}
                     emptyOptionLabel="National holidays only"
                     states={states}
                 />

@@ -52,6 +52,7 @@ export default function SwitzerlandCountryOptimizerForm({
                 onChange={setCantonCode}
                 disabled={schemaLoading}
                 includeEmptyOption
+                isInvalid={!schema?.cantons.some((entry) => entry.code === cantonCode)}
                 emptyOptionLabel={schemaLoading ? "Loading..." : "Select canton"}
                 states={schema?.cantons ?? []}
             />

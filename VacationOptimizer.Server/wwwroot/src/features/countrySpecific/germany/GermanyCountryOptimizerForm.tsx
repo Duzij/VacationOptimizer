@@ -50,6 +50,7 @@ export default function GermanyCountryOptimizerForm({
                 onChange={setStateCode}
                 disabled={schemaLoading}
                 includeEmptyOption
+                isInvalid={!schema?.states.some((entry) => entry.code === stateCode)}
                 emptyOptionLabel={schemaLoading ? "Loading..." : "Select state / region"}
                 states={schema?.states ?? []}
             />

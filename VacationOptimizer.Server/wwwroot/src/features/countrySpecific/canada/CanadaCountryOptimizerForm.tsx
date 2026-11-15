@@ -50,6 +50,7 @@ export default function CanadaCountryOptimizerForm({
                 onChange={setProvinceCode}
                 disabled={schemaLoading}
                 includeEmptyOption
+                isInvalid={!schema?.provinces.some((entry) => entry.code === provinceCode)}
                 emptyOptionLabel={schemaLoading ? "Loading..." : "Select province / territory"}
                 states={schema?.provinces ?? []}
             />

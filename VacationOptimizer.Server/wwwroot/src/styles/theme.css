@@ -28,11 +28,13 @@
   --range-thumb-border: 2px solid var(--color-background);
   --range-thumb-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23888888' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5l5 5 5-5'/%3E%3C/svg%3E");
+  --select-chevron-danger: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23b91c1c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5l5 5 5-5'/%3E%3C/svg%3E");
   --landing-accent: #0f7b83;
   --landing-accent-soft: #e1f4f5;
   --globe-dot: #bfd2d3;
   --landing-accent-alt: var(--color-accent);
   --landing-accent-alt-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  --color-danger: #b91c1c;
 }
 
 .light {

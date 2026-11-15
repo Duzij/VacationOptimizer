@@ -6,6 +6,16 @@ select {
   background-size: 0.95rem;
 }
 
+select[aria-invalid="true"] {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  background-image: var(--select-chevron-danger);
+}
+
+.state-select[aria-invalid="true"]:focus-visible {
+  outline-color: var(--color-danger);
+}
+
 .themed-range {
   --range-track: var(--color-border);
   --range-thumb: var(--color-primary);

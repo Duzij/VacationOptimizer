@@ -100,6 +100,7 @@ export function StateSelectField({
     disabled,
     includeEmptyOption,
     emptyOptionLabel,
+    isInvalid,
     states,
 }: {
     id: string;
@@ -109,6 +110,7 @@ export function StateSelectField({
     disabled: boolean;
     includeEmptyOption: boolean;
     emptyOptionLabel: string;
+    isInvalid: boolean;
     states: StateOption[];
 }) {
     return (
@@ -119,12 +121,12 @@ export function StateSelectField({
             <select
                 id={id}
                 value={value}
+                aria-invalid={isInvalid || undefined}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={disabled}
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text
                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-                     transition-all appearance-none cursor-pointer"
-            >
+                     transition-all appearance-none cursor-pointer">
                 {includeEmptyOption && <option value="">{emptyOptionLabel}</option>}
                 {states.map((entry) => (
                     <option key={entry.code} value={entry.code}>

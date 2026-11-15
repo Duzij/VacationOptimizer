@@ -88,6 +88,7 @@ export default function SpainCountryOptimizerForm({
                 onChange={handleStateChange}
                 disabled={schemaLoading}
                 includeEmptyOption
+                isInvalid={false}
                 emptyOptionLabel={schemaLoading ? "Loading..." : "National holidays only"}
                 states={schema?.states ?? []}
             />
