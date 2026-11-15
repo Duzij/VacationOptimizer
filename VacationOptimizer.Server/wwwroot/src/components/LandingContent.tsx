@@ -129,13 +129,13 @@ export default function LandingContent() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {popularGuides.map((guide) => (
-              <Link
+              <a
                 key={guide.href}
-                to={guide.href}
+                href={guide.href}
                 className="rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
               >
                 {guide.label}
-              </Link>
+              </a>
             ))}
           </div>
         </section>
