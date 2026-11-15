@@ -3,6 +3,7 @@ using VacationOptimizer.Server.CountrySpecific.Germany;
 using VacationOptimizer.Server.CountrySpecific.India;
 using VacationOptimizer.Server.CountrySpecific.Spain;
 using VacationOptimizer.Server.CountrySpecific.Switzerland;
+using VacationOptimizer.Server.CountrySpecific.UnitedKingdom;
 
 namespace VacationOptimizer.Server.CountrySpecific;
 
@@ -15,6 +16,7 @@ public static class CountrySpecificVacationEndpoints
         "IN",
         "ES",
         "CH",
+        "GB",
     };
 
     public static bool RequiresCountrySpecificEndpoint(string countryCode) => CountryCodes.Contains(countryCode);
@@ -32,6 +34,7 @@ public static class CountrySpecificVacationEndpoints
         api.MapIndiaVacationEndpoints();
         api.MapSpainVacationEndpoints();
         api.MapSwitzerlandVacationEndpoints();
+        api.MapUnitedKingdomVacationEndpoints();
 
         return api;
     }

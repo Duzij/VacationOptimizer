@@ -11,6 +11,7 @@ const SHOWCASE_DEFAULT_REGION_PARAMS: Record<string, string> = {
     DE: "stateCode=DE-BE",
     IN: "stateCode=IN-KA",
     CH: "cantonCode=CH-ZH",
+    GB: "nationCode=GB-ENG",
 };
 
 export function buildShowcasePlannerPath(countryCode: string): string {

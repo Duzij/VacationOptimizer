@@ -36,6 +36,7 @@ public static class WebApplicationExtensions
 
         app.UseDefaultFiles();
         app.UseStaticFiles();
+        app.UsePublicPageMetadata(app.Environment);
         app.UseRouting();
         app.UseCors();
         app.MapFallbackToFile("index.html");
@@ -84,5 +85,61 @@ public static class WebApplicationExtensions
         });
 
         return app;
+    }
+
+    private static IApplicationBuilder UsePublicPageMetadata(
+        this IApplicationBuilder app,
+        IWebHostEnvironment environment)
+    {
+        if (!environment.IsProduction())
+        {
+            return app;
+        }
+
+        var webRootPath = environment.WebRootPath
+            ?? Path.Combine(environment.ContentRootPath, "wwwroot");
+        var indexPath = Path.Combine(webRootPath, "dist", "index.html");
+        if (!File.Exists(indexPath))
+        {
+            return app;
+        }
+
+        var template = File.ReadAllText(indexPath);
+
+        return app.Use(async (context, next) =>
+        {
+            if (!HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsHead(context.Request.Method))
+            {
+                await next(context);
+                return;
+            }
+
+            var path = context.Request.Path.Value ?? "/";
+            if (!PublicPageMetadataCatalog.TryGet(path, out var metadata))
+            {
+                await next(context);
+                return;
+            }
+
+            if (path.Length > 1 && path.EndsWith('/'))
+            {
+                context.Response.StatusCode = StatusCodes.Status301MovedPermanently;
+                context.Response.Headers.Location = $"{metadata.Path}{context.Request.QueryString}";
+                return;
+            }
+
+            var html = PublicPageShellRenderer.Render(template, metadata);
+            context.Response.StatusCode = StatusCodes.Status200OK;
+            context.Response.ContentType = "text/html; charset=utf-8";
+            context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+
+            if (HttpMethods.IsHead(context.Request.Method))
+            {
+                context.Response.ContentLength = System.Text.Encoding.UTF8.GetByteCount(html);
+                return;
+            }
+
+            await context.Response.WriteAsync(html);
+        });
     }
 }

@@ -5,6 +5,17 @@ import HtmlFragment from "./HtmlFragment";
 import landingBoxesHtml from "../content/landing-boxes.html?raw";
 import landingSeoHtml from "../content/landing-seo.html?raw";
 
+const popularGuides = [
+  { href: "/blog/maximize-your-vacation-in-the-us-in-2027/", label: "US federal holidays and PTO planner 2027" },
+  { href: "/blog/maximize-your-annual-leave-in-the-uk-in-2027/", label: "UK bank holidays and annual leave 2027" },
+  { href: "/blog/germany-holiday-planner/", label: "Germany state-specific holiday planner" },
+  { href: "/blog/canada-holiday-planner/", label: "Canada province-specific holiday planner" },
+  { href: "/blog/maximize-your-pto-in-spain-in-2027/", label: "Spain 2027 holidays and bridge days" },
+  { href: "/blog/maximize-your-pto-in-the-netherlands-in-2027/", label: "Netherlands 2027 PTO guide" },
+  { href: "/blog/how-to-maximize-your-holidays-in-australia-in-2027/", label: "Australia 2027 holiday guide" },
+  { href: "/blog/indonesia-public-holidays-and-collective-leave/", label: "Indonesia public holidays and cuti bersama" },
+];
+
 export default function LandingContent() {
   return (
     <>
@@ -16,16 +27,16 @@ export default function LandingContent() {
                 <div className="space-y-6">
                   <div className="max-w-2xl space-y-4">
                     <h1 className="text-5xl font-semibold leading-[0.95] tracking-tight text-text md:text-7xl">
-                      There is a better way
+                      The holiday optimizer that turns
                       <br />
                       <span className="text-[var(--landing-accent)] italic">
-                        to use vacation days.
+                        vacation days into longer breaks.
                       </span>
                     </h1>
                     <h2 className="max-w-xl text-base leading-7 text-text-muted md:text-lg">
-                      Long Vacation is a holiday optimizer and PTO planner that
-                      turns scattered public holidays and weekends into longer
-                      breaks.
+                      Long Vacation is a free holiday optimizer, PTO planner, and
+                      time off planner that turns scattered public holidays and
+                      weekends into longer breaks.
                     </h2>
                   </div>
 
@@ -107,6 +118,26 @@ export default function LandingContent() {
               </p>
             </li>
           </ol>
+        </section>
+
+        <section className="landing-section" aria-labelledby="guides-title">
+          <div className="section-head">
+            <p className="section-head__eyebrow">Planning guides</p>
+            <h2 id="guides-title" className="section-head__title">
+              Popular 2027 vacation guides
+            </h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {popularGuides.map((guide) => (
+              <Link
+                key={guide.href}
+                to={guide.href}
+                className="rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-text transition-colors hover:bg-surface-hover"
+              >
+                {guide.label}
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section className="closing-cta" aria-labelledby="closing-cta-title">

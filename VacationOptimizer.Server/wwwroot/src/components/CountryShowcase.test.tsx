@@ -55,6 +55,7 @@ describe("buildShowcasePlannerPath", () => {
         expect(buildShowcasePlannerPath("de")).toBe("/app?country=DE&stateCode=DE-BE&year=2026&vacationDays=25");
         expect(buildShowcasePlannerPath("IN")).toBe("/app?country=IN&stateCode=IN-KA&year=2026&vacationDays=25");
         expect(buildShowcasePlannerPath("CH")).toBe("/app?country=CH&cantonCode=CH-ZH&year=2026&vacationDays=25");
+        expect(buildShowcasePlannerPath("GB")).toBe("/app?country=GB&nationCode=GB-ENG&year=2026&vacationDays=25");
     });
 });
 

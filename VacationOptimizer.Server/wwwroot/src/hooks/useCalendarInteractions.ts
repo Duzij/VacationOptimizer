@@ -11,6 +11,7 @@ import {
   isCanadaOptimizeRequest,
   isGermanyOptimizeRequest,
   isIndiaOptimizeRequest,
+  isUnitedKingdomOptimizeRequest,
 } from "../features/countrySpecific/models";
 import { useAnalytics } from "../posthog";
 
@@ -114,7 +115,9 @@ export function useCalendarInteractions({
       ? (scopeCode || "required state not selected")
       : isCanadaOptimizeRequest(activeRequest)
         ? (scopeCode || "required province not selected")
-        : (scopeCode || "national");
+        : isUnitedKingdomOptimizeRequest(activeRequest)
+          ? (scopeCode || "required nation not selected")
+          : (scopeCode || "national");
     return [
       "Issue type: Public holiday removal request",
       `Ignored in app: ${isIgnoredInApp ? "yes" : "no"}`,

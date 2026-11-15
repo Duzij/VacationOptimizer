@@ -10,6 +10,8 @@ import type {
     SpainOptimizeResult,
     SwitzerlandOptimizeRequest,
     SwitzerlandOptimizeResult,
+    UnitedKingdomOptimizeRequest,
+    UnitedKingdomOptimizeResult,
 } from "../features/countrySpecific/models";
 
 export interface Country {
@@ -119,7 +121,7 @@ export interface LegacyOptimizeResult extends OptimizationResultBase {
     scope?: undefined;
 }
 
-export type OptimizeResult = LegacyOptimizeResult | CanadaOptimizeResult | GermanyOptimizeResult | IndiaOptimizeResult | SpainOptimizeResult | SwitzerlandOptimizeResult;
+export type OptimizeResult = LegacyOptimizeResult | CanadaOptimizeResult | GermanyOptimizeResult | IndiaOptimizeResult | SpainOptimizeResult | SwitzerlandOptimizeResult | UnitedKingdomOptimizeResult;
 
 export interface SharedOptimizeRequestFields {
     country: string;
@@ -144,4 +146,4 @@ export interface LegacyOptimizeRequest extends SharedOptimizeRequestFields {
     provinceCode?: never;
 }
 
-export type OptimizeRequest = LegacyOptimizeRequest | CanadaOptimizeRequest | GermanyOptimizeRequest | IndiaOptimizeRequest | SpainOptimizeRequest | SwitzerlandOptimizeRequest;
+export type OptimizeRequest = LegacyOptimizeRequest | CanadaOptimizeRequest | GermanyOptimizeRequest | IndiaOptimizeRequest | SpainOptimizeRequest | SwitzerlandOptimizeRequest | UnitedKingdomOptimizeRequest;

@@ -9,6 +9,7 @@ import GermanyCountryOptimizerForm from "../features/countrySpecific/germany/Ger
 import IndiaCountryOptimizerForm from "../features/countrySpecific/india/IndiaCountryOptimizerForm";
 import SpainCountryOptimizerForm from "../features/countrySpecific/spain/SpainCountryOptimizerForm";
 import SwitzerlandCountryOptimizerForm from "../features/countrySpecific/switzerland/SwitzerlandCountryOptimizerForm";
+import UnitedKingdomCountryOptimizerForm from "../features/countrySpecific/unitedKingdom/UnitedKingdomCountryOptimizerForm";
 import {
     buildBaseRequest,
     isValidCustomPeriod,
@@ -235,7 +236,23 @@ export default function OptimizerForm({
                     onCustomPeriodChanged={onCustomPeriodChanged}
                 />
             )}
-            {country && !["CA", "DE", "IN", "ES", "CH"].includes(country) && (
+            {country === "GB" && (
+                <UnitedKingdomCountryOptimizerForm
+                    key={country}
+                    country={country}
+                    onResult={onResult}
+                    isLoading={isLoading}
+                    customFreeDays={customFreeDays}
+                    onCustomFreeDaysChange={onCustomFreeDaysChange}
+                    initialRequest={initialRequest}
+                    sharedDraft={sharedDraft}
+                    onSharedDraftChange={setSharedDraft}
+                    lockedVacationDaysCount={lockedVacationDaysCount}
+                    onResetLockedDays={onResetLockedDays}
+                    onCustomPeriodChanged={onCustomPeriodChanged}
+                />
+            )}
+            {country && !["CA", "DE", "IN", "ES", "CH", "GB"].includes(country) && (
                 <LegacyCountryOptimizerForm
                     key={country}
                     country={country}

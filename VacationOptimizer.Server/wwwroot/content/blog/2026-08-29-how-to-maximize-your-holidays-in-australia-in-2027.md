@@ -69,13 +69,18 @@ content: |
 
   Don't delay taking your vacation and remember that holiday-maxxing with [LongVacation.eu](https://longvacation.eu/) is free!
 
+  ## Sources
+
+  - [Fair Work Ombudsman — public holidays](https://www.fairwork.gov.au/employment-conditions/public-holidays)
+  - [Fair Work Ombudsman — leave](https://www.fairwork.gov.au/leave)
+
   ## Frequently asked questions
 
 
 
   ### What if a public holiday falls on a weekend?
 
-  Like other Anglo-Saxon countries, Australia moves weekend public holidays to the nearest weekday — usually the following Monday or the preceding Friday. In 2027, that gives you Anzac Day on the observed Monday, 26 April (the actual date, 25 April, is a Sunday) and Christmas Day on the observed Monday, 27 December (the actual date, 25 December, is a Saturday). The planner uses the observed dates, so the suggestions match the real non-working days for each state。
+  Like other Anglo-Saxon countries, Australia moves weekend public holidays to the nearest weekday — usually the following Monday or the preceding Friday. In 2027, that gives you Anzac Day on the observed Monday, 26 April (the actual date, 25 April, is a Sunday) and Christmas Day on the observed Monday, 27 December (the actual date, 25 December, is a Saturday). The planner uses the observed dates, so the suggestions match the real non-working days for each state.
 
 
 
@@ -93,7 +98,7 @@ content: |
 
 
 
-  A staycation is simply taking your days off without traveling anywhere — ideal when your budget is tight but your leave balance is not. The planner still helps: instead of scattered single days, it clusters your PTO around public holidays and weekends so even a stay-at-home break feels like a real one. Start with your state's calendar in the [planner](https://longvacation.eu/app?country=AU&amp;year=2027)。
+  A staycation is simply taking your days off without traveling anywhere — ideal when your budget is tight but your leave balance is not. The planner still helps: instead of scattered single days, it clusters your PTO around public holidays and weekends so even a stay-at-home break feels like a real one. Start with your state's calendar in the [planner](https://longvacation.eu/app?country=AU&amp;year=2027).
 
 
 

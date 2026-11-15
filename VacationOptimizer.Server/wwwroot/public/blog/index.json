@@ -1,6 +1,25 @@
 {
   "posts": [
     {
+      "title": "Maximize Your Annual Leave in the UK in 2027",
+      "date": "2026-12-15",
+      "author": "Team",
+      "slug": "maximize-your-annual-leave-in-the-uk-in-2027",
+      "language": "en",
+      "summary": "England & Wales, Scotland, and Northern Ireland bank holidays in 2027 set up a 10-day Easter break and a 10-day Christmas reset. Here's how to stretch 20 bookable days into 46 days off.",
+      "tags": [
+        "uk",
+        "england-wales",
+        "scotland",
+        "northern-ireland",
+        "vacation-planning",
+        "pto",
+        "bank-holidays",
+        "annual-leave"
+      ],
+      "wordCount": 660
+    },
+    {
       "title": "What Is the Best PTO Planner? I Tested 6 PTO Optimizers",
       "date": "2026-11-06",
       "author": "Ana",
@@ -143,7 +162,7 @@
         "public-holidays",
         "staycation"
       ],
-      "wordCount": 884
+      "wordCount": 899
     },
     {
       "title": "Maximize Your PTO in the Netherlands in 2027",
@@ -151,7 +170,7 @@
       "author": "Team",
       "slug": "maximize-your-pto-in-the-netherlands-in-2027",
       "language": "en",
-      "summary": "The Netherlands' 2027 calendar has two great bridge opportunities, around King's Day and the May holidays. Take just three PTO days and turn them into nine days off.",
+      "summary": "The Netherlands' 2027 calendar has two great bridge opportunities, around King's Day and the May holidays. Take just two PTO days and turn them into nine days off.",
       "tags": [
         "netherlands",
         "vacation-planning",
@@ -159,7 +178,7 @@
         "bridge-days",
         "public-holidays"
       ],
-      "wordCount": 638
+      "wordCount": 653
     },
     {
       "title": "See Your Country's Vacation Potential at a Glance",
@@ -219,7 +238,7 @@
         "public-holidays",
         "long-weekends"
       ],
-      "wordCount": 732
+      "wordCount": 749
     },
     {
       "title": "Why Taking Vacation Could Save You Money",
@@ -238,19 +257,21 @@
       "wordCount": 375
     },
     {
-      "title": "Maximize Your Vacation in the US in 2027",
+      "title": "2027 US Federal Holidays & PTO Planner",
       "date": "2026-07-05",
       "author": "Team",
       "slug": "maximize-your-vacation-in-the-us-in-2027",
       "language": "en",
-      "summary": "A practical 2027 US vacation-planning guide that shows how to stretch limited PTO around federal holidays and long weekends.",
+      "summary": "All 11 US federal holidays in 2027 — and how to turn 11 PTO days into 46 days off. Free planner, no sign-up.",
       "tags": [
         "us",
+        "federal-holidays",
+        "public-holidays",
         "vacation-planning",
         "pto",
         "long-weekends"
       ],
-      "wordCount": 749
+      "wordCount": 830
     }
   ]
 }

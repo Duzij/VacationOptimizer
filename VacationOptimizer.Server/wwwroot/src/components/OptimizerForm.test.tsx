@@ -6,6 +6,7 @@ import OptimizerForm from "./OptimizerForm";
 const countries = [
   { code: "CA", name: "Canada" },
   { code: "DE", name: "Germany" },
+  { code: "GB", name: "United Kingdom" },
   { code: "IN", name: "India" },
   { code: "US", name: "United States" },
 ];
@@ -113,6 +114,21 @@ vi.mock("../features/countrySpecific/countrySpecificApi", () => ({
     },
     isLoading: false,
   }),
+  useUnitedKingdomSchema: () => ({
+    data: {
+      countryCode: "GB" as const,
+      component: "unitedKingdom" as const,
+      yearRange: { min: 2026, max: 2031 },
+      defaults: {
+        vacationDays: 25,
+        minimumDaysPerRange: 4,
+        maximumDaysPerRange: 14,
+      },
+      nationSelectionRequired: true,
+      nations: [{ code: "GB-ENG", name: "England & Wales" }],
+    },
+    isLoading: false,
+  }),
 }));
 
 vi.mock("../features/countrySpecific/canada/api", () => ({
@@ -167,6 +183,24 @@ vi.mock("../features/countrySpecific/switzerland/api", () => ({
       },
       cantonSelectionRequired: true,
       cantons: [],
+    },
+    isLoading: false,
+  }),
+}));
+
+vi.mock("../features/countrySpecific/unitedKingdom/api", () => ({
+  useUnitedKingdomSchema: () => ({
+    data: {
+      countryCode: "GB" as const,
+      component: "unitedKingdom" as const,
+      yearRange: { min: 2026, max: 2031 },
+      defaults: {
+        vacationDays: 25,
+        minimumDaysPerRange: 4,
+        maximumDaysPerRange: 14,
+      },
+      nationSelectionRequired: true,
+      nations: [{ code: "GB-ENG", name: "England & Wales" }],
     },
     isLoading: false,
   }),
@@ -237,6 +271,30 @@ describe("OptimizerForm", () => {
     expect((screen.getAllByRole("button", { name: /Optimize/i })[0] as HTMLButtonElement).disabled).toBe(true);
 
     await user.selectOptions(screen.getByLabelText("State / Region"), "DE-BE");
+
+    const optimizeButton = screen.getAllByRole("button", { name: /Optimize/i })[0];
+    expect((optimizeButton as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("mounts the United Kingdom form and requires a nation before submit", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <OptimizerForm
+        onResult={vi.fn()}
+        isLoading={false}
+        customFreeDays={[]}
+        onCustomFreeDaysChange={vi.fn()}
+        initialRequest={null}
+      />,
+    );
+
+    await user.selectOptions(screen.getByLabelText("Country"), "GB");
+
+    expect(screen.getByLabelText("Nation")).toBeTruthy();
+    expect((screen.getAllByRole("button", { name: /Optimize/i })[0] as HTMLButtonElement).disabled).toBe(true);
+
+    await user.selectOptions(screen.getByLabelText("Nation"), "GB-ENG");
 
     const optimizeButton = screen.getAllByRole("button", { name: /Optimize/i })[0];
     expect((optimizeButton as HTMLButtonElement).disabled).toBe(false);

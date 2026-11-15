@@ -4,6 +4,7 @@ import type { GermanyOptimizeRequest, GermanyOptimizeResult } from "./germany/mo
 import type { IndiaOptimizeRequest, IndiaOptimizeResult } from "./india/models";
 import type { SpainOptimizeRequest, SpainOptimizeResult } from "./spain/models";
 import type { SwitzerlandOptimizeRequest, SwitzerlandOptimizeResult } from "./switzerland/models";
+import type { UnitedKingdomOptimizeRequest, UnitedKingdomOptimizeResult } from "./unitedKingdom/models";
 
 export type {
     CanadaCountrySchema,
@@ -36,6 +37,12 @@ export type {
     SwitzerlandOptimizeResult,
     SwitzerlandOptimizeScope,
 } from "./switzerland/models";
+export type {
+    UnitedKingdomCountrySchema,
+    UnitedKingdomOptimizeRequest,
+    UnitedKingdomOptimizeResult,
+    UnitedKingdomOptimizeScope,
+} from "./unitedKingdom/models";
 export type { OptimizationFormDefaults, OptimizationYearRange } from "./shared/models";
 
 export function isCanadaOptimizeRequest(request: OptimizeRequest | null | undefined): request is CanadaOptimizeRequest {
@@ -58,6 +65,10 @@ export function isSwitzerlandOptimizeRequest(request: OptimizeRequest | null | u
     return request?.country === "CH";
 }
 
+export function isUnitedKingdomOptimizeRequest(request: OptimizeRequest | null | undefined): request is UnitedKingdomOptimizeRequest {
+    return request?.country === "GB";
+}
+
 export function isCanadaOptimizeResult(result: OptimizeResult | null | undefined): result is CanadaOptimizeResult {
     return result?.countryCode === "CA";
 }
@@ -76,6 +87,10 @@ export function isSpainOptimizeResult(result: OptimizeResult | null | undefined)
 
 export function isSwitzerlandOptimizeResult(result: OptimizeResult | null | undefined): result is SwitzerlandOptimizeResult {
     return result?.countryCode === "CH";
+}
+
+export function isUnitedKingdomOptimizeResult(result: OptimizeResult | null | undefined): result is UnitedKingdomOptimizeResult {
+    return result?.countryCode === "GB";
 }
 
 export function getOptimizeRequestScopeCode(request: OptimizeRequest | null | undefined) {
@@ -97,6 +112,10 @@ export function getOptimizeRequestScopeCode(request: OptimizeRequest | null | un
 
     if (isSwitzerlandOptimizeRequest(request)) {
         return request.cantonCode;
+    }
+
+    if (isUnitedKingdomOptimizeRequest(request)) {
+        return request.nationCode;
     }
 
     return request.state ?? "";

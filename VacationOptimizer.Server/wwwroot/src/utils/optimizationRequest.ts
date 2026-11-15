@@ -10,11 +10,13 @@ import {
   isIndiaOptimizeRequest,
   isSpainOptimizeRequest,
   isSwitzerlandOptimizeRequest,
+  isUnitedKingdomOptimizeRequest,
   type CanadaOptimizeRequest,
   type GermanyOptimizeRequest,
   type IndiaOptimizeRequest,
   type SpainOptimizeRequest,
   type SwitzerlandOptimizeRequest,
+  type UnitedKingdomOptimizeRequest,
 } from "../features/countrySpecific/models";
 import {
   defaultMaximumDaysPerRange,
@@ -295,6 +297,18 @@ function normalizeSwitzerlandRequest(request: SwitzerlandOptimizeRequest): Switz
   };
 }
 
+function normalizeUnitedKingdomRequest(request: UnitedKingdomOptimizeRequest): UnitedKingdomOptimizeRequest {
+  const normalized = normalizeBaseFields(request);
+
+  return {
+    ...normalized,
+    country: "GB",
+    // Links and saved requests from before the nation selector defaulted to
+    // England & Wales, so keep that behavior when no nation is supplied.
+    nationCode: request.nationCode?.trim().toUpperCase() || "GB-ENG",
+  };
+}
+
 export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequest {
   if (isCanadaOptimizeRequest(request)) {
     return normalizeCanadaRequest(request);
@@ -314,6 +328,10 @@ export function normalizeOptimizeRequest(request: OptimizeRequest): OptimizeRequ
 
   if (isSwitzerlandOptimizeRequest(request)) {
     return normalizeSwitzerlandRequest(request);
+  }
+
+  if (isUnitedKingdomOptimizeRequest(request)) {
+    return normalizeUnitedKingdomRequest(request);
   }
 
   const normalized = normalizeBaseFields(request);
@@ -455,6 +473,27 @@ export function parseRequestFromSearchParams(params: URLSearchParams): OptimizeR
     });
   }
 
+  if (country === "GB") {
+    const nationCode = params.get("nationCode")?.trim().toUpperCase() || "GB-ENG";
+
+    return normalizeUnitedKingdomRequest({
+      country: "GB",
+      nationCode,
+      year: parseNumber(params.get("year"), currentYear),
+      vacationDays: parseNumber(params.get("vacationDays"), defaultVacationDays),
+      minimumDaysPerRange: parseNumber(params.get("minDays"), defaultMinimumDaysPerRange),
+      maximumDaysPerRange: parseNumber(params.get("maxDays"), defaultMaximumDaysPerRange),
+      maxNumberOfVacationsPerMonth: parseMonthlyVacationLimits(params.get("monthlyCaps")),
+      customFreeDays: parseDateList(params.get("customDays")).map((date) => ({ date })),
+      ignoredHolidayDates: parseDateList(params.get("ignoredHolidays")),
+      neverHolidayDates: parseDateList(params.get("neverHolidays")),
+      lockedVacationDates: parseDateList(params.get("lockedVacationDays")),
+      seedToken: params.get("seed") ?? undefined,
+      startDate: parseDate(params.get("startDate")),
+      endDate: parseDate(params.get("endDate")),
+    });
+  }
+
   return normalizeOptimizeRequest({
     country,
     state: params.get("state")?.trim().toUpperCase() || undefined,
@@ -504,6 +543,8 @@ export function buildSearchParamsFromRequest(request: OptimizeRequest | null) {
     }
   } else if (isSwitzerlandOptimizeRequest(normalizedRequest)) {
     params.set("cantonCode", normalizedRequest.cantonCode);
+  } else if (isUnitedKingdomOptimizeRequest(normalizedRequest)) {
+    params.set("nationCode", normalizedRequest.nationCode);
   } else if (normalizedRequest.state) {
     params.set("state", normalizedRequest.state);
   }
@@ -568,6 +609,10 @@ function getScopeCode(request: OptimizeRequest) {
 
   if (isSwitzerlandOptimizeRequest(request)) {
     return request.cantonCode;
+  }
+
+  if (isUnitedKingdomOptimizeRequest(request)) {
+    return request.nationCode ?? "";
   }
 
   return request.state ?? "";

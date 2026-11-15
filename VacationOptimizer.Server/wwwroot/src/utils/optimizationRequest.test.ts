@@ -77,6 +77,49 @@ describe("optimizationRequest", () => {
     expect(normalizeOptimizeRequest(oldRequest)).toMatchObject({ country: "DE", stateCode: "" });
   });
 
+  it("round-trips United Kingdom nation requests through search params", () => {
+    const request = normalizeOptimizeRequest({
+      country: "GB",
+      nationCode: " gb-sct ",
+      year: getDefaultYear(),
+      vacationDays: 25,
+    });
+    const params = buildSearchParamsFromRequest(request);
+
+    expect(request).toMatchObject({ country: "GB", nationCode: "GB-SCT" });
+    expect(params.get("nationCode")).toBe("GB-SCT");
+    expect(parseRequestFromSearchParams(params)).toEqual(request);
+  });
+
+  it("treats United Kingdom requests for different nations as different holiday scopes", () => {
+    const baseRequest = { country: "GB" as const, year: getDefaultYear(), vacationDays: 25 };
+
+    expect(hasSameHolidayScope(
+      { ...baseRequest, nationCode: "GB-ENG" },
+      { ...baseRequest, nationCode: "GB-SCT" },
+    )).toBe(false);
+    expect(hasSameHolidayScope(
+      { ...baseRequest, nationCode: "GB-ENG" },
+      { ...baseRequest, nationCode: "GB-ENG" },
+    )).toBe(true);
+  });
+
+  it("defaults old United Kingdom runtime objects to England & Wales", () => {
+    const oldRequest = {
+      country: "GB",
+      year: getDefaultYear(),
+      vacationDays: 25,
+    } as unknown as Parameters<typeof normalizeOptimizeRequest>[0];
+
+    expect(normalizeOptimizeRequest(oldRequest)).toMatchObject({ country: "GB", nationCode: "GB-ENG" });
+  });
+
+  it("defaults a United Kingdom link without a nation to England & Wales", () => {
+    const params = new URLSearchParams(`country=GB&year=${getDefaultYear()}&vacationDays=25`);
+
+    expect(parseRequestFromSearchParams(params)).toMatchObject({ country: "GB", nationCode: "GB-ENG" });
+  });
+
   it("preserves empty custom free day titles", () => {
     const request = normalizeOptimizeRequest({
       country: "US",

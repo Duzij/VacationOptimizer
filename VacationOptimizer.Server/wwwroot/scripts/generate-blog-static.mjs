@@ -29,6 +29,19 @@ const seoKeywords = [
   "vacation planner",
   "time off planner",
 ];
+const generatedDate = new Date().toISOString().slice(0, 10);
+const OG_LOCALE_BY_LANGUAGE = {
+  en: "en_US",
+  de: "de_DE",
+  es: "es_ES",
+  fr: "fr_FR",
+  hi: "hi_IN",
+  id: "id_ID",
+  it: "it_IT",
+  nl: "nl_NL",
+  pt: "pt_PT",
+};
+const FAQ_HEADING_PATTERN = /<h2[^>]*>\s*(?:Frequently asked questions|Pertanyaan umum|Preguntas frecuentes|Häufige Fragen|Häufig gestellte Fragen|Veelgestelde vragen|Questions fréquentes|Domande frequenti|Perguntas frequentes)\s*<\/h2>/i;
 const markdown = new MarkdownIt({
   html: false,
   linkify: true,
@@ -125,15 +138,15 @@ async function mirrorAgentFilesToDist(publicDir) {
 
 async function generateSitemap(posts, publicDir) {
   const staticEntries = [
-    { loc: `${siteUrl}/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "1.0" },
-    { loc: `${siteUrl}/about/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.8" },
-    { loc: `${siteUrl}/contact/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.7" },
-    { loc: `${siteUrl}/privacy/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
-    { loc: `${siteUrl}/terms/`, lastmod: "2026-08-04", changefreq: "monthly", priority: "0.6" },
-    { loc: `${siteUrl}/app/`, lastmod: "2026-08-04", changefreq: "weekly", priority: "0.9" },
-    { loc: `${siteUrl}/fetch/`, lastmod: "2026-10-24", changefreq: "monthly", priority: "0.6" },
-    { loc: `${siteUrl}/blog/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "weekly", priority: "0.8" },
-    { loc: `${siteUrl}/blog/fetch/`, lastmod: posts[0]?.date || "2026-08-04", changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/`, lastmod: generatedDate, changefreq: "weekly", priority: "1.0" },
+    { loc: `${siteUrl}/about`, lastmod: generatedDate, changefreq: "monthly", priority: "0.8" },
+    { loc: `${siteUrl}/contact`, lastmod: generatedDate, changefreq: "monthly", priority: "0.7" },
+    { loc: `${siteUrl}/privacy`, lastmod: generatedDate, changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/terms`, lastmod: generatedDate, changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/app`, lastmod: generatedDate, changefreq: "weekly", priority: "0.9" },
+    { loc: `${siteUrl}/fetch/`, lastmod: generatedDate, changefreq: "monthly", priority: "0.6" },
+    { loc: `${siteUrl}/blog/`, lastmod: posts[0]?.date || generatedDate, changefreq: "weekly", priority: "0.8" },
+    { loc: `${siteUrl}/blog/fetch/`, lastmod: posts[0]?.date || generatedDate, changefreq: "monthly", priority: "0.6" },
   ];
 
   const postEntries = posts.map((post) => ({
@@ -382,8 +395,8 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
 
   return renderDocument({
     appIndexHtml,
-    title: "Holiday Optimizer & PTO Optimizer Blog | How to Maximize Vacation Days",
-    description: "Learn how to maximize vacation days in 2027 with day-off planning and bridge-day tips that turn public holidays into longer vacations. Holiday optimizer and PTO optimizer guidance from Long Vacation - Vacation Optimizer.",
+    title: "Holiday Optimizer & PTO Planner Blog | Long Vacation",
+    description: "Learn how to maximize vacation days in 2027 with day-off planning and bridge-day tips that turn public holidays into longer vacations. Holiday optimizer and PTO planner guidance from Long Vacation.",
     canonicalPath: "/blog/",
     body: `
       <div class="blog-shell">
@@ -392,7 +405,7 @@ function renderBlogIndexPage(posts, appIndexHtml, siteData, footerHtml) {
           <section class="stack-lg">
             <div class="blog-hero stack-sm">
               <h1>How to Maximize Vacation Days with a LongVacation holiday Optimizer</h1>
-              <p>Day-off planningand country-aware guidance to turn public holidays into longer vacations — for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
+              <p>Day-off country-aware guidance that helps you navigate and turn public holidays into longer vacations — for anyone looking for a holiday optimizer, a holidays optimizer for local calendars, or a PTO optimizer.</p>
               <p class="blog-summary">For AI agents: a <a href="/blog/fetch/">machine-readable summary of this blog</a> is also available.</p>
             </div>
             <div class="blog-post-grid">${cards}</div>
@@ -449,10 +462,11 @@ function renderBlogPostPage(post, posts, appIndexHtml, siteData, footerHtml) {
 
   return renderDocument({
     appIndexHtml,
-    title: `${post.title} | Long Vacation - Vacation Optimizer`,
+    title: `${post.title} | Long Vacation`,
     description: post.summary,
     canonicalPath: `/blog/${post.slug}/`,
     post,
+    posts,
     alternateLinks: renderAlternateLinkTags(post, posts),
     body: `
       <div class="blog-shell">
@@ -483,6 +497,7 @@ ${renderLanguageSwitcher(post, posts)}
             ${renderAdUnit()}
             <article class="blog-post-content">
               ${postHtml}
+              ${renderRelatedGuides(post, posts)}
             </article>
           </section>
         </main>
@@ -708,9 +723,113 @@ function renderTag(tag) {
   return `<span class="blog-tag">${escapeHtml(tag)}</span>`;
 }
 
-function renderDocument({ appIndexHtml, title, description, canonicalPath, body, post, schemaType, alternateLinks }) {
+function getRelatedPosts(post, posts) {
+  const isTranslation = !isEnglishLanguage(post.language);
+  const referencePost = isTranslation
+    ? posts.find((candidate) => candidate.slug === post.translationOf) ?? post
+    : post;
+  const sourcePost = isTranslation ? referencePost : null;
+  const englishSlug = referencePost.slug;
+
+  const sameLanguageCandidates = posts.filter((candidate) =>
+    candidate.slug !== post.slug
+    && candidate.slug !== englishSlug
+    && candidate.translationOf !== englishSlug
+    && candidate.language === post.language);
+
+  const fallbackCandidates = posts.filter((candidate) =>
+    candidate.slug !== post.slug
+    && candidate.slug !== englishSlug
+    && !candidate.translationOf
+    && isEnglishLanguage(candidate.language));
+
+  const basePool = sameLanguageCandidates.length >= 2 ? sameLanguageCandidates : fallbackCandidates;
+  const pool = [...basePool];
+  if (sourcePost && !pool.some((candidate) => candidate.slug === sourcePost.slug)) {
+    pool.push(sourcePost);
+  }
+
+  return pool
+    .map((candidate) => {
+      let score = candidate.tags.filter((tag) => referencePost.tags.includes(tag)).length;
+      if (sourcePost && candidate.slug === sourcePost.slug) {
+        score += 100;
+      }
+      return { candidate, score };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((left, right) => right.score - left.score || right.candidate.date.localeCompare(left.candidate.date))
+    .slice(0, 3)
+    .map((entry) => entry.candidate);
+}
+
+function renderRelatedGuides(post, posts) {
+  const related = getRelatedPosts(post, posts);
+  if (related.length === 0) {
+    return "";
+  }
+
+  const items = related.map((candidate) =>
+    `<li><a class="blog-post-link" href="/blog/${encodeURIComponent(candidate.slug)}/">${escapeHtml(candidate.title)}</a> — ${escapeHtml(candidate.summary)}</li>`
+  ).join("\n                ");
+
+  return `
+              <section class="blog-related" aria-labelledby="related-guides-title" style="margin-top:2rem;border-top:1px solid var(--color-border);padding-top:1.5rem">
+                <h2 id="related-guides-title">Related guides</h2>
+                <ul>
+                ${items}
+                </ul>
+              </section>`;
+}
+
+function extractFaqEntries(html) {
+  const headingMatch = html.match(FAQ_HEADING_PATTERN);
+  if (!headingMatch || headingMatch.index === undefined) {
+    return [];
+  }
+
+  const sectionStart = headingMatch.index + headingMatch[0].length;
+  const rest = html.slice(sectionStart);
+  const nextHeadingIndex = rest.search(/<h2[\s>]/i);
+  const section = nextHeadingIndex === -1 ? rest : rest.slice(0, nextHeadingIndex);
+  const entries = [];
+  const questionPattern = /<h3[^>]*>([\s\S]*?)<\/h3>\s*([\s\S]*?)(?=<h3[\s>]|$)/gi;
+  let match;
+
+  while ((match = questionPattern.exec(section)) !== null) {
+    const name = stripHtml(match[1]);
+    const answer = stripHtml(match[2]);
+    if (name && answer) {
+      entries.push({ name, answer });
+    }
+  }
+
+  return entries;
+}
+
+function stripHtml(value) {
+  return decodeHtml(String(value).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+}
+
+function decodeHtml(value) {
+  return value
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&nbsp;", " ");
+}
+
+function getOgLocale(language) {
+  const base = language.split("-")[0].toLowerCase();
+  return OG_LOCALE_BY_LANGUAGE[base] ?? "en_US";
+}
+
+function renderDocument({ appIndexHtml, title, description, canonicalPath, body, post, posts, schemaType, alternateLinks }) {
   const canonicalUrl = `${siteUrl}${canonicalPath}`;
-  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType, alternateLinks });
+  const head = buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, posts, schemaType, alternateLinks });
 
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(post?.language ?? "en")}">
@@ -726,7 +845,7 @@ ${body}
 </html>`;
 }
 
-function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, schemaType, alternateLinks }) {
+function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl, post, posts = [], schemaType, alternateLinks }) {
   const headMatch = appIndexHtml.match(/<head>([\s\S]*?)<\/head>/i);
   if (!headMatch) {
     throw new Error("Could not locate <head> in index.html.");
@@ -735,7 +854,6 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl,
   const pageSchemaType = schemaType ?? (post ? "BlogPosting" : "Blog");
 
   const structuredData = {
-    "@context": "https://schema.org",
     "@type": pageSchemaType,
     headline: title,
     name: title,
@@ -764,16 +882,62 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl,
     };
   }
 
-  const structuredDataJson = JSON.stringify(structuredData, null, 2);
+  const graph = [structuredData];
+
+  if (post) {
+    graph.push({
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${siteUrl}/` },
+        { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog/` },
+        { "@type": "ListItem", position: 3, name: post.title, item: canonicalUrl },
+      ],
+    });
+
+    const faqEntries = extractFaqEntries(post.html);
+    if (faqEntries.length > 0) {
+      graph.push({
+        "@type": "FAQPage",
+        mainEntity: faqEntries.map((entry) => ({
+          "@type": "Question",
+          name: entry.name,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: entry.answer,
+          },
+        })),
+      });
+    }
+  }
+
+  const structuredDataJson = JSON.stringify({ "@context": "https://schema.org", "@graph": graph }, null, 2);
+  const ogType = post ? "article" : "website";
+  const ogLocale = getOgLocale(post?.language ?? "en");
+  const alternateLocales = post
+    ? getPostEditions(post, posts)
+        .filter((edition) => edition.language !== post.language)
+        .map((edition) => `<meta property="og:locale:alternate" content="${getOgLocale(edition.language)}" />`)
+    : [];
+  const articleMeta = post
+    ? [
+        `<meta property="article:published_time" content="${escapeHtml(post.date)}" />`,
+        `<meta property="article:modified_time" content="${escapeHtml(post.date)}" />`,
+        `<meta property="article:section" content="${escapeHtml(post.tags[0] ?? "vacation-planning")}" />`,
+        ...post.tags.map((tag) => `<meta property="article:tag" content="${escapeHtml(tag)}" />`),
+      ]
+    : [];
 
   var allHeadContent = headMatch[1]
       .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
       .replace(/<meta\s+name="description"[\s\S]*?\/>/i, `<meta name="description" content="${escapeHtml(description)}" />`)
       .replace(/<meta\s+name="keywords"[\s\S]*?\/>/i, `<meta name="keywords" content="${escapeHtml((post?.tags ?? seoKeywords).join(", "))}" />`)
       .replace(/<link\s+rel="canonical"[\s\S]*?\/>/i, `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />`)
+      .replace(/<meta\s+property="og:type"[\s\S]*?\/>/i, `<meta property="og:type" content="${ogType}" />`)
+      .replace(/<meta\s+property="og:locale"[\s\S]*?\/>/i, `<meta property="og:locale" content="${ogLocale}" />`)
       .replace(/<meta\s+property="og:url"[\s\S]*?\/>/i, `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />`)
       .replace(/<meta\s+property="og:title"[\s\S]*?\/>/i, `<meta property="og:title" content="${escapeHtml(title)}" />`)
       .replace(/<meta\s+property="og:description"[\s\S]*?\/>/i, `<meta property="og:description" content="${escapeHtml(description)}" />`)
+      .replace(/<meta\s+name="twitter:card"[\s\S]*?\/>/i, `<meta name="twitter:card" content="summary_large_image" />`)
       .replace(/<meta\s+name="twitter:title"[\s\S]*?\/>/i, `<meta name="twitter:title" content="${escapeHtml(title)}" />`)
       .replace(/<meta\s+name="twitter:description"[\s\S]*?\/>/i, `<meta name="twitter:description" content="${escapeHtml(description)}" />`)
       .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i, `<script type="application/ld+json">\n${structuredDataJson}\n  </script>`)
@@ -782,6 +946,11 @@ function buildHeadFromAppIndex(appIndexHtml, { title, description, canonicalUrl,
       .split("\n")
       .map((line) => `  ${line}`)
       .join("\n");
+
+  const extraMeta = [...alternateLocales, ...articleMeta].filter(Boolean).join("\n  ");
+  if (extraMeta) {
+    allHeadContent = `${allHeadContent}\n  ${extraMeta}`;
+  }
 
   return alternateLinks ? `${allHeadContent}\n  ${alternateLinks}` : allHeadContent;
 }

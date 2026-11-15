@@ -82,6 +82,33 @@ public class PublicHolidayServiceTests
     }
 
     [Fact]
+    public void GetStates_UnitedKingdom_ReturnsThreeNations()
+    {
+        var nations = _holidayService.GetStates("GB");
+
+        Assert.Equal(3, nations.Count);
+        Assert.Contains(nations, nation => nation.Code == "GB-ENG" && nation.Name == "England & Wales");
+        Assert.Contains(nations, nation => nation.Code == "GB-SCT" && nation.Name == "Scotland");
+        Assert.Contains(nations, nation => nation.Code == "GB-NIR" && nation.Name == "Northern Ireland");
+    }
+
+    [Fact]
+    public void GetHolidays_UnitedKingdom2027WithNation_ReturnsNationSpecificHolidays()
+    {
+        var scotland = _holidayService.GetHolidays("GB", 2027, "GB-SCT");
+
+        Assert.Contains(scotland, holiday => holiday.Date == new DateOnly(2027, 1, 4));
+        Assert.Contains(scotland, holiday => holiday.Date == new DateOnly(2027, 11, 30) && holiday.Name == "St Andrew's Day");
+        Assert.DoesNotContain(scotland, holiday => holiday.Date == new DateOnly(2027, 3, 29));
+    }
+
+    [Fact]
+    public void GetHolidays_UnitedKingdom2027WithUnknownNation_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => _holidayService.GetHolidays("GB", 2027, "GB-XXX"));
+    }
+
+    [Fact]
     public void GetHolidays_Germany2027WithoutState_ReturnsNationalHolidaysOnly()
     {
         var holidays = _holidayService.GetHolidays("DE", 2027);

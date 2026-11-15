@@ -91,8 +91,8 @@ function Main() {
             element={
               <>
                 <RouteMeta
-                  title="Holiday Optimizer & PTO Optimizer | Long Vacation - Vacation Optimizer"
-                  description="Use Long Vacation - Vacation Optimizer, a holiday optimizer and PTO optimizer, to learn how to maximize vacation days in 2027 and turn day-off planning into longer vacations around public holidays and weekends."
+                  title="Holiday Optimizer & PTO Planner | Long Vacation"
+                  description="Turn public holidays and weekends into longer breaks with a free holiday optimizer, PTO planner, and time off planner. No sign-up."
                   canonicalPath="/"
                 />
                 <HomePage />
@@ -441,8 +441,8 @@ function PlannerPage() {
   return (
     <>
       <RouteMeta
-        title="Vacation Planner | Long Vacation - Vacation Optimizer"
-        description="Use this holiday optimizer and PTO optimizer to compare vacation-day scenarios around public holidays, weekends, and custom free days."
+        title="PTO Planner & Time Off Planner | Long Vacation"
+        description="Use this free holiday optimizer to compare vacation-day scenarios around public holidays, weekends, and custom free days."
         canonicalPath="/app"
       />
 

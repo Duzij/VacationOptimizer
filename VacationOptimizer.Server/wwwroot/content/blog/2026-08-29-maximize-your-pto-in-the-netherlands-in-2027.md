@@ -3,7 +3,7 @@ title: "Maximize Your PTO in the Netherlands in 2027"
 date: 2026-08-29
 author: "Team"
 slug: "maximize-your-pto-in-the-netherlands-in-2027"
-summary: "The Netherlands' 2027 calendar has two great bridge opportunities, around King's Day and the May holidays. Take just three PTO days and turn them into nine days off."
+summary: "The Netherlands' 2027 calendar has two great bridge opportunities, around King's Day and the May holidays. Take just two PTO days and turn them into nine days off."
 tags: [netherlands, vacation-planning, pto, bridge-days, public-holidays]
 content: |
   While you might be enjoying your well-deserved summer vacation right now, what's the best thing to do during your current vacation? That's right! Book the next one! This way, you avoid the post-vacation blues when you return to work and have another trip to look forward to. So, what does 2027 look like in terms of public holidays, and how can you maximize your time off?
@@ -26,23 +26,28 @@ content: |
 
   Another excellent opportunity comes in May. Liberation Day falls on Wednesday, and Ascension Day falls on Thursday. Take Friday, 7 May off, and you'll turn them into a long vacation with just one vacation day.
 
-  That is already 9 vacation days in total by simply taking three days of your PTOs. This is your sign to book them now.
+  That is already nine days off in total by taking just two vacation days. This is your sign to book them now.
 
   Check [LongVacation.eu](https://longvacation.eu/) to explore even more options and maximize your vacation in 2027!
 
-  ## Three PTO days, nine days off — worked example
+  ## Two PTO days, nine days off — worked example
 
   The spring cluster is where the Netherlands' 2027 calendar pays off the most:
 
   - **King's Day** falls on Tuesday, 27 April. Take **Monday, 26 April** off and the Tuesday holiday connects to the weekend: four consecutive days off (24–27 April) using a single PTO day.
 
-  - **Liberation Day** falls on Wednesday, 5 May, and **Ascension Day** on Thursday,6 May. Take **Friday,7 May** off and those two holidays plus the weekend become a five-day break (5–9 May) — again with a single PTO day.
+  - **Liberation Day** falls on Wednesday, 5 May, and **Ascension Day** on Thursday, 6 May. Take **Friday, 7 May** off and those two holidays plus the weekend become a five-day break (5–9 May) — again with a single PTO day.
 
 
 
-  That is nine days off spread across two breaks for the price of two vacation days — and you still have most of your allowance for summer and Christmas. See exactly how it stacks in the [planner](https://longvacation.eu/app?country=NL&amp;year=2027)。
+  That is nine days off spread across two breaks for the price of two vacation days — and you still have most of your allowance for summer and Christmas. See exactly how it stacks in the [planner](https://longvacation.eu/app?country=NL&amp;year=2027).
 
 
+
+  ## Sources
+
+  - [Rijksoverheid — official public holidays](https://www.rijksoverheid.nl/onderwerpen/arbeidsovereenkomst-en-cao/vraag-en-antwoord/officiele-feestdagen)
+  - [Rijksoverheid — holiday days and leave](https://www.rijksoverheid.nl/onderwerpen/vakantiedagen-en-vrije-dagen)
 
   ## Frequently asked questions
 
@@ -50,7 +55,7 @@ content: |
 
   ### Does everyone get Liberation Day off?
 
-  Liberation Day (Bevrijdingsdag) is a national public holiday in the Netherlands, so most employees get it off. It is worth confirming with your employer anyway, especially if you work in essential services or under a sector agreement with different rules。
+  Liberation Day (Bevrijdingsdag) is a national public holiday in the Netherlands, so most employees get it off. It is worth confirming with your employer anyway, especially if you work in essential services or under a sector agreement with different rules.
 
 
 

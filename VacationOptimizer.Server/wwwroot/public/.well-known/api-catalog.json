@@ -6,7 +6,7 @@
     {
       "path": "/api/vacations/optimize",
       "method": "POST",
-      "description": "Run the vacation-day optimizer for a supported country, year, region/state/city, vacation-day settings, custom free days, ignored holidays, monthly caps, locked days, and range constraints. Use the country-specific optimize route for IN, ES, and CH."
+      "description": "Run the vacation-day optimizer for a supported country, year, region/state/city, vacation-day settings, custom free days, ignored holidays, monthly caps, locked days, and range constraints. Use the country-specific optimize route for CA, DE, IN, ES, CH, and GB."
     },
     {
       "path": "/api/vacations/countries/{countryCode}/schema",
@@ -16,7 +16,7 @@
     {
       "path": "/api/vacations/countries/{countryCode}/optimize",
       "method": "POST",
-      "description": "Run country-specific optimization for IN, ES, or CH."
+      "description": "Run country-specific optimization for CA, DE, IN, ES, CH, or GB. Canada requires provinceCode, Germany and India require stateCode, Switzerland requires cantonCode, and the United Kingdom requires nationCode (GB-ENG, GB-SCT, or GB-NIR)."
     },
     {
       "path": "/api/vacations/showcase",
@@ -31,7 +31,7 @@
     {
       "path": "/api/vacations/countries/{countryCode}/states",
       "method": "GET",
-      "description": "List states/regions for a country."
+      "description": "List states/regions for a generic country. Country-specific regions are exposed by the /countries/{countryCode}/schema route."
     },
     {
       "path": "/api/vacations/detected-country",

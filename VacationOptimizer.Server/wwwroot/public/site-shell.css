@@ -124,6 +124,7 @@ body {
 .site-cookie-settings {
   appearance: none;
   background: var(--site-shell-transparent);
+  color: var(--color-text-muted);
   cursor: pointer;
   font-family: inherit;
 }

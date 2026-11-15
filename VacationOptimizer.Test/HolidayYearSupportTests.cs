@@ -40,6 +40,52 @@ public class HolidayYearSupportTests
         }
     }
 
+    [Fact]
+    public void GetHolidays_2027_IsSupportedForEveryUnitedKingdomNationScope()
+    {
+        var nations = _holidayService.GetStates("GB");
+
+        Assert.Equal(3, nations.Count);
+        foreach (var nation in nations)
+        {
+            var holidays = _holidayService.GetHolidays("GB", SupportedYear, nation.Code);
+
+            Assert.NotEmpty(holidays);
+            Assert.All(holidays, holiday => Assert.Equal(SupportedYear, holiday.Date.Year));
+        }
+    }
+
+    [Theory]
+    [InlineData("GB-ENG", "2027-03-29", "Easter Monday")]
+    [InlineData("GB-ENG", "2027-08-30", "Summer")]
+    [InlineData("GB-SCT", "2027-01-04", "New Year Holiday")]
+    [InlineData("GB-SCT", "2027-08-02", "Summer Holiday")]
+    [InlineData("GB-SCT", "2027-11-30", "St Andrew's Day")]
+    [InlineData("GB-NIR", "2027-03-17", "St Patrick's Day")]
+    [InlineData("GB-NIR", "2027-07-12", "Battle of the Boyne")]
+    public void GetHolidays_UnitedKingdomNationScope_IncludesNationHoliday_2027(string nationCode, string date, string holidayName)
+    {
+        var holidays = _holidayService.GetHolidays("GB", SupportedYear, nationCode);
+
+        Assert.Contains(holidays, holiday =>
+            holiday.Date == DateOnly.Parse(date)
+            && holiday.Name == holidayName);
+    }
+
+    [Fact]
+    public void GetHolidays_UnitedKingdomNationScopes_ExcludeOtherNationsHolidays_2027()
+    {
+        var englandAndWales = _holidayService.GetHolidays("GB", SupportedYear, "GB-ENG");
+        var scotland = _holidayService.GetHolidays("GB", SupportedYear, "GB-SCT");
+        var northernIreland = _holidayService.GetHolidays("GB", SupportedYear, "GB-NIR");
+
+        Assert.DoesNotContain(scotland, holiday => holiday.Date == new DateOnly(2027, 3, 29));
+        Assert.DoesNotContain(scotland, holiday => holiday.Name == "St Patrick's Day");
+        Assert.DoesNotContain(englandAndWales, holiday => holiday.Name == "St Andrew's Day");
+        Assert.DoesNotContain(englandAndWales, holiday => holiday.Date == new DateOnly(2027, 7, 12));
+        Assert.DoesNotContain(northernIreland, holiday => holiday.Date == new DateOnly(2027, 8, 2));
+    }
+
     [Theory]
     [InlineData("ES-CT-BCN")]
     [InlineData("ES-MD-MAD")]

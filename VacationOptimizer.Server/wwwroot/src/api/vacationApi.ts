@@ -13,6 +13,7 @@ import {
     isIndiaOptimizeRequest,
     isSpainOptimizeRequest,
     isSwitzerlandOptimizeRequest,
+    isUnitedKingdomOptimizeRequest,
 } from "../features/countrySpecific/models";
 import {
     optimizeCanadaVacation,
@@ -20,6 +21,7 @@ import {
     optimizeIndiaVacation,
     optimizeSpainVacation,
     optimizeSwitzerlandVacation,
+    optimizeUnitedKingdomVacation,
 } from "../features/countrySpecific/countrySpecificApi";
 import { SHOWCASE_VACATION_DAYS, SHOWCASE_YEAR } from "../showcase";
 
@@ -97,7 +99,9 @@ export async function optimizeVacation(request: OptimizeRequest): Promise<Optimi
                     ? optimizeSpainVacation(request)
                     : isSwitzerlandOptimizeRequest(request)
                         ? optimizeSwitzerlandVacation(request)
-                        : optimizeLegacyVacation(request);
+                        : isUnitedKingdomOptimizeRequest(request)
+                            ? optimizeUnitedKingdomVacation(request)
+                            : optimizeLegacyVacation(request);
 }
 
 export function useCountries() {

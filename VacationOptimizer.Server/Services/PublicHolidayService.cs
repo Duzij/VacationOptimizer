@@ -1,6 +1,7 @@
 using PublicHoliday;
 using System.Reflection;
 using VacationOptimizer.Server.CountrySpecific.Switzerland;
+using VacationOptimizer.Server.CountrySpecific.UnitedKingdom;
 using VacationOptimizer.Server.Data;
 using VacationOptimizer.Server.Data.SeedData;
 using Microsoft.EntityFrameworkCore;
@@ -215,6 +216,11 @@ public class PublicHolidayService : IPublicHolidayService
             return SwitzerlandCantons.All.ToArray();
         }
 
+        if (string.Equals(countryCode, "GB", StringComparison.OrdinalIgnoreCase))
+        {
+            return UnitedKingdomNations.All.ToArray();
+        }
+
         return _dbContext.States
             .Where(s => s.Country!.IsoCode == countryCode)
             .OrderBy(s => s.Name)
@@ -245,6 +251,23 @@ public class PublicHolidayService : IPublicHolidayService
 
     private static void ConfigureFallbackProvider(IPublicHolidays provider, string countryCode, string? stateCode)
     {
+        if (string.Equals(countryCode, "GB", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(stateCode))
+            {
+                return;
+            }
+
+            if (provider is not UKBankHoliday ukProvider
+                || !UnitedKingdomNations.TryGetHolidayRegion(stateCode, out var region))
+            {
+                throw new ArgumentException($"Unsupported state code '{stateCode}' for country 'GB'.");
+            }
+
+            ukProvider.UkCountry = region;
+            return;
+        }
+
         if (!string.Equals(countryCode, "CH", StringComparison.OrdinalIgnoreCase)
             || string.IsNullOrWhiteSpace(stateCode))
         {

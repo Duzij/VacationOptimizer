@@ -17,6 +17,7 @@ public static class ShowcaseDefaults
     public const string DefaultGermanyStateCode = "DE-BE";
     public const string DefaultIndiaStateCode = "IN-KA";
     public const string DefaultSwitzerlandCantonCode = "CH-ZH";
+    public const string DefaultUnitedKingdomNationCode = "GB-ENG";
 }
 
 /// <summary>
@@ -60,6 +61,7 @@ public class ShowcaseService(
         "DE" => ResolveStateOrThrow("DE", ShowcaseDefaults.DefaultGermanyStateCode),
         "IN" => ResolveStateOrThrow("IN", ShowcaseDefaults.DefaultIndiaStateCode),
         "CH" => ResolveStateOrThrow("CH", ShowcaseDefaults.DefaultSwitzerlandCantonCode),
+        "GB" => ResolveStateOrThrow("GB", ShowcaseDefaults.DefaultUnitedKingdomNationCode),
         _ => null,
     };
 

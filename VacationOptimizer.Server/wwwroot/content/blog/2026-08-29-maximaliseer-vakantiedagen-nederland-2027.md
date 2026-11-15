@@ -1,14 +1,18 @@
 ---
-title: "Haal meer uit je vakantiedagen in Nederland in 2027"
+title: "Vrije dagen 2027: maximaliseer je vakantiedagen"
 date: 2026-08-29
 author: "Team"
 slug: "maximaliseer-vakantiedagen-nederland-2027"
 language: nl
 translationOf: "maximize-your-pto-in-the-netherlands-in-2027"
-summary: "De Nederlandse feestdagenkalender van 2027 biedt mooie brugdagen rond Koningsdag en in mei. Met slechts enkele vakantiedagen kun je langere pauzes plannen."
-tags: [nederland, vakantieplanning, vakantiedagen, brugdagen, feestdagen]
+summary: "Bekijk alle Nederlandse feestdagen in 2027 en plan je vrije dagen slim. Met twee vakantiedagen maak je negen vrije dagen rond Koningsdag en de meivakantie."
+tags: [nederland, vrije-dagen, vakantie-2027, vakantieplanning, vakantiedagen, brugdagen, feestdagen]
 content: |
   Misschien geniet je nu van een welverdiende zomervakantie. Wat kun je tijdens je vakantie het beste doen? Je volgende vakantie boeken, natuurlijk! Zo heb je na thuiskomst alweer iets om naar uit te kijken. Hoe ziet de feestdagenkalender van 2027 eruit, en hoe haal je het meeste uit je vrije dagen?
+
+  ## Vrije dagen en feestdagen in 2027
+
+  Dit zijn de Nederlandse feestdagen in 2027 en de kansen die ze bieden:
 
   | Datum | Feestdag | Dag | Mogelijkheid |
   | --- | --- | --- | --- |
@@ -28,7 +32,7 @@ content: |
 
   Een andere goede kans doet zich in mei voor. Bevrijdingsdag valt op woensdag en Hemelvaartsdag op donderdag. Neem vrijdag 7 mei vrij en je maakt met één vakantiedag een langere vakantie.
 
-  Zo krijg je negen dagen vrij door slechts enkele dagen van je vakantietegoed op te nemen. Dit is je teken om ze nu alvast te plannen.
+  Zo krijg je met twee vakantiedagen negen vrije dagen. Dit is je teken om ze nu alvast te plannen.
 
   Kijk op [LongVacation.eu](https://longvacation.eu/) voor meer mogelijkheden en haal in 2027 meer uit je vrije dagen!
 
@@ -41,6 +45,11 @@ content: |
   - **Bevrijdingsdag** valt op woensdag 5 mei en **Hemelvaartsdag** op donderdag 6 mei. Neem **vrijdag 7 mei** vrij en de feestdagen plus het weekend vormen een periode van vijf dagen (5–9 mei) — opnieuw met één vakantiedag.
 
   Dat zijn negen vrije dagen, verdeeld over twee periodes, voor twee vakantiedagen. Je houdt dus het grootste deel van je vakantietegoed over voor de zomer en Kerstmis. Bekijk hoe de dagen samenkomen in de [planner](https://longvacation.eu/app?country=NL&amp;year=2027).
+
+  ## Bronnen
+
+  - [Rijksoverheid — officiële feestdagen](https://www.rijksoverheid.nl/onderwerpen/arbeidsovereenkomst-en-cao/vraag-en-antwoord/officiele-feestdagen)
+  - [Rijksoverheid — vakantiedagen en vrije dagen](https://www.rijksoverheid.nl/onderwerpen/vakantiedagen-en-vrije-dagen)
 
   ## Veelgestelde vragen
 

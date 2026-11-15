@@ -281,9 +281,9 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
         var xml = await File.ReadAllTextAsync(sitemapPath);
         Assert.Contains("https://longvacation.eu/", xml);
-        Assert.Contains("https://longvacation.eu/about/", xml);
-        Assert.Contains("https://longvacation.eu/contact/", xml);
-        Assert.Contains("https://longvacation.eu/app/", xml);
+        Assert.Contains("https://longvacation.eu/about", xml);
+        Assert.Contains("https://longvacation.eu/contact", xml);
+        Assert.Contains("https://longvacation.eu/app", xml);
         Assert.Contains("https://longvacation.eu/fetch/", xml);
     }
 
@@ -335,6 +335,26 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"component\":\"india\"", json);
         Assert.Contains("\"stateSelectionRequired\":true", json);
         Assert.Contains("\"code\":\"IN-KA\"", json);
+    }
+
+    [Fact]
+    public async Task GetUnitedKingdomSchema_ReturnsNationContract()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/countries/GB/schema");
+
+        response.EnsureSuccessStatusCode();
+        var schema = await response.Content.ReadFromJsonAsync<UnitedKingdomSchemaResponse>();
+
+        Assert.NotNull(schema);
+        Assert.Equal("GB", schema.CountryCode);
+        Assert.Equal("unitedKingdom", schema.Component);
+        Assert.True(schema.NationSelectionRequired);
+        Assert.Equal(3, schema.Nations.Count);
+        Assert.Contains(schema.Nations, nation => nation.Code == "GB-ENG" && nation.Name == "England & Wales");
+        Assert.Contains(schema.Nations, nation => nation.Code == "GB-SCT" && nation.Name == "Scotland");
+        Assert.Contains(schema.Nations, nation => nation.Code == "GB-NIR" && nation.Name == "Northern Ireland");
     }
 
     [Fact]
@@ -490,6 +510,66 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"stateName\":\"Berlin\"", json);
         Assert.Contains("\"publicHolidaysCount\":", json);
         Assert.Contains("\"plannerSeed\":\"", json);
+    }
+
+    [Fact]
+    public async Task OptimizeUnitedKingdom_RequiresNationCode()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            year = 2027,
+            vacationDays = 5,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/GB/optimize", payload);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("nationCode", json);
+    }
+
+    [Fact]
+    public async Task OptimizeUnitedKingdom_WithNation_ReturnsUnitedKingdomSpecificScope()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            nationCode = "GB-SCT",
+            year = 2027,
+            vacationDays = 5,
+            minimumDaysPerRange = 1,
+            maximumDaysPerRange = 14,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/GB/optimize", payload);
+
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"countryCode\":\"GB\"", json);
+        Assert.Contains("\"type\":\"nation\"", json);
+        Assert.Contains("\"nationCode\":\"GB-SCT\"", json);
+        Assert.Contains("\"nationName\":\"Scotland\"", json);
+        Assert.Contains("\"publicHolidaysCount\":", json);
+        Assert.Contains("\"plannerSeed\":\"", json);
+    }
+
+    [Fact]
+    public async Task OptimizeUnitedKingdom_RejectsUnknownNation()
+    {
+        var client = _factory.CreateClient();
+        var payload = JsonContent.Create(new
+        {
+            nationCode = "GB-XXX",
+            year = 2027,
+            vacationDays = 5,
+        });
+
+        var response = await client.PostAsync("/api/vacations/countries/GB/optimize", payload);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        Assert.Contains("GB-XXX", json);
     }
 
     [Fact]
@@ -849,6 +929,18 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task Showcase_UsesDefaultNationForUnitedKingdom()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/vacations/showcase?country=GB&year=2027&vacationDays=25");
+
+        response.EnsureSuccessStatusCode();
+        var totalDaysOff = await response.Content.ReadFromJsonAsync<int>();
+        Assert.True(totalDaysOff > 25, $"Expected more total days off than the 25 PTO days, got {totalDaysOff}.");
+    }
+
+    [Fact]
     public async Task Showcase_UsesDefaultCantonForSwitzerland()
     {
         var client = _factory.CreateClient();
@@ -889,4 +981,10 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         string Component,
         bool CantonSelectionRequired,
         List<StateResponse> Cantons);
+
+    private sealed record UnitedKingdomSchemaResponse(
+        string CountryCode,
+        string Component,
+        bool NationSelectionRequired,
+        List<StateResponse> Nations);
 }
